@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County — Member Directory — 142 active members">
+  <meta name="theme-color" content="#0F1011">
+  <title>Members — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .filter-toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px 0;
+      margin-bottom: 16px;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-group-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      min-height: 32px;
+      white-space: nowrap;
+    }
+    .filter-pill:hover {
+      border-color: var(--border-hover);
+      color: var(--text-body);
+      background: var(--bg-panel-hover);
+    }
+    .filter-pill.active {
+      background: var(--yellow-light);
+      border-color: rgba(245,196,0,0.4);
+      color: var(--yellow);
+    }
+    .filter-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 320px;
+    }
+    .filter-search input {
+      width: 100%;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      height: 38px;
+      font-size: 14px;
+      color: var(--text-body);
+      font-family: var(--font-base);
+    }
+    .filter-search input::placeholder { color: var(--text-disabled); }
+    .filter-search input:focus-visible { border-color: var(--yellow); }
+    .filter-search-icon {
+      position: absolute;
+      left: 10px;
+      color: var(--text-disabled);
+      pointer-events: none;
+      font-size: 14px;
+    }
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0 0;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .pagination-info {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .page-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 10px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: var(--font-base);
+      min-height: 36px;
+    }
+    .page-btn:hover {
+      background: var(--bg-panel-hover);
+      color: var(--text-body);
+      border-color: var(--border-hover);
+    }
+    .page-btn.active {
+      background: var(--yellow);
+      border-color: var(--yellow);
+      color: #000;
+    }
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop[hidden] { display: none; }
+    .modal {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hover);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      background: var(--bg-panel);
+      z-index: 1;
+    }
+    .modal-title {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.04em;
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-color);
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-body);
+      cursor: pointer;
+      min-height: 28px;
+    }
+    .checkbox-item input[type="checkbox"] {
+      min-height: unset;
+    }
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<div class="admin-shell">
+
+  <!-- SIDEBAR -->
+  <nav class="admin-sidebar" aria-label="Main navigation">
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — Go to national dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text">
+        <span class="logo-name">TDRN</span>
+        <span class="logo-tagline">Disaster Response Network</span>
+      </div>
+    </a>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-nat">
+      <span class="sidebar-section-label" id="nav-nat">National</span>
+      <a href="index.html" class="nav-item" aria-label="National Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="#" class="nav-item" aria-label="All members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge" aria-label="142 members">142</span></a>
+      <a href="#" class="nav-item" aria-label="All teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="#" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="#" class="nav-item" aria-label="Active alerts"><span class="nav-item-icon" aria-hidden="true">🔔</span><span>Alerts</span><span class="nav-item-badge" aria-label="3 alerts">3</span></a>
+      <a href="#" class="nav-item" aria-label="Reports"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Reports</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-tn">
+      <span class="sidebar-section-label" id="nav-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee State Dashboard"><span class="nav-item-icon" aria-hidden="true">🗺</span><span>TN Dashboard</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-wc">
+      <span class="sidebar-section-label" id="nav-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item" aria-label="Warren County Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="wc-members.html" class="nav-item active" aria-current="page" aria-label="Members — currently viewing"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge" aria-label="142 members">142</span></a>
+      <a href="wc-teams.html" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="wc-training.html" class="nav-item" aria-label="Training"><span class="nav-item-icon" aria-hidden="true">🎓</span><span>Training</span></a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="wc-events.html" class="nav-item" aria-label="Events"><span class="nav-item-icon" aria-hidden="true">📅</span><span>Events</span></a>
+      <a href="wc-communications.html" class="nav-item" aria-label="Communications"><span class="nav-item-icon" aria-hidden="true">📡</span><span>Communications</span></a>
+      <a href="wc-documents.html" class="nav-item" aria-label="Documents"><span class="nav-item-icon" aria-hidden="true">📄</span><span>Documents</span></a>
+      <a href="wc-certifications.html" class="nav-item" aria-label="Certifications"><span class="nav-item-icon" aria-hidden="true">🏅</span><span>Certifications</span></a>
+      <a href="wc-applicants.html" class="nav-item" aria-label="Applicants"><span class="nav-item-icon" aria-hidden="true">📋</span><span>Applicants</span><span class="nav-item-badge" aria-label="3 pending">3</span></a>
+      <a href="wc-partners.html" class="nav-item" aria-label="Partners"><span class="nav-item-icon" aria-hidden="true">🤝</span><span>Partners</span></a>
+      <a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Readiness</span></a>
+      <a href="wc-settings.html" class="nav-item" aria-label="Settings"><span class="nav-item-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin — View profile">
+        <div class="user-avatar" aria-hidden="true">JA</div>
+        <div class="user-info"><div class="user-name">Jason</div><div class="user-role">County Admin — WC</div></div>
+      </a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode">
+        <span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span>
+        <span class="focus-mode-label">Focus Mode</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+
+    <!-- TOPBAR -->
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb">
+        <ol>
+          <li><a href="index.html" aria-label="National Dashboard">National</a></li>
+          <li><a href="tennessee.html" aria-label="Tennessee Dashboard">Tennessee</a></li>
+          <li><a href="warren-county.html" aria-label="Warren County Dashboard">Warren County</a></li>
+          <li><span class="current" aria-current="page">Members</span></li>
+        </ol>
+      </nav>
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-members">Search members</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-members" placeholder="Search members…" autocomplete="off">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill operational" role="status" aria-label="County status: Operational">
+          <span class="status-pill-icon" aria-hidden="true">✓</span> Operational
+        </span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread">
+          <span aria-hidden="true">🔔</span>
+          <span class="notification-badge" aria-hidden="true"></span>
+        </button>
+        <button class="topbar-btn primary" aria-label="Add a new member" onclick="TDRN.modal.open('modal-add-member')">
+          <span aria-hidden="true">＋</span> Add Member
+        </button>
+      </div>
+    </header>
+
+    <!-- SUBNAV -->
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html"      class="subnav-tab" aria-label="Dashboard">Dashboard</a>
+      <a href="wc-members.html"         class="subnav-tab active" aria-current="page" aria-label="Members — currently active">Members</a>
+      <a href="wc-teams.html"           class="subnav-tab" aria-label="Teams">Teams</a>
+      <a href="wc-training.html"        class="subnav-tab" aria-label="Training">Training</a>
+      <a href="wc-equipment.html"       class="subnav-tab" aria-label="Equipment">Equipment</a>
+      <a href="wc-events.html"          class="subnav-tab" aria-label="Events">Events</a>
+      <a href="wc-communications.html"  class="subnav-tab" aria-label="Communications">Communications</a>
+      <a href="wc-documents.html"       class="subnav-tab" aria-label="Documents">Documents</a>
+      <a href="wc-certifications.html"  class="subnav-tab" aria-label="Certifications">Certifications</a>
+      <a href="wc-applicants.html"      class="subnav-tab" aria-label="Applicants">Applicants <span aria-hidden="true" style="font-size:10px;background:var(--yellow);color:#000;padding:1px 5px;border-radius:10px;margin-left:3px;">3</span></a>
+      <a href="wc-partners.html"        class="subnav-tab" aria-label="Partners">Partners</a>
+      <a href="wc-readiness.html"       class="subnav-tab" aria-label="Readiness">Readiness</a>
+      <a href="wc-settings.html"        class="subnav-tab" aria-label="Settings">Settings</a>
+    </nav>
+
+    <!-- CONTENT -->
+    <main id="main-content" class="admin-content" aria-label="Member Directory">
+
+      <!-- CONTENT HEADER -->
+      <div class="content-header">
+        <div class="content-header-left">
+          <h1 class="content-title">Member Directory</h1>
+          <p class="content-subtitle">142 active members across all skill classifications</p>
+        </div>
+        <div class="content-actions">
+          <button class="btn btn-ghost" aria-label="Export member roster to CSV" onclick="TDRN.print.exportToCSV(TDRN.data.members,'warren-members.csv')">
+            <span aria-hidden="true">📥</span> Export CSV
+          </button>
+          <button class="btn btn-primary" aria-label="Add a new member" onclick="TDRN.modal.open('modal-add-member')">
+            <span aria-hidden="true">＋</span> Add Member
+          </button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <section aria-labelledby="members-stats-heading">
+        <h2 id="members-stats-heading" class="sr-only">Member Statistics</h2>
+        <div class="stats-grid" style="--stats-cols:4;">
+          <div class="stat-card accent-blue" role="article" aria-label="Total Members: 142">
+            <div class="stat-label">Total Members</div>
+            <div class="stat-value">142</div>
+            <div class="stat-change up"><span aria-hidden="true">↑</span> +12 this month</div>
+            <span class="stat-icon" aria-hidden="true">👥</span>
+          </div>
+          <div class="stat-card accent-green" role="article" aria-label="Active Members: 118">
+            <div class="stat-label">Active</div>
+            <div class="stat-value">118</div>
+            <div class="stat-change flat"><span aria-hidden="true">→</span> 83% of roster</div>
+            <span class="stat-icon" aria-hidden="true">✓</span>
+          </div>
+          <div class="stat-card accent-yellow" role="article" aria-label="Standby Members: 19">
+            <div class="stat-label">Standby</div>
+            <div class="stat-value">19</div>
+            <div class="stat-change flat"><span aria-hidden="true">→</span> Available on-call</div>
+            <span class="stat-icon" aria-hidden="true">⏱</span>
+          </div>
+          <div class="stat-card accent-red" role="article" aria-label="Inactive Members: 5">
+            <div class="stat-label">Inactive</div>
+            <div class="stat-value">5</div>
+            <div class="stat-change flat"><span aria-hidden="true">→</span> Pending review</div>
+            <span class="stat-icon" aria-hidden="true">–</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- FILTER TOOLBAR -->
+      <section aria-label="Filter and search members">
+        <div class="filter-toolbar">
+          <div class="filter-search">
+            <label class="sr-only" for="member-search">Search members by name, role, or skill</label>
+            <span class="filter-search-icon" aria-hidden="true">🔍</span>
+            <input type="search" id="member-search" placeholder="Search by name, role, skill…"
+              data-live-search data-search-container="#member-tbody" data-search-items="tr[data-searchable]">
+          </div>
+          <div class="filter-group" role="group" aria-label="Filter by status">
+            <span class="filter-group-label" id="status-filter-label">Status:</span>
+            <button class="filter-pill active" aria-pressed="true" aria-label="Show all statuses" data-filter-status="all" data-filter-container="#member-tbody">All</button>
+            <button class="filter-pill" aria-pressed="false" aria-label="Show active members" data-filter-status="active" data-filter-container="#member-tbody">Active</button>
+            <button class="filter-pill" aria-pressed="false" aria-label="Show standby members" data-filter-status="standby" data-filter-container="#member-tbody">Standby</button>
+            <button class="filter-pill" aria-pressed="false" aria-label="Show inactive members" data-filter-status="inactive" data-filter-container="#member-tbody">Inactive</button>
+          </div>
+          <div class="filter-group" role="group" aria-label="Filter by role">
+            <span class="filter-group-label">Role:</span>
+            <select id="role-filter" class="form-select" style="height:36px;font-size:13px;padding:0 10px;" aria-label="Filter by role">
+              <option value="all">All Roles</option>
+              <option value="team-leader">Team Leader</option>
+              <option value="operator">Operator</option>
+              <option value="volunteer">Volunteer</option>
+              <option value="coordinator">Coordinator</option>
+            </select>
+          </div>
+          <div class="filter-group" role="group" aria-label="Filter by skill">
+            <span class="filter-group-label">Skill:</span>
+            <select id="skill-filter" class="form-select" style="height:36px;font-size:13px;padding:0 10px;" aria-label="Filter by skill">
+              <option value="all">All Skills</option>
+              <option value="chainsaw">Chainsaw</option>
+              <option value="heavy-equipment">Heavy Equipment</option>
+              <option value="medical">Medical</option>
+              <option value="logistics">Logistics</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- MEMBER TABLE -->
+      <section class="panel" aria-labelledby="member-table-title">
+        <div class="panel-header">
+          <h2 class="panel-title" id="member-table-title">
+            <span aria-hidden="true">👥</span> All Members
+          </h2>
+          <span style="font-size:13px;color:var(--text-muted);" aria-live="polite" id="member-count-label">Showing 15 of 142</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" aria-label="Warren County member directory" data-sortable>
+            <thead>
+              <tr>
+                <th scope="col" data-sort-col="0" aria-sort="ascending">Name</th>
+                <th scope="col" data-sort-col="1">Role</th>
+                <th scope="col" data-sort-col="2">Skills</th>
+                <th scope="col" data-sort-col="3">Status</th>
+                <th scope="col" data-sort-col="4">Phone</th>
+                <th scope="col" data-sort-col="5">Last Active</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="member-tbody">
+              <tr data-searchable data-status="operational">
+                <td><strong>Marcus Reyes</strong></td>
+                <td>Team Leader</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">ICS-200</span><span class="badge badge-blue" style="font-size:10px;">CERT</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                <td><a href="tel:5125550101" style="font-family:var(--font-mono);font-size:12px;">(512) 555-0101</a></td>
+                <td><span class="text-muted" style="font-size:12px;">Today</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Marcus Reyes profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Marcus Reyes">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Marcus Reyes">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="operational">
+                <td><strong>Denise Okafor</strong></td>
+                <td>Medical Officer</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">EMT-B</span><span class="badge badge-blue" style="font-size:10px;">CPR</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                <td><a href="tel:5125550102" style="font-family:var(--font-mono);font-size:12px;">(512) 555-0102</a></td>
+                <td><span class="text-muted" style="font-size:12px;">Today</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Denise Okafor profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Denise Okafor">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Denise Okafor">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="standby">
+                <td><strong>James Whitfield</strong></td>
+                <td>Logistics Coord.</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">ICS-100</span><span class="badge badge-blue" style="font-size:10px;">FEMA</span></td>
+                <td><span class="badge badge-standby" aria-label="Status: Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span></td>
+                <td><a href="tel:2105550103" style="font-family:var(--font-mono);font-size:12px;">(210) 555-0103</a></td>
+                <td><span class="text-muted" style="font-size:12px;">Today</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View James Whitfield profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit James Whitfield">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate James Whitfield">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="operational">
+                <td><strong>Aisha Mohammed</strong></td>
+                <td>Communications</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">HAM</span><span class="badge badge-blue" style="font-size:10px;">NIMS</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                <td><a href="tel:2105550104" style="font-family:var(--font-mono);font-size:12px;">(210) 555-0104</a></td>
+                <td><span class="text-muted" style="font-size:12px;">2 hrs ago</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Aisha Mohammed profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Aisha Mohammed">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Aisha Mohammed">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="training">
+                <td><strong>Travis Buchanan</strong></td>
+                <td>SAR Specialist</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">USAR</span><span class="badge badge-blue" style="font-size:10px;">Rope</span></td>
+                <td><span class="badge badge-training" aria-label="Status: Training"><span class="badge-icon" aria-hidden="true"></span>Training</span></td>
+                <td><a href="tel:7135550105" style="font-family:var(--font-mono);font-size:12px;">(713) 555-0105</a></td>
+                <td><span class="text-muted" style="font-size:12px;">Yesterday</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Travis Buchanan profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Travis Buchanan">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Travis Buchanan">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="operational">
+                <td><strong>Priya Nair</strong></td>
+                <td>Shelter Manager</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">Red Cross</span><span class="badge badge-blue" style="font-size:10px;">ICS-100</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                <td><a href="tel:7135550106" style="font-family:var(--font-mono);font-size:12px;">(713) 555-0106</a></td>
+                <td><span class="text-muted" style="font-size:12px;">4 hrs ago</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Priya Nair profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Priya Nair">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Priya Nair">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="operational">
+                <td><strong>Nathan Park</strong></td>
+                <td>IT / Comms</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">HAM</span><span class="badge badge-blue" style="font-size:10px;">Network</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                <td><a href="tel:6155550107" style="font-family:var(--font-mono);font-size:12px;">(615) 555-0107</a></td>
+                <td><span class="text-muted" style="font-size:12px;">1 hr ago</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Nathan Park profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Nathan Park">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Nathan Park">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="standby">
+                <td><strong>Latasha Williams</strong></td>
+                <td>Medical Officer</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">RN</span><span class="badge badge-blue" style="font-size:10px;">ACLS</span></td>
+                <td><span class="badge badge-standby" aria-label="Status: Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span></td>
+                <td><a href="tel:6155550108" style="font-family:var(--font-mono);font-size:12px;">(615) 555-0108</a></td>
+                <td><span class="text-muted" style="font-size:12px;">6 hrs ago</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Latasha Williams profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Latasha Williams">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Latasha Williams">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="operational">
+                <td><strong>Derek Chen</strong></td>
+                <td>Heavy Equipment Op.</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">Excavator</span><span class="badge badge-blue" style="font-size:10px;">Chainsaw</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                <td><a href="tel:6155550109" style="font-family:var(--font-mono);font-size:12px;">(615) 555-0109</a></td>
+                <td><span class="text-muted" style="font-size:12px;">3 hrs ago</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Derek Chen profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Derek Chen">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Derek Chen">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="operational">
+                <td><strong>Rosa Martinez</strong></td>
+                <td>Volunteer Coordinator</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">CERT</span><span class="badge badge-blue" style="font-size:10px;">ICS-100</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                <td><a href="tel:9315550110" style="font-family:var(--font-mono);font-size:12px;">(931) 555-0110</a></td>
+                <td><span class="text-muted" style="font-size:12px;">5 hrs ago</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Rosa Martinez profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Rosa Martinez">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Rosa Martinez">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="standby">
+                <td><strong>Earl Thompson</strong></td>
+                <td>Chainsaw Operator</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">Chainsaw</span><span class="badge badge-blue" style="font-size:10px;">First Aid</span></td>
+                <td><span class="badge badge-standby" aria-label="Status: Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span></td>
+                <td><a href="tel:9315550111" style="font-family:var(--font-mono);font-size:12px;">(931) 555-0111</a></td>
+                <td><span class="text-muted" style="font-size:12px;">Yesterday</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Earl Thompson profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Earl Thompson">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Earl Thompson">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="operational">
+                <td><strong>Sandra Hobbs</strong></td>
+                <td>Logistics</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">ICS-200</span><span class="badge badge-blue" style="font-size:10px;">Logistics</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                <td><a href="tel:9315550112" style="font-family:var(--font-mono);font-size:12px;">(931) 555-0112</a></td>
+                <td><span class="text-muted" style="font-size:12px;">Today</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Sandra Hobbs profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Sandra Hobbs">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Sandra Hobbs">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="inactive">
+                <td><strong>Roy Danforth</strong></td>
+                <td>Volunteer</td>
+                <td><span class="badge badge-blue" style="font-size:10px;">CERT</span></td>
+                <td><span class="badge badge-inactive" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span></td>
+                <td><a href="tel:9315550113" style="font-family:var(--font-mono);font-size:12px;">(931) 555-0113</a></td>
+                <td><span class="text-muted" style="font-size:12px;">3 weeks ago</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Roy Danforth profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Roy Danforth">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--green);" aria-label="Reactivate Roy Danforth">Reactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="operational">
+                <td><strong>Carmen Iglesias</strong></td>
+                <td>Medical Volunteer</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">CPR</span><span class="badge badge-blue" style="font-size:10px;">First Aid</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                <td><a href="tel:9315550114" style="font-family:var(--font-mono);font-size:12px;">(931) 555-0114</a></td>
+                <td><span class="text-muted" style="font-size:12px;">Today</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Carmen Iglesias profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Carmen Iglesias">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Carmen Iglesias">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-searchable data-status="standby">
+                <td><strong>Tyrone Jackson</strong></td>
+                <td>Driver / Transport</td>
+                <td><span class="badge badge-blue" style="font-size:10px;margin-right:3px;">CDL-A</span><span class="badge badge-blue" style="font-size:10px;">ICS-100</span></td>
+                <td><span class="badge badge-standby" aria-label="Status: Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span></td>
+                <td><a href="tel:9315550115" style="font-family:var(--font-mono);font-size:12px;">(931) 555-0115</a></td>
+                <td><span class="text-muted" style="font-size:12px;">2 days ago</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm" aria-label="View Tyrone Jackson profile">View</button>
+                    <button class="btn btn-ghost btn-sm" aria-label="Edit Tyrone Jackson">Edit</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--red);" aria-label="Deactivate Tyrone Jackson">Deactivate</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="pagination">
+          <span class="pagination-info">Showing 1–15 of 142 members</span>
+          <nav class="pagination-controls" aria-label="Member list pagination">
+            <button class="page-btn" disabled aria-label="Previous page">← Prev</button>
+            <button class="page-btn active" aria-label="Page 1, currently selected" aria-current="page">1</button>
+            <button class="page-btn" aria-label="Go to page 2">2</button>
+            <button class="page-btn" aria-label="Go to page 3">3</button>
+            <span class="page-btn" style="border:none;background:none;cursor:default;" aria-hidden="true">…</span>
+            <button class="page-btn" aria-label="Go to page 10">10</button>
+            <button class="page-btn" aria-label="Next page">Next →</button>
+          </nav>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ADD MEMBER MODAL -->
+<div id="modal-add-member" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-add-member-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-add-member-title">Add New Member</h2>
+      <button class="btn btn-ghost btn-icon-only" aria-label="Close Add Member modal" onclick="TDRN.modal.close('modal-add-member')">✕</button>
+    </div>
+    <form id="form-add-member" class="modal-body" data-validate-form novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="field-fullname">Full Name <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="text" id="field-fullname" class="form-input" required placeholder="e.g. Jane Smith" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="field-role">Role <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <select id="field-role" class="form-select" required aria-label="Select member role">
+            <option value="">Select role…</option>
+            <option>Team Leader</option>
+            <option>Medical Officer</option>
+            <option>Logistics Coordinator</option>
+            <option>Communications</option>
+            <option>SAR Specialist</option>
+            <option>Shelter Manager</option>
+            <option>Heavy Equipment Operator</option>
+            <option>Chainsaw Operator</option>
+            <option>Volunteer</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="field-email">Email <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="email" id="field-email" class="form-input" required placeholder="name@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="field-phone">Phone <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="tel" id="field-phone" class="form-input" required placeholder="(555) 000-0000" autocomplete="tel">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Skills</label>
+        <div class="checkbox-group" role="group" aria-label="Select member skills">
+          <label class="checkbox-item"><input type="checkbox" name="skill" value="chainsaw"> Chainsaw Operations</label>
+          <label class="checkbox-item"><input type="checkbox" name="skill" value="heavy-equipment"> Heavy Equipment</label>
+          <label class="checkbox-item"><input type="checkbox" name="skill" value="medical"> Medical / First Aid</label>
+          <label class="checkbox-item"><input type="checkbox" name="skill" value="logistics"> Logistics</label>
+          <label class="checkbox-item"><input type="checkbox" name="skill" value="comms"> Communications / HAM</label>
+          <label class="checkbox-item"><input type="checkbox" name="skill" value="search-rescue"> Search &amp; Rescue</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="field-certs">Certifications</label>
+        <input type="text" id="field-certs" class="form-input" placeholder="ICS-100, CERT, CPR, etc." aria-describedby="field-certs-hint">
+        <div class="form-hint" id="field-certs-hint">Comma-separated list of current certifications</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="field-status">Status <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <select id="field-status" class="form-select" required>
+            <option value="">Select status…</option>
+            <option value="operational">Operational</option>
+            <option value="standby">Standby</option>
+            <option value="training">Training</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="field-notes">Notes</label>
+        <textarea id="field-notes" class="form-textarea" rows="3" placeholder="Any relevant background, availability, or special skills…"></textarea>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" aria-label="Cancel and close modal" onclick="TDRN.modal.close('modal-add-member')">Cancel</button>
+      <button class="btn btn-primary" aria-label="Submit and add member" onclick="TDRN.forms.validateForm(document.getElementById('form-add-member')) && TDRN.toast.success('Member added successfully') && TDRN.modal.close('modal-add-member')">
+        <span aria-hidden="true">＋</span> Add Member
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

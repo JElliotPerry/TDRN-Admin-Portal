@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County — Events and Training Calendar">
+  <meta name="theme-color" content="#0F1011">
+  <title>Events — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Calendar */
+    .cal-grid { display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px; }
+    .cal-header-cell { text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-disabled);padding:8px 4px; }
+    .cal-day { min-height:72px;background:var(--bg-body);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:6px;display:flex;flex-direction:column;gap:3px;cursor:pointer;transition:var(--transition); }
+    .cal-day:hover { border-color:var(--border-hover);background:var(--bg-panel-hover); }
+    .cal-day:focus-visible { outline:2px solid var(--yellow);outline-offset:2px; }
+    .cal-day.today { border-color:var(--yellow);background:var(--yellow-light); }
+    .cal-day.selected { border-color:var(--blue);background:var(--blue-light); }
+    .cal-day.other-month { opacity:0.35; }
+    .cal-day-num { font-size:12px;font-weight:700;color:var(--text-muted); }
+    .cal-day.today .cal-day-num { color:var(--yellow); }
+    .cal-event-dot { display:flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .cal-event-dot.training { background:var(--yellow-light);color:var(--yellow); }
+    .cal-event-dot.meeting { background:var(--blue-light);color:var(--blue); }
+    .cal-event-dot.deployment { background:var(--red-light);color:var(--red); }
+    .cal-event-dot.drill { background:var(--green-light);color:var(--green); }
+    /* Event cards */
+    .event-detail-card { background:var(--bg-panel);border:1px solid var(--border-color);border-radius:var(--radius-lg);overflow:hidden;display:flex;transition:var(--transition); }
+    .event-detail-card:hover { border-color:var(--border-hover);box-shadow:var(--shadow-md); }
+    .event-date-badge { width:72px;min-width:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 8px;font-family:var(--font-heading);text-align:center; }
+    .event-date-badge.training { background:var(--yellow-light);color:var(--yellow); }
+    .event-date-badge.meeting { background:var(--blue-light);color:var(--blue); }
+    .event-date-badge.deployment { background:var(--red-light);color:var(--red); }
+    .event-date-badge.drill { background:var(--green-light);color:var(--green); }
+    .event-date-month { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em; }
+    .event-date-day { font-size:28px;font-weight:900;line-height:1; }
+    .event-body { flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:6px; }
+    .event-title { font-family:var(--font-heading);font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:0.03em; }
+    .event-meta { display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-muted); }
+    .event-desc { font-size:13px;color:var(--text-muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+    .event-actions { display:flex;align-items:center;gap:8px;padding:12px 20px;border-left:1px solid var(--border-color);flex-direction:column;justify-content:center; }
+    /* Past events */
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .modal-backdrop[hidden] { display:none; }
+    .modal { background:var(--bg-panel);border:1px solid var(--border-hover);border-radius:var(--radius-lg);width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg); }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-panel);z-index:1; }
+    .modal-title { font-family:var(--font-heading);font-size:18px;font-weight:700;color:var(--text-primary); }
+    .modal-body { padding:24px; }
+    .modal-footer { display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+<div class="admin-shell">
+  <nav class="admin-sidebar" aria-label="Main navigation">
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — National dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text"><span class="logo-name">TDRN</span><span class="logo-tagline">Disaster Response Network</span></div>
+    </a>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-nat"><span class="sidebar-section-label" id="nav-nat">National</span>
+      <a href="index.html" class="nav-item" aria-label="National Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="#" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="#" class="nav-item" aria-label="Alerts"><span class="nav-item-icon" aria-hidden="true">🔔</span><span>Alerts</span><span class="nav-item-badge">3</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-tn"><span class="sidebar-section-label" id="nav-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee Dashboard"><span class="nav-item-icon" aria-hidden="true">🗺</span><span>TN Dashboard</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-wc"><span class="sidebar-section-label" id="nav-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item" aria-label="Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="wc-members.html" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="wc-teams.html" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="wc-training.html" class="nav-item" aria-label="Training"><span class="nav-item-icon" aria-hidden="true">🎓</span><span>Training</span></a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="wc-events.html" class="nav-item active" aria-current="page" aria-label="Events — currently viewing"><span class="nav-item-icon" aria-hidden="true">📅</span><span>Events</span></a>
+      <a href="wc-communications.html" class="nav-item" aria-label="Communications"><span class="nav-item-icon" aria-hidden="true">📡</span><span>Communications</span></a>
+      <a href="wc-documents.html" class="nav-item" aria-label="Documents"><span class="nav-item-icon" aria-hidden="true">📄</span><span>Documents</span></a>
+      <a href="wc-certifications.html" class="nav-item" aria-label="Certifications"><span class="nav-item-icon" aria-hidden="true">🏅</span><span>Certifications</span></a>
+      <a href="wc-applicants.html" class="nav-item" aria-label="Applicants"><span class="nav-item-icon" aria-hidden="true">📋</span><span>Applicants</span><span class="nav-item-badge">18</span></a>
+      <a href="wc-partners.html" class="nav-item" aria-label="Partners"><span class="nav-item-icon" aria-hidden="true">🤝</span><span>Partners</span></a>
+      <a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Readiness</span></a>
+      <a href="wc-settings.html" class="nav-item" aria-label="Settings"><span class="nav-item-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin"><div class="user-avatar" aria-hidden="true">JA</div><div class="user-info"><div class="user-name">Jason</div><div class="user-role">County Admin — WC</div></div></a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode"><span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span><span class="focus-mode-label">Focus Mode</span></button>
+    </div>
+  </nav>
+  <div class="admin-main">
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb"><ol>
+        <li><a href="index.html">National</a></li><li><a href="tennessee.html">Tennessee</a></li>
+        <li><a href="warren-county.html">Warren County</a></li><li><span class="current" aria-current="page">Events</span></li>
+      </ol></nav>
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-ev">Search events</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-ev" placeholder="Search events…" autocomplete="off">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill critical" role="status" aria-label="Active Incident"><span class="status-pill-icon" aria-hidden="true">⚠</span> Active Incident</span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread"><span aria-hidden="true">🔔</span><span class="notification-badge" aria-hidden="true"></span></button>
+        <button class="topbar-btn secondary" aria-label="Export calendar" onclick="TDRN.print.exportToCSV([],'warren-events.csv')"><span aria-hidden="true">📥</span> Export Calendar</button>
+        <button class="topbar-btn primary" aria-label="Create new event" onclick="TDRN.modal.open('modal-create-event')"><span aria-hidden="true">＋</span> Create Event</button>
+      </div>
+    </header>
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html" class="subnav-tab">Dashboard</a>
+      <a href="wc-members.html" class="subnav-tab">Members</a>
+      <a href="wc-teams.html" class="subnav-tab">Teams</a>
+      <a href="wc-training.html" class="subnav-tab">Training</a>
+      <a href="wc-equipment.html" class="subnav-tab">Equipment</a>
+      <a href="wc-events.html" class="subnav-tab active" aria-current="page">Events</a>
+      <a href="wc-communications.html" class="subnav-tab">Communications</a>
+      <a href="wc-documents.html" class="subnav-tab">Documents</a>
+      <a href="wc-certifications.html" class="subnav-tab">Certifications</a>
+      <a href="wc-applicants.html" class="subnav-tab">Applicants</a>
+      <a href="wc-partners.html" class="subnav-tab">Partners</a>
+      <a href="wc-readiness.html" class="subnav-tab">Readiness</a>
+      <a href="wc-settings.html" class="subnav-tab">Settings</a>
+    </nav>
+    <main id="main-content" class="admin-content" aria-label="Events and Training Calendar">
+      <div class="content-header">
+        <div class="content-header-left">
+          <h1 class="content-title">Events &amp; Training Calendar</h1>
+          <p class="content-subtitle">Upcoming deployments, training sessions, drills, and meetings</p>
+        </div>
+        <div class="content-actions">
+          <button class="btn btn-ghost" onclick="TDRN.print.exportToCSV([],'warren-events.csv')" aria-label="Export calendar"><span aria-hidden="true">📥</span> Export</button>
+          <button class="btn btn-primary" onclick="TDRN.modal.open('modal-create-event')" aria-label="Create new event"><span aria-hidden="true">＋</span> Create Event</button>
+        </div>
+      </div>
+      <!-- STATS -->
+      <section aria-labelledby="ev-stats-h"><h2 id="ev-stats-h" class="sr-only">Event Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card accent-yellow" role="article" aria-label="This Month: 4 events"><div class="stat-label">This Month</div><div class="stat-value">4</div><div class="stat-change flat"><span aria-hidden="true">→</span> May 2026</div><span class="stat-icon" aria-hidden="true">📅</span></div>
+          <div class="stat-card accent-blue" role="article" aria-label="Upcoming: 9 events"><div class="stat-label">Upcoming</div><div class="stat-value">9</div><div class="stat-change flat"><span aria-hidden="true">→</span> Next 60 days</div><span class="stat-icon" aria-hidden="true">🗓</span></div>
+          <div class="stat-card accent-green" role="article" aria-label="Completed This Quarter: 18"><div class="stat-label">Completed (Quarter)</div><div class="stat-value">18</div><div class="stat-change up"><span aria-hidden="true">↑</span> +5 vs prior</div><span class="stat-icon" aria-hidden="true">✓</span></div>
+          <div class="stat-card accent-purple" role="article" aria-label="Members Attending: 89"><div class="stat-label">Members Attending</div><div class="stat-value">89</div><div class="stat-change flat"><span aria-hidden="true">→</span> Across all events</div><span class="stat-icon" aria-hidden="true">👥</span></div>
+        </div>
+      </section>
+      <!-- CALENDAR -->
+      <section class="panel" aria-labelledby="cal-heading" style="margin-bottom:24px;">
+        <div class="panel-header">
+          <h2 class="panel-title" id="cal-heading"><span aria-hidden="true">📅</span> May 2026</h2>
+          <div class="panel-actions">
+            <button class="btn btn-ghost btn-sm" aria-label="Previous month">‹ Apr</button>
+            <button class="btn btn-ghost btn-sm" aria-label="Today">Today</button>
+            <button class="btn btn-ghost btn-sm" aria-label="Next month">Jun ›</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="cal-grid" role="grid" aria-label="May 2026 calendar">
+            <div class="cal-header-cell" role="columnheader" aria-label="Sunday">Sun</div>
+            <div class="cal-header-cell" role="columnheader" aria-label="Monday">Mon</div>
+            <div class="cal-header-cell" role="columnheader" aria-label="Tuesday">Tue</div>
+            <div class="cal-header-cell" role="columnheader" aria-label="Wednesday">Wed</div>
+            <div class="cal-header-cell" role="columnheader" aria-label="Thursday">Thu</div>
+            <div class="cal-header-cell" role="columnheader" aria-label="Friday">Fri</div>
+            <div class="cal-header-cell" role="columnheader" aria-label="Saturday">Sat</div>
+            <!-- Row 1: Apr 27 - May 2 -->
+            <div class="cal-day other-month" role="gridcell" aria-label="April 27" tabindex="-1"><div class="cal-day-num">27</div></div>
+            <div class="cal-day other-month" role="gridcell" aria-label="April 28" tabindex="-1"><div class="cal-day-num">28</div></div>
+            <div class="cal-day other-month" role="gridcell" aria-label="April 29" tabindex="-1"><div class="cal-day-num">29</div></div>
+            <div class="cal-day other-month" role="gridcell" aria-label="April 30" tabindex="-1"><div class="cal-day-num">30</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 1" tabindex="0"><div class="cal-day-num">1</div></div>
+            <div class="cal-day today" role="gridcell" aria-label="May 2 — today" tabindex="0"><div class="cal-day-num">2</div><div class="cal-event-dot deployment" aria-label="Event: Tornado Response — Active Deployment"><span aria-hidden="true">⚠</span>Deploy</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 3" tabindex="0"><div class="cal-day-num">3</div></div>
+            <!-- Row 2: May 4-10 -->
+            <div class="cal-day" role="gridcell" aria-label="May 4" tabindex="0"><div class="cal-day-num">4</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 5" tabindex="0"><div class="cal-day-num">5</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 6" tabindex="0"><div class="cal-day-num">6</div><div class="cal-event-dot meeting" aria-label="Event: EOC Leadership Meeting"><span aria-hidden="true">●</span>Meeting</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 7" tabindex="0"><div class="cal-day-num">7</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 8" tabindex="0"><div class="cal-day-num">8</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 9" tabindex="0"><div class="cal-day-num">9</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 10 — ICS-100 Training" tabindex="0"><div class="cal-day-num">10</div><div class="cal-event-dot training" aria-label="Event: ICS-100 Certification"><span aria-hidden="true">●</span>ICS-100</div></div>
+            <!-- Row 3: May 11-17 -->
+            <div class="cal-day" role="gridcell" aria-label="May 11" tabindex="0"><div class="cal-day-num">11</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 12" tabindex="0"><div class="cal-day-num">12</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 13" tabindex="0"><div class="cal-day-num">13</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 14" tabindex="0"><div class="cal-day-num">14</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 15" tabindex="0"><div class="cal-day-num">15</div><div class="cal-event-dot drill" aria-label="Event: Search and Rescue Drill"><span aria-hidden="true">●</span>SAR Drill</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 16" tabindex="0"><div class="cal-day-num">16</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 17" tabindex="0"><div class="cal-day-num">17</div></div>
+            <!-- Row 4: May 18-24 -->
+            <div class="cal-day" role="gridcell" aria-label="May 18" tabindex="0"><div class="cal-day-num">18</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 19" tabindex="0"><div class="cal-day-num">19</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 20" tabindex="0"><div class="cal-day-num">20</div><div class="cal-event-dot meeting" aria-label="Event: Monthly Leadership Briefing"><span aria-hidden="true">●</span>Brief</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 21" tabindex="0"><div class="cal-day-num">21</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 22" tabindex="0"><div class="cal-day-num">22</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 23" tabindex="0"><div class="cal-day-num">23</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 24" tabindex="0"><div class="cal-day-num">24</div><div class="cal-event-dot training" aria-label="Event: First Aid Refresher"><span aria-hidden="true">●</span>First Aid</div></div>
+            <!-- Row 5: May 25-31 -->
+            <div class="cal-day" role="gridcell" aria-label="May 25" tabindex="0"><div class="cal-day-num">25</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 26" tabindex="0"><div class="cal-day-num">26</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 27" tabindex="0"><div class="cal-day-num">27</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 28" tabindex="0"><div class="cal-day-num">28</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 29" tabindex="0"><div class="cal-day-num">29</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 30" tabindex="0"><div class="cal-day-num">30</div><div class="cal-event-dot drill" aria-label="Event: CERT Full-Scale Exercise"><span aria-hidden="true">●</span>CERT Ex.</div></div>
+            <div class="cal-day" role="gridcell" aria-label="May 31" tabindex="0"><div class="cal-day-num">31</div></div>
+          </div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;" aria-label="Calendar legend">
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);"><span style="width:10px;height:10px;border-radius:2px;background:var(--yellow-light);border:1px solid rgba(245,196,0,0.4);" aria-hidden="true"></span>Training</span>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);"><span style="width:10px;height:10px;border-radius:2px;background:var(--blue-light);border:1px solid rgba(96,165,250,0.4);" aria-hidden="true"></span>Meeting</span>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);"><span style="width:10px;height:10px;border-radius:2px;background:var(--red-light);border:1px solid rgba(248,113,113,0.4);" aria-hidden="true"></span>Deployment</span>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);"><span style="width:10px;height:10px;border-radius:2px;background:var(--green-light);border:1px solid rgba(52,211,153,0.4);" aria-hidden="true"></span>Drill</span>
+          </div>
+        </div>
+      </section>
+      <!-- UPCOMING EVENTS -->
+      <section aria-labelledby="upcoming-ev-h" style="margin-bottom:24px;">
+        <h2 id="upcoming-ev-h" style="font-family:var(--font-heading);font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:0.04em;margin-bottom:16px;">Upcoming Events</h2>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <article class="event-detail-card" aria-label="Tornado Response — Active Deployment — ongoing">
+            <div class="event-date-badge deployment" aria-hidden="true"><div class="event-date-month">MAY</div><div class="event-date-day">2</div></div>
+            <div class="event-body">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="event-title">Tornado Response — Active Deployment</div><span class="badge badge-critical" aria-label="Type: Deployment"><span class="badge-icon" aria-hidden="true"></span>Deployment</span></div>
+              <div class="event-meta"><span><span aria-hidden="true">📍</span> Warren County — Multiple Sectors</span><span><span aria-hidden="true">⏱</span> Day 3 — ongoing</span><span><span aria-hidden="true">👥</span> 142 / 142 members</span></div>
+              <div class="event-desc">Full county response to EF2 tornado — ICS Type 3 active. Debris clearing, shelter support, and search operations ongoing.</div>
+            </div>
+            <div class="event-actions"><button class="btn btn-ghost btn-sm" aria-label="View tornado response details">Details</button><button class="btn btn-ghost btn-sm" aria-label="Edit event">Edit</button></div>
+          </article>
+          <article class="event-detail-card" aria-label="EOC Leadership Meeting — May 6">
+            <div class="event-date-badge meeting" aria-hidden="true"><div class="event-date-month">MAY</div><div class="event-date-day">6</div></div>
+            <div class="event-body">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="event-title">EOC Leadership Meeting</div><span class="badge badge-training" aria-label="Type: Meeting"><span class="badge-icon" aria-hidden="true"></span>Meeting</span></div>
+              <div class="event-meta"><span><span aria-hidden="true">📍</span> Warren County EOC</span><span><span aria-hidden="true">🕗</span> 09:00 – 11:00 CDT</span><span><span aria-hidden="true">👥</span> 12 / 20 registered</span></div>
+              <div class="event-desc">After-action coordination meeting for leadership. Review current incident status and plan stand-down protocol.</div>
+            </div>
+            <div class="event-actions"><button class="btn btn-ghost btn-sm" aria-label="View EOC Leadership Meeting">Details</button><button class="btn btn-primary btn-sm" aria-label="Register for EOC Leadership Meeting">Register</button></div>
+          </article>
+          <article class="event-detail-card" aria-label="ICS-100 Certification — May 10">
+            <div class="event-date-badge training" aria-hidden="true"><div class="event-date-month">MAY</div><div class="event-date-day">10</div></div>
+            <div class="event-body">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="event-title">ICS-100 Certification</div><span class="badge badge-training" aria-label="Type: Training"><span class="badge-icon" aria-hidden="true"></span>Training</span></div>
+              <div class="event-meta"><span><span aria-hidden="true">📍</span> McMinnville Fire Hall</span><span><span aria-hidden="true">🕗</span> 08:00 – 17:00 CDT</span><span><span aria-hidden="true">👥</span> 12 / 30 registered</span></div>
+              <div class="event-desc">Full-day ICS-100 Introduction to the Incident Command System. FEMA-certified. Completion counts toward compliance tracking.</div>
+            </div>
+            <div class="event-actions"><button class="btn btn-ghost btn-sm" aria-label="View ICS-100 details">Details</button><button class="btn btn-primary btn-sm" aria-label="Register members for ICS-100">Register</button></div>
+          </article>
+          <article class="event-detail-card" aria-label="Search and Rescue Drill — May 15">
+            <div class="event-date-badge drill" aria-hidden="true"><div class="event-date-month">MAY</div><div class="event-date-day">15</div></div>
+            <div class="event-body">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="event-title">Search &amp; Rescue Drill</div><span class="badge badge-operational" aria-label="Type: Drill"><span class="badge-icon" aria-hidden="true"></span>Drill</span></div>
+              <div class="event-meta"><span><span aria-hidden="true">📍</span> Cardwell Mountain WMA</span><span><span aria-hidden="true">🕗</span> 06:00 – 14:00 CDT</span><span><span aria-hidden="true">👥</span> 28 / 40 registered</span></div>
+              <div class="event-desc">Wilderness search and rescue scenario exercise. Teams Alpha and Charlie required. Full gear deployment.</div>
+            </div>
+            <div class="event-actions"><button class="btn btn-ghost btn-sm" aria-label="View SAR Drill details">Details</button><button class="btn btn-primary btn-sm" aria-label="Register for SAR Drill">Register</button></div>
+          </article>
+          <article class="event-detail-card" aria-label="Monthly Leadership Briefing — May 20">
+            <div class="event-date-badge meeting" aria-hidden="true"><div class="event-date-month">MAY</div><div class="event-date-day">20</div></div>
+            <div class="event-body">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="event-title">Monthly Leadership Briefing</div><span class="badge badge-training" aria-label="Type: Meeting"><span class="badge-icon" aria-hidden="true"></span>Meeting</span></div>
+              <div class="event-meta"><span><span aria-hidden="true">📍</span> Warren County EOC</span><span><span aria-hidden="true">🕗</span> 18:00 – 19:30 CDT</span><span><span aria-hidden="true">👥</span> 14 / 25 registered</span></div>
+              <div class="event-desc">Regular monthly briefing for team leaders and coordinators. Review incident after-action, upcoming training schedule.</div>
+            </div>
+            <div class="event-actions"><button class="btn btn-ghost btn-sm" aria-label="View briefing details">Details</button><button class="btn btn-ghost btn-sm" aria-label="Register for briefing">Register</button></div>
+          </article>
+          <article class="event-detail-card" aria-label="First Aid Refresher — May 24">
+            <div class="event-date-badge training" aria-hidden="true"><div class="event-date-month">MAY</div><div class="event-date-day">24</div></div>
+            <div class="event-body">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="event-title">First Aid / CPR Refresher</div><span class="badge badge-training" aria-label="Type: Training"><span class="badge-icon" aria-hidden="true"></span>Training</span></div>
+              <div class="event-meta"><span><span aria-hidden="true">📍</span> McMinnville Community Center</span><span><span aria-hidden="true">🕗</span> 08:00 – 13:00 CDT</span><span><span aria-hidden="true">👥</span> 18 / 25 registered</span></div>
+              <div class="event-desc">Renewal training for expiring First Aid/CPR certifications. AHA-certified instructor. Priority for members expiring within 60 days.</div>
+            </div>
+            <div class="event-actions"><button class="btn btn-ghost btn-sm" aria-label="View First Aid refresher details">Details</button><button class="btn btn-primary btn-sm" aria-label="Register for First Aid refresher">Register</button></div>
+          </article>
+          <article class="event-detail-card" aria-label="CERT Full-Scale Exercise — May 30">
+            <div class="event-date-badge drill" aria-hidden="true"><div class="event-date-month">MAY</div><div class="event-date-day">30</div></div>
+            <div class="event-body">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="event-title">CERT Full-Scale Exercise</div><span class="badge badge-operational" aria-label="Type: Drill"><span class="badge-icon" aria-hidden="true"></span>Drill</span></div>
+              <div class="event-meta"><span><span aria-hidden="true">📍</span> Warren County Fairgrounds</span><span><span aria-hidden="true">🕗</span> 07:00 – 15:00 CDT</span><span><span aria-hidden="true">👥</span> 45 / 60 registered</span></div>
+              <div class="event-desc">Annual full-scale CERT exercise simulating mass casualty event. All CERT-certified members expected. Evaluators from TN EMA attending.</div>
+            </div>
+            <div class="event-actions"><button class="btn btn-ghost btn-sm" aria-label="View CERT exercise details">Details</button><button class="btn btn-primary btn-sm" aria-label="Register for CERT exercise">Register</button></div>
+          </article>
+          <article class="event-detail-card" aria-label="CERT Basic Cohort 8 — June 7">
+            <div class="event-date-badge training" aria-hidden="true"><div class="event-date-month">JUN</div><div class="event-date-day">7</div></div>
+            <div class="event-body">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="event-title">CERT Basic — Cohort 8</div><span class="badge badge-training" aria-label="Type: Training"><span class="badge-icon" aria-hidden="true"></span>Training</span></div>
+              <div class="event-meta"><span><span aria-hidden="true">📍</span> Warren County EOC</span><span><span aria-hidden="true">🕗</span> 08:00 – 17:00 CDT</span><span><span aria-hidden="true">👥</span> 8 / 25 registered</span></div>
+              <div class="event-desc">New member CERT Basic Training cohort. 16-hour multi-day program covering fire safety, disaster medical, search and rescue, terrorism.</div>
+            </div>
+            <div class="event-actions"><button class="btn btn-ghost btn-sm" aria-label="View CERT Basic details">Details</button><button class="btn btn-primary btn-sm" aria-label="Register for CERT Basic">Register</button></div>
+          </article>
+        </div>
+      </section>
+      <!-- PAST EVENTS -->
+      <section class="panel" aria-labelledby="past-ev-h">
+        <div class="panel-header"><h2 class="panel-title" id="past-ev-h"><span aria-hidden="true">📋</span> Completed Events</h2></div>
+        <div class="table-wrapper">
+          <table class="data-table" aria-label="Completed events log">
+            <thead><tr><th scope="col">Event</th><th scope="col">Type</th><th scope="col">Date</th><th scope="col">Location</th><th scope="col">Attendance</th><th scope="col">Outcome</th></tr></thead>
+            <tbody>
+              <tr><td>Chainsaw Safety Recertification</td><td><span class="badge badge-training" style="font-size:11px;"><span class="badge-icon" aria-hidden="true"></span>Training</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 18</span></td><td>Equipment Bay</td><td>23/25 <span style="color:var(--green);">92%</span></td><td>All renewed</td></tr>
+              <tr><td>April Leadership Meeting</td><td><span class="badge badge-standby" style="font-size:11px;"><span class="badge-icon" aria-hidden="true"></span>Meeting</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 15</span></td><td>EOC</td><td>18/20 <span style="color:var(--green);">90%</span></td><td>ICS planning complete</td></tr>
+              <tr><td>Tornado Response Activation</td><td><span class="badge badge-critical" style="font-size:11px;"><span class="badge-icon" aria-hidden="true"></span>Deployment</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 29</span></td><td>Multi-sector</td><td>142/142 <span style="color:var(--green);">100%</span></td><td>Ongoing</td></tr>
+              <tr><td>ICS-700 Study Group</td><td><span class="badge badge-training" style="font-size:11px;"><span class="badge-icon" aria-hidden="true"></span>Training</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 10</span></td><td>Virtual</td><td>31/40 <span style="color:var(--yellow);">78%</span></td><td>14 tested</td></tr>
+              <tr><td>Spring Readiness Drill</td><td><span class="badge badge-operational" style="font-size:11px;"><span class="badge-icon" aria-hidden="true"></span>Drill</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 5</span></td><td>Fairgrounds</td><td>52/60 <span style="color:var(--green);">87%</span></td><td>Passed</td></tr>
+              <tr><td>Medical Cache Inspection</td><td><span class="badge badge-standby" style="font-size:11px;"><span class="badge-icon" aria-hidden="true"></span>Meeting</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 28</span></td><td>Medical Cache</td><td>8/8 <span style="color:var(--green);">100%</span></td><td>2 items replaced</td></tr>
+              <tr><td>CERT Basic — Cohort 7</td><td><span class="badge badge-training" style="font-size:11px;"><span class="badge-icon" aria-hidden="true"></span>Training</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 15</span></td><td>EOC</td><td>22/25 <span style="color:var(--green);">88%</span></td><td>22 certified</td></tr>
+              <tr><td>Heavy Equipment Safety</td><td><span class="badge badge-training" style="font-size:11px;"><span class="badge-icon" aria-hidden="true"></span>Training</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 8</span></td><td>Equipment Bay</td><td>15/16 <span style="color:var(--green);">94%</span></td><td>All certified</td></tr>
+              <tr><td>February Leadership Meeting</td><td><span class="badge badge-standby" style="font-size:11px;"><span class="badge-icon" aria-hidden="true"></span>Meeting</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Feb 18</span></td><td>EOC</td><td>17/20 <span style="color:var(--yellow);">85%</span></td><td>Budget approved</td></tr>
+              <tr><td>Winter Readiness Drill</td><td><span class="badge badge-operational" style="font-size:11px;"><span class="badge-icon" aria-hidden="true"></span>Drill</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Jan 25</span></td><td>Multi-site</td><td>88/100 <span style="color:var(--green);">88%</span></td><td>Passed</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<!-- CREATE EVENT MODAL -->
+<div id="modal-create-event" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-ev-title">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="modal-ev-title">Create Event</h2><button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-create-event')">✕</button></div>
+    <form id="form-create-event" class="modal-body" data-validate-form novalidate>
+      <div class="form-group"><label class="form-label" for="ev-title">Event Title <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><input type="text" id="ev-title" class="form-input" required placeholder="e.g. ICS-200 Certification"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" for="ev-type">Type <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><select id="ev-type" class="form-select" required><option value="">Select…</option><option>Training</option><option>Meeting</option><option>Deployment</option><option>Drill</option><option>Other</option></select></div>
+        <div class="form-group"><label class="form-label" for="ev-date">Date <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><input type="date" id="ev-date" class="form-input" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" for="ev-start">Start Time <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><input type="time" id="ev-start" class="form-input" required></div>
+        <div class="form-group"><label class="form-label" for="ev-end">End Time</label><input type="time" id="ev-end" class="form-input"></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="ev-location">Location <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><input type="text" id="ev-location" class="form-input" required placeholder="EOC, Fairgrounds, Virtual, etc."></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" for="ev-capacity">Max Capacity</label><input type="number" id="ev-capacity" class="form-input" placeholder="40" min="1"></div>
+        <div class="form-group"><label class="form-label" for="ev-req-certs">Required Certifications</label><input type="text" id="ev-req-certs" class="form-input" placeholder="ICS-100, CERT, etc."></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="ev-desc">Description</label><textarea id="ev-desc" class="form-textarea" rows="3" placeholder="Event objectives, what to bring, special instructions…"></textarea></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input type="checkbox" id="ev-notify" value="1" aria-label="Notify all members about this event">
+        <label for="ev-notify" style="font-size:14px;color:var(--text-body);cursor:pointer;">Notify all members when published</label>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-create-event')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" aria-label="Create event" onclick="TDRN.forms.validateForm(document.getElementById('form-create-event')) && TDRN.toast.success('Event created') && TDRN.modal.close('modal-create-event')"><span aria-hidden="true">＋</span> Create Event</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

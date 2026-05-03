@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County — Partner Network">
+  <meta name="theme-color" content="#0F1011">
+  <title>Partners — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .partner-card { background:var(--bg-panel);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;display:flex;flex-direction:column;gap:12px;transition:var(--transition); }
+    .partner-card:hover { border-color:var(--border-hover);box-shadow:var(--shadow-md); }
+    .partner-card-header { display:flex;align-items:flex-start;justify-content:space-between;gap:8px; }
+    .partner-name { font-family:var(--font-heading);font-size:15px;font-weight:700;color:var(--text-primary);letter-spacing:0.03em; }
+    .partner-contact { display:flex;flex-direction:column;gap:3px; }
+    .partner-contact-name { font-size:13px;font-weight:600;color:var(--text-body); }
+    .partner-contact-detail { font-size:12px;color:var(--text-muted); }
+    .partner-tags { display:flex;gap:6px;flex-wrap:wrap; }
+    .partner-tag { font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:var(--bg-body);border:1px solid var(--border-color);color:var(--text-muted); }
+    .partner-meta { display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-disabled); }
+    .partner-actions { display:flex;gap:6px; }
+    .filter-pills { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px; }
+    .filter-pill { padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);transition:var(--transition);min-height:32px; }
+    .filter-pill:hover { border-color:var(--border-hover);color:var(--text-body); }
+    .filter-pill.active { background:var(--yellow-light);color:var(--yellow);border-color:rgba(245,196,0,0.4); }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .modal-backdrop[hidden] { display:none; }
+    .modal { background:var(--bg-panel);border:1px solid var(--border-hover);border-radius:var(--radius-lg);width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg); }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-panel);z-index:1; }
+    .modal-title { font-family:var(--font-heading);font-size:18px;font-weight:700;color:var(--text-primary); }
+    .modal-body { padding:24px; }
+    .modal-footer { display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+<div class="admin-shell">
+  <nav class="admin-sidebar" aria-label="Main navigation">
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — National dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text"><span class="logo-name">TDRN</span><span class="logo-tagline">Disaster Response Network</span></div>
+    </a>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-nat"><span class="sidebar-section-label" id="nav-nat">National</span>
+      <a href="index.html" class="nav-item" aria-label="National Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="#" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="#" class="nav-item" aria-label="Alerts"><span class="nav-item-icon" aria-hidden="true">🔔</span><span>Alerts</span><span class="nav-item-badge">3</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-tn"><span class="sidebar-section-label" id="nav-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee Dashboard"><span class="nav-item-icon" aria-hidden="true">🗺</span><span>TN Dashboard</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-wc"><span class="sidebar-section-label" id="nav-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item" aria-label="Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="wc-members.html" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="wc-teams.html" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="wc-training.html" class="nav-item" aria-label="Training"><span class="nav-item-icon" aria-hidden="true">🎓</span><span>Training</span></a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="wc-events.html" class="nav-item" aria-label="Events"><span class="nav-item-icon" aria-hidden="true">📅</span><span>Events</span></a>
+      <a href="wc-communications.html" class="nav-item" aria-label="Communications"><span class="nav-item-icon" aria-hidden="true">📡</span><span>Communications</span></a>
+      <a href="wc-documents.html" class="nav-item" aria-label="Documents"><span class="nav-item-icon" aria-hidden="true">📄</span><span>Documents</span></a>
+      <a href="wc-certifications.html" class="nav-item" aria-label="Certifications"><span class="nav-item-icon" aria-hidden="true">🏅</span><span>Certifications</span></a>
+      <a href="wc-applicants.html" class="nav-item" aria-label="Applicants"><span class="nav-item-icon" aria-hidden="true">📋</span><span>Applicants</span><span class="nav-item-badge">18</span></a>
+      <a href="wc-partners.html" class="nav-item active" aria-current="page" aria-label="Partners — currently viewing"><span class="nav-item-icon" aria-hidden="true">🤝</span><span>Partners</span></a>
+      <a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Readiness</span></a>
+      <a href="wc-settings.html" class="nav-item" aria-label="Settings"><span class="nav-item-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin"><div class="user-avatar" aria-hidden="true">JA</div><div class="user-info"><div class="user-name">Jason</div><div class="user-role">County Admin — WC</div></div></a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode"><span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span><span class="focus-mode-label">Focus Mode</span></button>
+    </div>
+  </nav>
+  <div class="admin-main">
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb"><ol>
+        <li><a href="index.html">National</a></li><li><a href="tennessee.html">Tennessee</a></li>
+        <li><a href="warren-county.html">Warren County</a></li><li><span class="current" aria-current="page">Partners</span></li>
+      </ol></nav>
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-partners">Search partners</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-partners" placeholder="Search partners…" autocomplete="off">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill critical" role="status" aria-label="Active Incident"><span class="status-pill-icon" aria-hidden="true">⚠</span> Active Incident</span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread"><span aria-hidden="true">🔔</span><span class="notification-badge" aria-hidden="true"></span></button>
+        <button class="topbar-btn secondary" aria-label="Export partner directory" onclick="TDRN.print.exportToCSV([],'warren-partners.csv')"><span aria-hidden="true">📥</span> Export</button>
+        <button class="topbar-btn primary" aria-label="Add new partner" onclick="TDRN.modal.open('modal-add-partner')"><span aria-hidden="true">＋</span> Add Partner</button>
+      </div>
+    </header>
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html" class="subnav-tab">Dashboard</a>
+      <a href="wc-members.html" class="subnav-tab">Members</a>
+      <a href="wc-teams.html" class="subnav-tab">Teams</a>
+      <a href="wc-training.html" class="subnav-tab">Training</a>
+      <a href="wc-equipment.html" class="subnav-tab">Equipment</a>
+      <a href="wc-events.html" class="subnav-tab">Events</a>
+      <a href="wc-communications.html" class="subnav-tab">Communications</a>
+      <a href="wc-documents.html" class="subnav-tab">Documents</a>
+      <a href="wc-certifications.html" class="subnav-tab">Certifications</a>
+      <a href="wc-applicants.html" class="subnav-tab">Applicants</a>
+      <a href="wc-partners.html" class="subnav-tab active" aria-current="page">Partners</a>
+      <a href="wc-readiness.html" class="subnav-tab">Readiness</a>
+      <a href="wc-settings.html" class="subnav-tab">Settings</a>
+    </nav>
+    <main id="main-content" class="admin-content" aria-label="Partner Network">
+      <div class="content-header">
+        <div class="content-header-left"><h1 class="content-title">Partner Network</h1><p class="content-subtitle">Contractors, agencies, and mutual aid partners — Warren County</p></div>
+        <div class="content-actions">
+          <button class="btn btn-ghost" aria-label="Export directory" onclick="TDRN.print.exportToCSV([],'warren-partners.csv')"><span aria-hidden="true">📥</span> Export Directory</button>
+          <button class="btn btn-primary" aria-label="Add partner" onclick="TDRN.modal.open('modal-add-partner')"><span aria-hidden="true">＋</span> Add Partner</button>
+        </div>
+      </div>
+      <!-- STATS -->
+      <section aria-labelledby="partners-stats-h"><h2 id="partners-stats-h" class="sr-only">Partner Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card accent-blue" role="article" aria-label="Total Partners: 24"><div class="stat-label">Total Partners</div><div class="stat-value">24</div><div class="stat-change up"><span aria-hidden="true">↑</span> +3 this year</div><span class="stat-icon" aria-hidden="true">🤝</span></div>
+          <div class="stat-card accent-green" role="article" aria-label="Active Agreements: 11"><div class="stat-label">Active Agreements</div><div class="stat-value">11</div><div class="stat-change flat"><span aria-hidden="true">→</span> MOU / Contract</div><span class="stat-icon" aria-hidden="true">📋</span></div>
+          <div class="stat-card accent-yellow" role="article" aria-label="Contractors On-Call: 9"><div class="stat-label">Contractors On-Call</div><div class="stat-value">9</div><div class="stat-change up"><span aria-hidden="true">↑</span> Active incident</div><span class="stat-icon" aria-hidden="true">🏗</span></div>
+          <div class="stat-card accent-purple" role="article" aria-label="Gov Agency Liaisons: 4"><div class="stat-label">Gov. Liaisons</div><div class="stat-value">4</div><div class="stat-change flat"><span aria-hidden="true">→</span> State &amp; Federal</div><span class="stat-icon" aria-hidden="true">🏛</span></div>
+        </div>
+      </section>
+      <!-- FILTER PILLS -->
+      <div class="filter-pills" role="group" aria-label="Filter partners by type">
+        <button class="filter-pill active" aria-pressed="true" aria-label="Show all partners">All (24)</button>
+        <button class="filter-pill" aria-pressed="false" aria-label="Show government partners"><span aria-hidden="true">🏛</span> Government</button>
+        <button class="filter-pill" aria-pressed="false" aria-label="Show contractors"><span aria-hidden="true">🏗</span> Contractor</button>
+        <button class="filter-pill" aria-pressed="false" aria-label="Show nonprofits"><span aria-hidden="true">💛</span> Nonprofit</button>
+        <button class="filter-pill" aria-pressed="false" aria-label="Show medical partners"><span aria-hidden="true">🏥</span> Medical</button>
+        <button class="filter-pill" aria-pressed="false" aria-label="Show equipment suppliers"><span aria-hidden="true">🔧</span> Equipment</button>
+        <button class="filter-pill" aria-pressed="false" aria-label="Show mutual aid partners"><span aria-hidden="true">🤝</span> Mutual Aid</button>
+      </div>
+      <!-- PARTNER CARDS GRID -->
+      <section aria-labelledby="partner-cards-h" style="margin-bottom:28px;">
+        <h2 id="partner-cards-h" class="sr-only">Partner Cards</h2>
+        <div class="grid-3">
+          <article class="partner-card" aria-label="Warren County EMA">
+            <div class="partner-card-header">
+              <div><div class="partner-name">Warren County EMA</div><span class="badge badge-operational" aria-label="Type: Government" style="margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Government</span></div>
+              <span class="badge badge-operational" aria-label="Agreement: Active MOU"><span class="badge-icon" aria-hidden="true"></span>Active MOU</span>
+            </div>
+            <div class="partner-contact"><div class="partner-contact-name">Bill Summers</div><div class="partner-contact-detail"><span aria-hidden="true">📞</span> (931) 473-2121</div><div class="partner-contact-detail"><span aria-hidden="true">✉</span> bsummers@warrencountytn.gov</div></div>
+            <div class="partner-tags"><span class="partner-tag">EOC Access</span><span class="partner-tag">Resource Coordination</span><span class="partner-tag">ICS Support</span></div>
+            <div class="partner-meta"><span>Last contact: <strong>May 2</strong></span></div>
+            <div class="partner-actions"><button class="btn btn-ghost btn-sm" aria-label="View Warren County EMA details">View</button><button class="btn btn-ghost btn-sm" aria-label="Contact Warren County EMA">Contact</button><button class="btn btn-ghost btn-sm" aria-label="Edit Warren County EMA">Edit</button></div>
+          </article>
+          <article class="partner-card" aria-label="Tennessee EMA">
+            <div class="partner-card-header">
+              <div><div class="partner-name">Tennessee EMA</div><span class="badge badge-operational" aria-label="Type: Government" style="margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Government</span></div>
+              <span class="badge badge-operational" aria-label="Agreement: Active MOU"><span class="badge-icon" aria-hidden="true"></span>Active MOU</span>
+            </div>
+            <div class="partner-contact"><div class="partner-contact-name">Regional Liaison</div><div class="partner-contact-detail"><span aria-hidden="true">📞</span> (615) 741-0001</div><div class="partner-contact-detail"><span aria-hidden="true">✉</span> ema.liaison@tn.gov</div></div>
+            <div class="partner-tags"><span class="partner-tag">State Resources</span><span class="partner-tag">IMT Support</span><span class="partner-tag">Grants</span></div>
+            <div class="partner-meta"><span>Last contact: <strong>May 1</strong></span></div>
+            <div class="partner-actions"><button class="btn btn-ghost btn-sm" aria-label="View TN EMA details">View</button><button class="btn btn-ghost btn-sm" aria-label="Contact TN EMA">Contact</button><button class="btn btn-ghost btn-sm" aria-label="Edit TN EMA">Edit</button></div>
+          </article>
+          <article class="partner-card" aria-label="McMinnville Fire Department">
+            <div class="partner-card-header">
+              <div><div class="partner-name">McMinnville Fire Dept.</div><span class="badge badge-operational" aria-label="Type: Government" style="margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Government</span></div>
+              <span class="badge badge-operational" aria-label="Agreement: Active MOU"><span class="badge-icon" aria-hidden="true"></span>Active MOU</span>
+            </div>
+            <div class="partner-contact"><div class="partner-contact-name">Chief Ray Hollis</div><div class="partner-contact-detail"><span aria-hidden="true">📞</span> (931) 473-2148</div><div class="partner-contact-detail"><span aria-hidden="true">✉</span> rhollis@mcminnvillefire.org</div></div>
+            <div class="partner-tags"><span class="partner-tag">Rescue</span><span class="partner-tag">Medical First Response</span><span class="partner-tag">Heavy Rescue</span></div>
+            <div class="partner-meta"><span>Last contact: <strong>Apr 30</strong></span></div>
+            <div class="partner-actions"><button class="btn btn-ghost btn-sm" aria-label="View MFD details">View</button><button class="btn btn-ghost btn-sm" aria-label="Contact MFD">Contact</button><button class="btn btn-ghost btn-sm" aria-label="Edit MFD">Edit</button></div>
+          </article>
+          <article class="partner-card" aria-label="Cannon County CERT — Mutual Aid">
+            <div class="partner-card-header">
+              <div><div class="partner-name">Cannon County CERT</div><span class="badge badge-training" aria-label="Type: Mutual Aid" style="margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Mutual Aid</span></div>
+              <span class="badge badge-operational" aria-label="Agreement: Active MOU"><span class="badge-icon" aria-hidden="true"></span>Active MOU</span>
+            </div>
+            <div class="partner-contact"><div class="partner-contact-name">Teresa McBride</div><div class="partner-contact-detail"><span aria-hidden="true">📞</span> (615) 563-5535</div><div class="partner-contact-detail"><span aria-hidden="true">✉</span> tmcbride@cannonco.gov</div></div>
+            <div class="partner-tags"><span class="partner-tag">SAR</span><span class="partner-tag">Shelter Management</span></div>
+            <div class="partner-meta"><span>Last contact: <strong>May 2 — Active</strong></span></div>
+            <div class="partner-actions"><button class="btn btn-ghost btn-sm" aria-label="View Cannon County CERT">View</button><button class="btn btn-ghost btn-sm" aria-label="Contact">Contact</button><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></div>
+          </article>
+          <article class="partner-card" aria-label="Ridgeline Tree and Debris — Contractor">
+            <div class="partner-card-header">
+              <div><div class="partner-name">Ridgeline Tree &amp; Debris</div><span class="badge badge-standby" aria-label="Type: Contractor" style="margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Contractor</span></div>
+              <span class="badge badge-operational" aria-label="Agreement: Active Contract"><span class="badge-icon" aria-hidden="true"></span>Active Contract</span>
+            </div>
+            <div class="partner-contact"><div class="partner-contact-name">Dale Pruett</div><div class="partner-contact-detail"><span aria-hidden="true">📞</span> (931) 507-3312</div><div class="partner-contact-detail"><span aria-hidden="true">✉</span> dale@ridgelinetree.com</div></div>
+            <div class="partner-tags"><span class="partner-tag">Chainsaw</span><span class="partner-tag">Debris Removal</span><span class="partner-tag">Bucket Truck</span></div>
+            <div class="partner-meta"><span>Last contact: <strong>May 2 — Deployed</strong></span></div>
+            <div class="partner-actions"><button class="btn btn-ghost btn-sm" aria-label="View Ridgeline details">View</button><button class="btn btn-ghost btn-sm" aria-label="Contact Ridgeline">Contact</button><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></div>
+          </article>
+          <article class="partner-card" aria-label="Highland Equipment Rental — Contractor">
+            <div class="partner-card-header">
+              <div><div class="partner-name">Highland Equipment Rental</div><span class="badge badge-standby" aria-label="Type: Contractor" style="margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Contractor</span></div>
+              <span class="badge badge-operational" aria-label="Agreement: Active Contract"><span class="badge-icon" aria-hidden="true"></span>Active Contract</span>
+            </div>
+            <div class="partner-contact"><div class="partner-contact-name">Gary Hutchins</div><div class="partner-contact-detail"><span aria-hidden="true">📞</span> (931) 473-8854</div><div class="partner-contact-detail"><span aria-hidden="true">✉</span> ghutchins@highlandequip.com</div></div>
+            <div class="partner-tags"><span class="partner-tag">Excavator</span><span class="partner-tag">Skid Steer</span><span class="partner-tag">Generators</span></div>
+            <div class="partner-meta"><span>Last contact: <strong>May 1</strong></span></div>
+            <div class="partner-actions"><button class="btn btn-ghost btn-sm" aria-label="View Highland Equipment">View</button><button class="btn btn-ghost btn-sm" aria-label="Contact">Contact</button><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></div>
+          </article>
+          <article class="partner-card" aria-label="River Valley Medical Center">
+            <div class="partner-card-header">
+              <div><div class="partner-name">River Valley Medical Center</div><span class="badge badge-critical" aria-label="Type: Medical" style="margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Medical</span></div>
+              <span class="badge badge-operational" aria-label="Agreement: Active MOU"><span class="badge-icon" aria-hidden="true"></span>Active MOU</span>
+            </div>
+            <div class="partner-contact"><div class="partner-contact-name">Dr. Sharon Wells</div><div class="partner-contact-detail"><span aria-hidden="true">📞</span> (931) 473-6161</div><div class="partner-contact-detail"><span aria-hidden="true">✉</span> swells@rvmc.org</div></div>
+            <div class="partner-tags"><span class="partner-tag">Trauma</span><span class="partner-tag">Mass Casualty</span><span class="partner-tag">Medical Cache</span></div>
+            <div class="partner-meta"><span>Last contact: <strong>May 2 — Active</strong></span></div>
+            <div class="partner-actions"><button class="btn btn-ghost btn-sm" aria-label="View RVMC details">View</button><button class="btn btn-ghost btn-sm" aria-label="Contact RVMC">Contact</button><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></div>
+          </article>
+          <article class="partner-card" aria-label="Warren County Red Cross Chapter">
+            <div class="partner-card-header">
+              <div><div class="partner-name">American Red Cross — WC Chapter</div><span class="badge badge-training" aria-label="Type: Nonprofit" style="margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Nonprofit</span></div>
+              <span class="badge badge-operational" aria-label="Agreement: Active MOU"><span class="badge-icon" aria-hidden="true"></span>Active MOU</span>
+            </div>
+            <div class="partner-contact"><div class="partner-contact-name">Linda Carr</div><div class="partner-contact-detail"><span aria-hidden="true">📞</span> (931) 473-5523</div><div class="partner-contact-detail"><span aria-hidden="true">✉</span> lcarr@redcross.org</div></div>
+            <div class="partner-tags"><span class="partner-tag">Shelter Ops</span><span class="partner-tag">Feeding</span><span class="partner-tag">Mental Health</span></div>
+            <div class="partner-meta"><span>Last contact: <strong>May 2 — Active shelter</strong></span></div>
+            <div class="partner-actions"><button class="btn btn-ghost btn-sm" aria-label="View Red Cross">View</button><button class="btn btn-ghost btn-sm" aria-label="Contact">Contact</button><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></div>
+          </article>
+          <article class="partner-card" aria-label="Carter Communications — HAM Radio">
+            <div class="partner-card-header">
+              <div><div class="partner-name">Carter Comm. / ARES Group</div><span class="badge badge-standby" aria-label="Type: Contractor" style="margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Contractor</span></div>
+              <span class="badge badge-standby" aria-label="Agreement: Standby Agreement"><span class="badge-icon" aria-hidden="true"></span>Standby</span>
+            </div>
+            <div class="partner-contact"><div class="partner-contact-name">Phil Carter (KD4XZT)</div><div class="partner-contact-detail"><span aria-hidden="true">📞</span> (931) 607-4491</div><div class="partner-contact-detail"><span aria-hidden="true">✉</span> pcarter@arestn.net</div></div>
+            <div class="partner-tags"><span class="partner-tag">HAM Radio</span><span class="partner-tag">Emergency Comms</span><span class="partner-tag">WINLINK</span></div>
+            <div class="partner-meta"><span>Last contact: <strong>Apr 30</strong></span></div>
+            <div class="partner-actions"><button class="btn btn-ghost btn-sm" aria-label="View Carter Comms">View</button><button class="btn btn-ghost btn-sm" aria-label="Contact">Contact</button><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></div>
+          </article>
+        </div>
+      </section>
+      <!-- MUTUAL AID AGREEMENTS TABLE -->
+      <section class="panel" aria-labelledby="mou-h">
+        <div class="panel-header">
+          <h2 class="panel-title" id="mou-h"><span aria-hidden="true">📋</span> Mutual Aid Agreements</h2>
+          <button class="btn btn-ghost btn-sm" aria-label="Export agreements"><span aria-hidden="true">📥</span> Export</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" aria-label="Mutual Aid and Partner Agreements">
+            <thead><tr>
+              <th scope="col">Partner</th>
+              <th scope="col">Agreement Type</th>
+              <th scope="col">Signed</th>
+              <th scope="col">Expires</th>
+              <th scope="col">Services Covered</th>
+              <th scope="col">Status</th>
+              <th scope="col">Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr><td><strong>Warren County EMA</strong></td><td>MOU</td><td><span style="font-family:var(--font-mono);font-size:12px;">Jan 15, 2025</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Jan 14, 2027</span></td><td>EOC access, ICS support, resource coordination</td><td><span class="badge badge-operational" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" aria-label="View WC EMA MOU">View</button></td></tr>
+              <tr><td><strong>Tennessee EMA</strong></td><td>MOU</td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 1, 2025</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Feb 28, 2027</span></td><td>State resources, IMT support, grants administration</td><td><span class="badge badge-operational" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" aria-label="View TN EMA MOU">View</button></td></tr>
+              <tr><td><strong>McMinnville Fire Dept.</strong></td><td>MOU</td><td><span style="font-family:var(--font-mono);font-size:12px;">Jun 10, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Jun 9, 2026</span></td><td>Fire/rescue, technical rescue, medical first response</td><td><span class="badge badge-operational" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" aria-label="View MFD MOU">View</button></td></tr>
+              <tr><td><strong>Cannon County CERT</strong></td><td>Mutual Aid</td><td><span style="font-family:var(--font-mono);font-size:12px;">Aug 5, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Aug 4, 2026</span></td><td>Personnel exchange, joint training, SAR support</td><td><span class="badge badge-operational" aria-label="Status: Active — deployed"><span class="badge-icon" aria-hidden="true"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" aria-label="View Cannon County MOU">View</button></td></tr>
+              <tr><td><strong>Ridgeline Tree &amp; Debris</strong></td><td>Active Contract</td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 29, 2026</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 31, 2026</span></td><td>Debris removal, chainsaw ops, bucket truck</td><td><span class="badge badge-operational" aria-label="Status: Active — deployed"><span class="badge-icon" aria-hidden="true"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" aria-label="View Ridgeline contract">View</button></td></tr>
+              <tr><td><strong>River Valley Medical Center</strong></td><td>MOU</td><td><span style="font-family:var(--font-mono);font-size:12px;">Sep 1, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Aug 31, 2026</span></td><td>Mass casualty support, medical cache, trauma</td><td><span class="badge badge-operational" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" aria-label="View RVMC MOU">View</button></td></tr>
+              <tr><td><strong>American Red Cross — WC</strong></td><td>MOU</td><td><span style="font-family:var(--font-mono);font-size:12px;">Feb 14, 2025</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Feb 13, 2027</span></td><td>Shelter operations, feeding, mental health</td><td><span class="badge badge-operational" aria-label="Status: Active — shelter open"><span class="badge-icon" aria-hidden="true"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" aria-label="View Red Cross MOU">View</button></td></tr>
+              <tr><td><strong>Carter Comm. / ARES</strong></td><td>Standby Agreement</td><td><span style="font-family:var(--font-mono);font-size:12px;">Nov 12, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Nov 11, 2026</span></td><td>HAM radio, emergency comms, WINLINK</td><td><span class="badge badge-standby" aria-label="Status: Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span></td><td><button class="btn btn-ghost btn-sm" aria-label="View ARES agreement">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<!-- ADD PARTNER MODAL -->
+<div id="modal-add-partner" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-partner-title">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="modal-partner-title">Add Partner</h2><button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-add-partner')">✕</button></div>
+    <form id="form-add-partner" class="modal-body" data-validate-form novalidate>
+      <div class="form-group"><label class="form-label" for="p-name">Organization Name <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><input type="text" id="p-name" class="form-input" required placeholder="e.g. McMinnville Fire Department"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" for="p-type">Type <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><select id="p-type" class="form-select" required><option value="">Select…</option><option>Government</option><option>Contractor</option><option>Nonprofit</option><option>Medical</option><option>Equipment</option><option>Mutual Aid</option></select></div>
+        <div class="form-group"><label class="form-label" for="p-agreement">Agreement Type</label><select id="p-agreement" class="form-select"><option value="">None yet</option><option>MOU</option><option>Active Contract</option><option>Standby Agreement</option><option>Informal</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="p-contact-name">Primary Contact Name <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><input type="text" id="p-contact-name" class="form-input" required placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label" for="p-contact-title">Title / Role</label><input type="text" id="p-contact-title" class="form-input" placeholder="Director, Chief, etc."></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" for="p-phone">Phone <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><input type="tel" id="p-phone" class="form-input" required placeholder="(931) 555-0100"></div>
+        <div class="form-group"><label class="form-label" for="p-email">Email <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><input type="email" id="p-email" class="form-input" required placeholder="contact@org.gov"></div>
+      </div>
+      <fieldset style="border:1px solid var(--border-color);border-radius:var(--radius-md);padding:12px 16px;">
+        <legend class="form-label">Services Offered</legend>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="chainsaw"> Chainsaw Ops</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="heavy-equip"> Heavy Equipment</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="medical"> Medical Support</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="shelter"> Shelter Ops</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="comms"> Communications</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="logistics"> Logistics</label>
+        </div>
+      </fieldset>
+      <div class="form-group" style="margin-top:12px;"><label class="form-label" for="p-agree-date">Agreement Date</label><input type="date" id="p-agree-date" class="form-input"></div>
+      <div class="form-group"><label class="form-label" for="p-notes">Notes</label><textarea id="p-notes" class="form-textarea" rows="2" placeholder="Additional details, capabilities, contacts…"></textarea></div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-add-partner')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" aria-label="Add partner" onclick="TDRN.forms.validateForm(document.getElementById('form-add-partner')) && TDRN.toast.success('Partner added') && TDRN.modal.close('modal-add-partner')"><span aria-hidden="true">＋</span> Add Partner</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

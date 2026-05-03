@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County — Team Management — 8 operational teams">
+  <meta name="theme-color" content="#0F1011">
+  <title>Teams — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .team-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+    .team-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-md); }
+    .team-card.deployed { border-color: rgba(248,113,113,0.35); }
+    .team-card.deployed .team-card-accent { background: var(--red); }
+    .team-card.standby .team-card-accent { background: var(--yellow); }
+    .team-card.training .team-card-accent { background: var(--blue); }
+    .team-card-accent { height: 4px; width: 100%; }
+    .team-card-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .team-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .team-name { font-family: var(--font-heading); font-size: 17px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.04em; }
+    .team-spec { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 2px; }
+    .team-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+    .team-meta-item { display: flex; flex-direction: column; gap: 1px; }
+    .team-meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-disabled); }
+    .team-meta-value { font-size: 13px; font-weight: 600; color: var(--text-body); }
+    .team-readiness { display: flex; flex-direction: column; gap: 4px; }
+    .team-readiness-header { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
+    .team-readiness-track { height: 6px; background: var(--bg-body); border-radius: 3px; overflow: hidden; }
+    .team-readiness-fill { height: 100%; border-radius: 3px; background: var(--green); transition: width 0.3s ease; }
+    .team-card-actions { display: flex; gap: 6px; padding: 12px 20px; border-top: 1px solid var(--border-color); background: var(--bg-body); flex-wrap: wrap; }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .modal-backdrop[hidden] { display:none; }
+    .modal { background:var(--bg-panel);border:1px solid var(--border-hover);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg); }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-panel);z-index:1; }
+    .modal-title { font-family:var(--font-heading);font-size:18px;font-weight:700;color:var(--text-primary);letter-spacing:0.04em; }
+    .modal-body { padding:24px; }
+    .modal-footer { display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<div class="admin-shell">
+  <nav class="admin-sidebar" aria-label="Main navigation">
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — Go to national dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text"><span class="logo-name">TDRN</span><span class="logo-tagline">Disaster Response Network</span></div>
+    </a>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-nat">
+      <span class="sidebar-section-label" id="nav-nat">National</span>
+      <a href="index.html" class="nav-item" aria-label="National Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="#" class="nav-item" aria-label="All members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="#" class="nav-item" aria-label="All teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="#" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="#" class="nav-item" aria-label="Alerts"><span class="nav-item-icon" aria-hidden="true">🔔</span><span>Alerts</span><span class="nav-item-badge" aria-label="3 alerts">3</span></a>
+      <a href="#" class="nav-item" aria-label="Reports"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Reports</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-tn">
+      <span class="sidebar-section-label" id="nav-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee Dashboard"><span class="nav-item-icon" aria-hidden="true">🗺</span><span>TN Dashboard</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-wc">
+      <span class="sidebar-section-label" id="nav-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item" aria-label="Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="wc-members.html" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="wc-teams.html" class="nav-item active" aria-current="page" aria-label="Teams — currently viewing"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span><span class="nav-item-badge">8</span></a>
+      <a href="wc-training.html" class="nav-item" aria-label="Training"><span class="nav-item-icon" aria-hidden="true">🎓</span><span>Training</span></a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="wc-events.html" class="nav-item" aria-label="Events"><span class="nav-item-icon" aria-hidden="true">📅</span><span>Events</span></a>
+      <a href="wc-communications.html" class="nav-item" aria-label="Communications"><span class="nav-item-icon" aria-hidden="true">📡</span><span>Communications</span></a>
+      <a href="wc-documents.html" class="nav-item" aria-label="Documents"><span class="nav-item-icon" aria-hidden="true">📄</span><span>Documents</span></a>
+      <a href="wc-certifications.html" class="nav-item" aria-label="Certifications"><span class="nav-item-icon" aria-hidden="true">🏅</span><span>Certifications</span></a>
+      <a href="wc-applicants.html" class="nav-item" aria-label="Applicants"><span class="nav-item-icon" aria-hidden="true">📋</span><span>Applicants</span><span class="nav-item-badge">3</span></a>
+      <a href="wc-partners.html" class="nav-item" aria-label="Partners"><span class="nav-item-icon" aria-hidden="true">🤝</span><span>Partners</span></a>
+      <a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Readiness</span></a>
+      <a href="wc-settings.html" class="nav-item" aria-label="Settings"><span class="nav-item-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin"><div class="user-avatar" aria-hidden="true">JA</div><div class="user-info"><div class="user-name">Jason</div><div class="user-role">County Admin — WC</div></div></a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode"><span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span><span class="focus-mode-label">Focus Mode</span></button>
+    </div>
+  </nav>
+
+  <div class="admin-main">
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb">
+        <ol>
+          <li><a href="index.html">National</a></li>
+          <li><a href="tennessee.html">Tennessee</a></li>
+          <li><a href="warren-county.html">Warren County</a></li>
+          <li><span class="current" aria-current="page">Teams</span></li>
+        </ol>
+      </nav>
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-teams">Search teams</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-teams" placeholder="Search teams…" autocomplete="off">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill critical" role="status" aria-label="Status: Active Incident"><span class="status-pill-icon" aria-hidden="true">⚠</span> Active Incident</span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread"><span aria-hidden="true">🔔</span><span class="notification-badge" aria-hidden="true"></span></button>
+        <button class="topbar-btn primary" aria-label="Create a new team" onclick="TDRN.modal.open('modal-create-team')"><span aria-hidden="true">＋</span> Create Team</button>
+      </div>
+    </header>
+
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html"     class="subnav-tab" aria-label="Dashboard">Dashboard</a>
+      <a href="wc-members.html"        class="subnav-tab" aria-label="Members">Members</a>
+      <a href="wc-teams.html"          class="subnav-tab active" aria-current="page" aria-label="Teams — currently active">Teams</a>
+      <a href="wc-training.html"       class="subnav-tab" aria-label="Training">Training</a>
+      <a href="wc-equipment.html"      class="subnav-tab" aria-label="Equipment">Equipment</a>
+      <a href="wc-events.html"         class="subnav-tab" aria-label="Events">Events</a>
+      <a href="wc-communications.html" class="subnav-tab" aria-label="Communications">Communications</a>
+      <a href="wc-documents.html"      class="subnav-tab" aria-label="Documents">Documents</a>
+      <a href="wc-certifications.html" class="subnav-tab" aria-label="Certifications">Certifications</a>
+      <a href="wc-applicants.html"     class="subnav-tab" aria-label="Applicants">Applicants</a>
+      <a href="wc-partners.html"       class="subnav-tab" aria-label="Partners">Partners</a>
+      <a href="wc-readiness.html"      class="subnav-tab" aria-label="Readiness">Readiness</a>
+      <a href="wc-settings.html"       class="subnav-tab" aria-label="Settings">Settings</a>
+    </nav>
+
+    <main id="main-content" class="admin-content" aria-label="Team Management">
+
+      <div class="content-header">
+        <div class="content-header-left">
+          <h1 class="content-title">Team Management</h1>
+          <p class="content-subtitle">8 operational teams — 3 currently deployed to active incident</p>
+        </div>
+        <div class="content-actions">
+          <button class="btn btn-ghost" aria-label="Print team roster"><span aria-hidden="true">🖨</span> Print Roster</button>
+          <button class="btn btn-primary" aria-label="Create a new team" onclick="TDRN.modal.open('modal-create-team')"><span aria-hidden="true">＋</span> Create Team</button>
+        </div>
+      </div>
+
+      <section aria-labelledby="team-stats-heading">
+        <h2 id="team-stats-heading" class="sr-only">Team Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card accent-blue" role="article" aria-label="Total Teams: 8"><div class="stat-label">Total Teams</div><div class="stat-value">8</div><div class="stat-change flat"><span aria-hidden="true">→</span> All structured</div><span class="stat-icon" aria-hidden="true">🛡</span></div>
+          <div class="stat-card accent-red" role="article" aria-label="Deployed Teams: 3"><div class="stat-label">Deployed</div><div class="stat-value">3</div><div class="stat-change down"><span aria-hidden="true">⚠</span> Active incident</div><span class="stat-icon" aria-hidden="true">🚀</span></div>
+          <div class="stat-card accent-yellow" role="article" aria-label="Standby Teams: 4"><div class="stat-label">Standby</div><div class="stat-value">4</div><div class="stat-change flat"><span aria-hidden="true">→</span> Ready to deploy</div><span class="stat-icon" aria-hidden="true">⏱</span></div>
+          <div class="stat-card accent-blue" role="article" aria-label="Teams in Training: 1"><div class="stat-label">Training</div><div class="stat-value">1</div><div class="stat-change flat"><span aria-hidden="true">→</span> Certification cycle</div><span class="stat-icon" aria-hidden="true">🎓</span></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="teams-grid-heading">
+        <h2 id="teams-grid-heading" class="sr-only">All Teams</h2>
+        <div class="grid-2" role="list" aria-label="Warren County teams">
+
+          <!-- TEAM ALPHA -->
+          <article class="team-card deployed" role="listitem" aria-label="Team Alpha — Deployed">
+            <div class="team-card-accent" aria-hidden="true"></div>
+            <div class="team-card-body">
+              <div class="team-card-header">
+                <div><div class="team-name">Team Alpha</div><div class="team-spec">Urban Search &amp; Rescue</div></div>
+                <span class="badge badge-critical" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span>
+              </div>
+              <div class="team-meta">
+                <div class="team-meta-item"><span class="team-meta-label">Leader</span><span class="team-meta-value">Marcus Reyes</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Members</span><span class="team-meta-value">18</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Formed</span><span class="team-meta-value">Mar 2021</span></div>
+              </div>
+              <div class="team-readiness" aria-label="Team readiness: 98%">
+                <div class="team-readiness-header"><span>Readiness</span><span>98%</span></div>
+                <div class="team-readiness-track"><div class="team-readiness-fill" style="width:98%" role="progressbar" aria-valuenow="98" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+            </div>
+            <div class="team-card-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View Team Alpha roster">View Roster</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Reassign Team Alpha">Reassign</button>
+              <button class="btn btn-sm" style="background:var(--red-light);color:var(--red);border:1px solid rgba(248,113,113,0.3);" aria-label="Brief Team Alpha">Brief</button>
+            </div>
+          </article>
+
+          <!-- TEAM BRAVO -->
+          <article class="team-card deployed" role="listitem" aria-label="Team Bravo — Deployed">
+            <div class="team-card-accent" aria-hidden="true"></div>
+            <div class="team-card-body">
+              <div class="team-card-header">
+                <div><div class="team-name">Team Bravo</div><div class="team-spec">Medical Support</div></div>
+                <span class="badge badge-critical" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span>
+              </div>
+              <div class="team-meta">
+                <div class="team-meta-item"><span class="team-meta-label">Leader</span><span class="team-meta-value">Denise Okafor</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Members</span><span class="team-meta-value">12</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Formed</span><span class="team-meta-value">Jul 2020</span></div>
+              </div>
+              <div class="team-readiness" aria-label="Team readiness: 95%">
+                <div class="team-readiness-header"><span>Readiness</span><span>95%</span></div>
+                <div class="team-readiness-track"><div class="team-readiness-fill" style="width:95%" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+            </div>
+            <div class="team-card-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View Team Bravo roster">View Roster</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Reassign Team Bravo">Reassign</button>
+              <button class="btn btn-sm" style="background:var(--red-light);color:var(--red);border:1px solid rgba(248,113,113,0.3);" aria-label="Brief Team Bravo">Brief</button>
+            </div>
+          </article>
+
+          <!-- TEAM CHARLIE -->
+          <article class="team-card deployed" role="listitem" aria-label="Team Charlie — Staging">
+            <div class="team-card-accent" aria-hidden="true"></div>
+            <div class="team-card-body">
+              <div class="team-card-header">
+                <div><div class="team-name">Team Charlie</div><div class="team-spec">Logistics &amp; Supply</div></div>
+                <span class="badge badge-standby" aria-label="Status: Staging"><span class="badge-icon" aria-hidden="true"></span>Staging</span>
+              </div>
+              <div class="team-meta">
+                <div class="team-meta-item"><span class="team-meta-label">Leader</span><span class="team-meta-value">James Whitfield</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Members</span><span class="team-meta-value">10</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Formed</span><span class="team-meta-value">Jan 2022</span></div>
+              </div>
+              <div class="team-readiness" aria-label="Team readiness: 89%">
+                <div class="team-readiness-header"><span>Readiness</span><span>89%</span></div>
+                <div class="team-readiness-track"><div class="team-readiness-fill" style="width:89%" role="progressbar" aria-valuenow="89" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+            </div>
+            <div class="team-card-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View Team Charlie roster">View Roster</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Reassign Team Charlie">Reassign</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Brief Team Charlie">Brief</button>
+            </div>
+          </article>
+
+          <!-- TEAM DELTA -->
+          <article class="team-card standby" role="listitem" aria-label="Team Delta — Standby">
+            <div class="team-card-accent" aria-hidden="true"></div>
+            <div class="team-card-body">
+              <div class="team-card-header">
+                <div><div class="team-name">Team Delta</div><div class="team-spec">Communications &amp; IT</div></div>
+                <span class="badge badge-standby" aria-label="Status: Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span>
+              </div>
+              <div class="team-meta">
+                <div class="team-meta-item"><span class="team-meta-label">Leader</span><span class="team-meta-value">Aisha Mohammed</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Members</span><span class="team-meta-value">9</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Formed</span><span class="team-meta-value">Sep 2021</span></div>
+              </div>
+              <div class="team-readiness" aria-label="Team readiness: 92%">
+                <div class="team-readiness-header"><span>Readiness</span><span>92%</span></div>
+                <div class="team-readiness-track"><div class="team-readiness-fill" style="width:92%" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+            </div>
+            <div class="team-card-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View Team Delta roster">View Roster</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Reassign Team Delta">Reassign</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Brief Team Delta">Brief</button>
+            </div>
+          </article>
+
+          <!-- TEAM ECHO -->
+          <article class="team-card standby" role="listitem" aria-label="Team Echo — Standby">
+            <div class="team-card-accent" aria-hidden="true"></div>
+            <div class="team-card-body">
+              <div class="team-card-header">
+                <div><div class="team-name">Team Echo</div><div class="team-spec">Shelter &amp; Mass Care</div></div>
+                <span class="badge badge-standby" aria-label="Status: Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span>
+              </div>
+              <div class="team-meta">
+                <div class="team-meta-item"><span class="team-meta-label">Leader</span><span class="team-meta-value">Priya Nair</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Members</span><span class="team-meta-value">14</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Formed</span><span class="team-meta-value">Nov 2020</span></div>
+              </div>
+              <div class="team-readiness" aria-label="Team readiness: 88%">
+                <div class="team-readiness-header"><span>Readiness</span><span>88%</span></div>
+                <div class="team-readiness-track"><div class="team-readiness-fill" style="width:88%" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+            </div>
+            <div class="team-card-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View Team Echo roster">View Roster</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Reassign Team Echo">Reassign</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Brief Team Echo">Brief</button>
+            </div>
+          </article>
+
+          <!-- TEAM FOXTROT -->
+          <article class="team-card standby" role="listitem" aria-label="Team Foxtrot — Standby">
+            <div class="team-card-accent" aria-hidden="true"></div>
+            <div class="team-card-body">
+              <div class="team-card-header">
+                <div><div class="team-name">Team Foxtrot</div><div class="team-spec">Heavy Equipment Ops</div></div>
+                <span class="badge badge-standby" aria-label="Status: Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span>
+              </div>
+              <div class="team-meta">
+                <div class="team-meta-item"><span class="team-meta-label">Leader</span><span class="team-meta-value">Derek Chen</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Members</span><span class="team-meta-value">11</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Formed</span><span class="team-meta-value">Feb 2022</span></div>
+              </div>
+              <div class="team-readiness" aria-label="Team readiness: 85%">
+                <div class="team-readiness-header"><span>Readiness</span><span>85%</span></div>
+                <div class="team-readiness-track"><div class="team-readiness-fill" style="width:85%" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+            </div>
+            <div class="team-card-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View Team Foxtrot roster">View Roster</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Reassign Team Foxtrot">Reassign</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Brief Team Foxtrot">Brief</button>
+            </div>
+          </article>
+
+          <!-- TEAM SIERRA -->
+          <article class="team-card standby" role="listitem" aria-label="Team Sierra — Standby">
+            <div class="team-card-accent" aria-hidden="true"></div>
+            <div class="team-card-body">
+              <div class="team-card-header">
+                <div><div class="team-name">Team Sierra</div><div class="team-spec">Swift Water Rescue</div></div>
+                <span class="badge badge-standby" aria-label="Status: Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span>
+              </div>
+              <div class="team-meta">
+                <div class="team-meta-item"><span class="team-meta-label">Leader</span><span class="team-meta-value">Travis Buchanan</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Members</span><span class="team-meta-value">8</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Formed</span><span class="team-meta-value">Jun 2023</span></div>
+              </div>
+              <div class="team-readiness" aria-label="Team readiness: 76%">
+                <div class="team-readiness-header"><span>Readiness</span><span>76%</span></div>
+                <div class="team-readiness-track"><div class="team-readiness-fill" style="width:76%;background:var(--yellow);" role="progressbar" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+            </div>
+            <div class="team-card-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View Team Sierra roster">View Roster</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Reassign Team Sierra">Reassign</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Brief Team Sierra">Brief</button>
+            </div>
+          </article>
+
+          <!-- TEAM OMEGA -->
+          <article class="team-card training" role="listitem" aria-label="Team Omega — Training">
+            <div class="team-card-accent" aria-hidden="true"></div>
+            <div class="team-card-body">
+              <div class="team-card-header">
+                <div><div class="team-name">Team Omega</div><div class="team-spec">Volunteer Training Cohort</div></div>
+                <span class="badge badge-training" aria-label="Status: Training"><span class="badge-icon" aria-hidden="true"></span>Training</span>
+              </div>
+              <div class="team-meta">
+                <div class="team-meta-item"><span class="team-meta-label">Leader</span><span class="team-meta-value">Rosa Martinez</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Members</span><span class="team-meta-value">20</span></div>
+                <div class="team-meta-item"><span class="team-meta-label">Est. Ready</span><span class="team-meta-value">Jun 2026</span></div>
+              </div>
+              <div class="team-readiness" aria-label="Team readiness: 42%">
+                <div class="team-readiness-header"><span>Training Progress</span><span>42%</span></div>
+                <div class="team-readiness-track"><div class="team-readiness-fill" style="width:42%;background:var(--blue);" role="progressbar" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+            </div>
+            <div class="team-card-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View Team Omega roster">View Roster</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Reassign Team Omega">Reassign</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Brief Team Omega">Brief</button>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- CREATE TEAM MODAL -->
+<div id="modal-create-team" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-create-team-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-create-team-title">Create New Team</h2>
+      <button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-create-team')">✕</button>
+    </div>
+    <form id="form-create-team" class="modal-body" data-validate-form novalidate>
+      <div class="form-group">
+        <label class="form-label" for="team-name">Team Name <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+        <input type="text" id="team-name" class="form-input" required placeholder="e.g. Team Kilo">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="team-leader">Team Leader <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+        <select id="team-leader" class="form-select" required aria-label="Select team leader">
+          <option value="">Select leader…</option>
+          <option>Marcus Reyes</option><option>Denise Okafor</option><option>James Whitfield</option>
+          <option>Aisha Mohammed</option><option>Priya Nair</option><option>Nathan Park</option>
+          <option>Derek Chen</option><option>Rosa Martinez</option><option>Travis Buchanan</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="team-spec">Specialization <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+        <select id="team-spec" class="form-select" required>
+          <option value="">Select specialization…</option>
+          <option>Urban Search &amp; Rescue</option><option>Medical Support</option>
+          <option>Logistics &amp; Supply</option><option>Communications &amp; IT</option>
+          <option>Heavy Equipment Ops</option><option>Shelter &amp; Mass Care</option>
+          <option>Swift Water Rescue</option><option>Volunteer Training</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="team-members">Initial Members</label>
+        <textarea id="team-members" class="form-textarea" rows="3" placeholder="Enter member names or IDs, one per line…"></textarea>
+        <div class="form-hint">You can also add members after creation via the roster view</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="team-notes">Notes</label>
+        <textarea id="team-notes" class="form-textarea" rows="2" placeholder="Mission focus, equipment needs, special assignments…"></textarea>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-create-team')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" aria-label="Create the new team" onclick="TDRN.forms.validateForm(document.getElementById('form-create-team')) && TDRN.toast.success('Team created successfully') && TDRN.modal.close('modal-create-team')"><span aria-hidden="true">＋</span> Create Team</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

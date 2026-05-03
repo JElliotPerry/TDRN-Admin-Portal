@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County — Certification Management — 387 active certifications">
+  <meta name="theme-color" content="#0F1011">
+  <title>Certifications — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .cert-type-card { background:var(--bg-panel);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:18px 20px;display:flex;flex-direction:column;gap:10px;transition:var(--transition); }
+    .cert-type-card:hover { border-color:var(--border-hover);box-shadow:var(--shadow-sm); }
+    .cert-type-header { display:flex;align-items:center;gap:10px; }
+    .cert-type-icon { width:36px;height:36px;border-radius:var(--radius-md);background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+    .cert-type-name { font-family:var(--font-heading);font-size:15px;font-weight:700;color:var(--text-primary);letter-spacing:0.03em; }
+    .cert-type-validity { font-size:11px;color:var(--text-muted); }
+    .cert-type-stats { display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px; }
+    .cert-type-stat { display:flex;flex-direction:column;gap:1px;padding:6px 8px;background:var(--bg-body);border-radius:var(--radius-sm); }
+    .cert-type-stat-label { font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-disabled); }
+    .cert-type-stat-value { font-size:13px;font-weight:700;color:var(--text-body); }
+    .cert-type-stat-value.warning { color:var(--orange); }
+    .cert-type-stat-value.danger { color:var(--red); }
+    .cert-type-actions { display:flex;gap:6px; }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .modal-backdrop[hidden] { display:none; }
+    .modal { background:var(--bg-panel);border:1px solid var(--border-hover);border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg); }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-panel);z-index:1; }
+    .modal-title { font-family:var(--font-heading);font-size:18px;font-weight:700;color:var(--text-primary); }
+    .modal-body { padding:24px; }
+    .modal-footer { display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<div class="admin-shell">
+  <nav class="admin-sidebar" aria-label="Main navigation">
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — National dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text"><span class="logo-name">TDRN</span><span class="logo-tagline">Disaster Response Network</span></div>
+    </a>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-nat"><span class="sidebar-section-label" id="nav-nat">National</span>
+      <a href="index.html" class="nav-item" aria-label="National Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="#" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="#" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="#" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="#" class="nav-item" aria-label="Alerts"><span class="nav-item-icon" aria-hidden="true">🔔</span><span>Alerts</span><span class="nav-item-badge">3</span></a>
+      <a href="#" class="nav-item" aria-label="Reports"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Reports</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-tn"><span class="sidebar-section-label" id="nav-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee Dashboard"><span class="nav-item-icon" aria-hidden="true">🗺</span><span>TN Dashboard</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-wc"><span class="sidebar-section-label" id="nav-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item" aria-label="Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="wc-members.html" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="wc-teams.html" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="wc-training.html" class="nav-item" aria-label="Training"><span class="nav-item-icon" aria-hidden="true">🎓</span><span>Training</span></a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span><span class="nav-item-badge">23</span></a>
+      <a href="wc-events.html" class="nav-item" aria-label="Events"><span class="nav-item-icon" aria-hidden="true">📅</span><span>Events</span></a>
+      <a href="wc-communications.html" class="nav-item" aria-label="Communications"><span class="nav-item-icon" aria-hidden="true">📡</span><span>Communications</span></a>
+      <a href="wc-documents.html" class="nav-item" aria-label="Documents"><span class="nav-item-icon" aria-hidden="true">📄</span><span>Documents</span></a>
+      <a href="wc-certifications.html" class="nav-item active" aria-current="page" aria-label="Certifications — currently viewing"><span class="nav-item-icon" aria-hidden="true">🏅</span><span>Certifications</span></a>
+      <a href="wc-applicants.html" class="nav-item" aria-label="Applicants"><span class="nav-item-icon" aria-hidden="true">📋</span><span>Applicants</span><span class="nav-item-badge">3</span></a>
+      <a href="wc-partners.html" class="nav-item" aria-label="Partners"><span class="nav-item-icon" aria-hidden="true">🤝</span><span>Partners</span></a>
+      <a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Readiness</span></a>
+      <a href="wc-settings.html" class="nav-item" aria-label="Settings"><span class="nav-item-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin"><div class="user-avatar" aria-hidden="true">JA</div><div class="user-info"><div class="user-name">Jason</div><div class="user-role">County Admin — WC</div></div></a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode"><span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span><span class="focus-mode-label">Focus Mode</span></button>
+    </div>
+  </nav>
+
+  <div class="admin-main">
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb"><ol>
+        <li><a href="index.html">National</a></li><li><a href="tennessee.html">Tennessee</a></li>
+        <li><a href="warren-county.html">Warren County</a></li><li><span class="current" aria-current="page">Certifications</span></li>
+      </ol></nav>
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-cert">Search certifications</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-cert" placeholder="Search certifications…" autocomplete="off">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill standby" role="status" aria-label="12 certifications expiring soon"><span class="status-pill-icon" aria-hidden="true">⏰</span> 12 Expiring Soon</span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread"><span aria-hidden="true">🔔</span><span class="notification-badge" aria-hidden="true"></span></button>
+        <button class="topbar-btn secondary" aria-label="Issue a new certification" onclick="TDRN.modal.open('modal-issue-cert')"><span aria-hidden="true">🏅</span> Issue Cert</button>
+        <button class="topbar-btn primary" aria-label="Add a new certification type" onclick="TDRN.modal.open('modal-add-cert-type')"><span aria-hidden="true">＋</span> Add Type</button>
+      </div>
+    </header>
+
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html"     class="subnav-tab">Dashboard</a>
+      <a href="wc-members.html"        class="subnav-tab">Members</a>
+      <a href="wc-teams.html"          class="subnav-tab">Teams</a>
+      <a href="wc-training.html"       class="subnav-tab">Training</a>
+      <a href="wc-equipment.html"      class="subnav-tab">Equipment</a>
+      <a href="wc-events.html"         class="subnav-tab">Events</a>
+      <a href="wc-communications.html" class="subnav-tab">Communications</a>
+      <a href="wc-documents.html"      class="subnav-tab">Documents</a>
+      <a href="wc-certifications.html" class="subnav-tab active" aria-current="page" aria-label="Certifications — currently active">Certifications</a>
+      <a href="wc-applicants.html"     class="subnav-tab">Applicants</a>
+      <a href="wc-partners.html"       class="subnav-tab">Partners</a>
+      <a href="wc-readiness.html"      class="subnav-tab">Readiness</a>
+      <a href="wc-settings.html"       class="subnav-tab">Settings</a>
+    </nav>
+
+    <main id="main-content" class="admin-content" aria-label="Certification Management">
+
+      <div class="content-header">
+        <div class="content-header-left">
+          <h1 class="content-title">Certification Management</h1>
+          <p class="content-subtitle">9 certification types — 387 active certs across 142 members</p>
+        </div>
+        <div class="content-actions">
+          <button class="btn btn-ghost" aria-label="Issue a new certification" onclick="TDRN.modal.open('modal-issue-cert')"><span aria-hidden="true">🏅</span> Issue Cert</button>
+          <button class="btn btn-primary" aria-label="Add a new certification type" onclick="TDRN.modal.open('modal-add-cert-type')"><span aria-hidden="true">＋</span> Add Cert Type</button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <section aria-labelledby="cert-stats-heading">
+        <h2 id="cert-stats-heading" class="sr-only">Certification Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card accent-green" role="article" aria-label="Active Certifications: 387"><div class="stat-label">Active Certs</div><div class="stat-value">387</div><div class="stat-change up"><span aria-hidden="true">↑</span> +14 this month</div><span class="stat-icon" aria-hidden="true">🏅</span></div>
+          <div class="stat-card accent-orange" role="article" aria-label="Expiring in 30 Days: 12"><div class="stat-label">Expiring (30 Days)</div><div class="stat-value">12</div><div class="stat-change down"><span aria-hidden="true">⚠</span> Notify members</div><span class="stat-icon" aria-hidden="true">⏰</span></div>
+          <div class="stat-card accent-red" role="article" aria-label="Expired: 8"><div class="stat-label">Expired</div><div class="stat-value">8</div><div class="stat-change down"><span aria-hidden="true">↓</span> Renewal needed</div><span class="stat-icon" aria-hidden="true">✗</span></div>
+          <div class="stat-card accent-blue" role="article" aria-label="Certification Types: 9"><div class="stat-label">Cert Types</div><div class="stat-value">9</div><div class="stat-change flat"><span aria-hidden="true">→</span> All active</div><span class="stat-icon" aria-hidden="true">📋</span></div>
+        </div>
+      </section>
+
+      <!-- EXPIRING ALERT -->
+      <div class="alert-strip alert-strip-warning" role="alert" aria-label="Warning: certifications expiring soon">
+        <span aria-hidden="true">⏰</span>
+        <strong>12 certifications expiring within 30 days.</strong>&nbsp;
+        <a href="#cert-table" style="color:inherit;font-weight:600;">View expiring certs</a> and notify members.
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;" aria-label="Send renewal notifications to affected members">Send Renewal Notices</button>
+      </div>
+
+      <!-- CERT TYPES GRID -->
+      <section aria-labelledby="cert-types-heading" style="margin-bottom:24px;">
+        <h2 id="cert-types-heading" style="font-family:var(--font-heading);font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:0.04em;margin-bottom:16px;">Certification Types</h2>
+        <div class="grid-3" role="list" aria-label="Certification type cards">
+
+          <article class="cert-type-card" role="listitem" aria-label="ICS-100 Introduction to ICS">
+            <div class="cert-type-header">
+              <div class="cert-type-icon" aria-hidden="true">📘</div>
+              <div><div class="cert-type-name">ICS-100</div><div class="cert-type-validity">Valid 3 years · FEMA issued</div></div>
+            </div>
+            <div class="cert-type-stats">
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Issued</span><span class="cert-type-stat-value">134</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expiring</span><span class="cert-type-stat-value warning">2</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expired</span><span class="cert-type-stat-value danger">1</span></div>
+            </div>
+            <div class="cert-type-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View all ICS-100 certifications">View All</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Issue ICS-100 certification" onclick="TDRN.modal.open('modal-issue-cert')">Issue</button>
+            </div>
+          </article>
+
+          <article class="cert-type-card" role="listitem" aria-label="ICS-200 Basic ICS">
+            <div class="cert-type-header">
+              <div class="cert-type-icon" aria-hidden="true">📗</div>
+              <div><div class="cert-type-name">ICS-200</div><div class="cert-type-validity">Valid 3 years · FEMA issued</div></div>
+            </div>
+            <div class="cert-type-stats">
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Issued</span><span class="cert-type-stat-value">111</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expiring</span><span class="cert-type-stat-value warning">3</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expired</span><span class="cert-type-stat-value danger">2</span></div>
+            </div>
+            <div class="cert-type-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View all ICS-200 certifications">View All</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Issue ICS-200 certification" onclick="TDRN.modal.open('modal-issue-cert')">Issue</button>
+            </div>
+          </article>
+
+          <article class="cert-type-card" role="listitem" aria-label="ICS-700 NIMS">
+            <div class="cert-type-header">
+              <div class="cert-type-icon" aria-hidden="true">📙</div>
+              <div><div class="cert-type-name">ICS-700 NIMS</div><div class="cert-type-validity">Valid 3 years · FEMA issued</div></div>
+            </div>
+            <div class="cert-type-stats">
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Issued</span><span class="cert-type-stat-value">92</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expiring</span><span class="cert-type-stat-value warning">1</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expired</span><span class="cert-type-stat-value danger">1</span></div>
+            </div>
+            <div class="cert-type-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View all ICS-700 certifications">View All</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Issue ICS-700 certification" onclick="TDRN.modal.open('modal-issue-cert')">Issue</button>
+            </div>
+          </article>
+
+          <article class="cert-type-card" role="listitem" aria-label="ICS-800 National Response Framework">
+            <div class="cert-type-header">
+              <div class="cert-type-icon" aria-hidden="true">📕</div>
+              <div><div class="cert-type-name">ICS-800</div><div class="cert-type-validity">Valid 3 years · FEMA issued</div></div>
+            </div>
+            <div class="cert-type-stats">
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Issued</span><span class="cert-type-stat-value">82</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expiring</span><span class="cert-type-stat-value warning">2</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expired</span><span class="cert-type-stat-value danger">1</span></div>
+            </div>
+            <div class="cert-type-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View all ICS-800 certifications">View All</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Issue ICS-800 certification" onclick="TDRN.modal.open('modal-issue-cert')">Issue</button>
+            </div>
+          </article>
+
+          <article class="cert-type-card" role="listitem" aria-label="First Aid and CPR">
+            <div class="cert-type-header">
+              <div class="cert-type-icon" style="background:var(--red-light);" aria-hidden="true">🩺</div>
+              <div><div class="cert-type-name">First Aid / CPR</div><div class="cert-type-validity">Valid 2 years · AHA / Red Cross</div></div>
+            </div>
+            <div class="cert-type-stats">
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Issued</span><span class="cert-type-stat-value">117</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expiring</span><span class="cert-type-stat-value warning">4</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expired</span><span class="cert-type-stat-value danger">2</span></div>
+            </div>
+            <div class="cert-type-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View all First Aid / CPR certifications">View All</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Issue First Aid/CPR certification" onclick="TDRN.modal.open('modal-issue-cert')">Issue</button>
+            </div>
+          </article>
+
+          <article class="cert-type-card" role="listitem" aria-label="Chainsaw Safety">
+            <div class="cert-type-header">
+              <div class="cert-type-icon" style="background:var(--orange-light);" aria-hidden="true">🪚</div>
+              <div><div class="cert-type-name">Chainsaw Safety</div><div class="cert-type-validity">Valid 2 years · TDRN issued</div></div>
+            </div>
+            <div class="cert-type-stats">
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Issued</span><span class="cert-type-stat-value">41</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expiring</span><span class="cert-type-stat-value">0</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expired</span><span class="cert-type-stat-value">0</span></div>
+            </div>
+            <div class="cert-type-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View all Chainsaw Safety certifications">View All</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Issue Chainsaw Safety certification" onclick="TDRN.modal.open('modal-issue-cert')">Issue</button>
+            </div>
+          </article>
+
+          <article class="cert-type-card" role="listitem" aria-label="Heavy Equipment Safety">
+            <div class="cert-type-header">
+              <div class="cert-type-icon" style="background:var(--yellow-light);" aria-hidden="true">🚜</div>
+              <div><div class="cert-type-name">Heavy Equipment Safety</div><div class="cert-type-validity">Valid 2 years · TDRN issued</div></div>
+            </div>
+            <div class="cert-type-stats">
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Issued</span><span class="cert-type-stat-value">29</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expiring</span><span class="cert-type-stat-value">0</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expired</span><span class="cert-type-stat-value">0</span></div>
+            </div>
+            <div class="cert-type-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View all Heavy Equipment Safety certifications">View All</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Issue Heavy Equipment Safety certification" onclick="TDRN.modal.open('modal-issue-cert')">Issue</button>
+            </div>
+          </article>
+
+          <article class="cert-type-card" role="listitem" aria-label="CERT Basic Training">
+            <div class="cert-type-header">
+              <div class="cert-type-icon" style="background:var(--green-light);" aria-hidden="true">🎓</div>
+              <div><div class="cert-type-name">CERT Basic</div><div class="cert-type-validity">Valid 3 years · FEMA / local EMA</div></div>
+            </div>
+            <div class="cert-type-stats">
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Issued</span><span class="cert-type-stat-value">101</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expiring</span><span class="cert-type-stat-value">0</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expired</span><span class="cert-type-stat-value">1</span></div>
+            </div>
+            <div class="cert-type-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View all CERT Basic certifications">View All</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Issue CERT Basic certification" onclick="TDRN.modal.open('modal-issue-cert')">Issue</button>
+            </div>
+          </article>
+
+          <article class="cert-type-card" role="listitem" aria-label="HAM Radio Amateur License">
+            <div class="cert-type-header">
+              <div class="cert-type-icon" style="background:var(--purple-light);" aria-hidden="true">📡</div>
+              <div><div class="cert-type-name">HAM Radio (FCC)</div><div class="cert-type-validity">Valid 10 years · FCC issued</div></div>
+            </div>
+            <div class="cert-type-stats">
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Issued</span><span class="cert-type-stat-value">18</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expiring</span><span class="cert-type-stat-value">0</span></div>
+              <div class="cert-type-stat"><span class="cert-type-stat-label">Expired</span><span class="cert-type-stat-value">0</span></div>
+            </div>
+            <div class="cert-type-actions">
+              <button class="btn btn-ghost btn-sm" aria-label="View all HAM Radio certifications">View All</button>
+              <button class="btn btn-ghost btn-sm" aria-label="Issue HAM Radio certification" onclick="TDRN.modal.open('modal-issue-cert')">Issue</button>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- INDIVIDUAL CERTS TABLE -->
+      <section class="panel" id="cert-table" aria-labelledby="cert-table-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="cert-table-heading"><span aria-hidden="true">📋</span> Individual Certifications</h2>
+          <div class="panel-actions">
+            <button class="btn btn-ghost btn-sm" aria-label="Export certifications to CSV" onclick="TDRN.print.exportToCSV([],'warren-certs.csv')"><span aria-hidden="true">📥</span> Export</button>
+            <button class="btn btn-sm btn-primary" aria-label="Issue new certification" onclick="TDRN.modal.open('modal-issue-cert')"><span aria-hidden="true">＋</span> Issue Cert</button>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" aria-label="Individual member certifications">
+            <thead><tr>
+              <th scope="col" data-sortable>Member</th>
+              <th scope="col" data-sortable>Cert Type</th>
+              <th scope="col" data-sortable>Issue Date</th>
+              <th scope="col" data-sortable>Expiry Date</th>
+              <th scope="col">Status</th>
+              <th scope="col">Issued By</th>
+              <th scope="col">Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>Marcus Reyes</td><td>ICS-100</td><td><span style="font-family:var(--font-mono);font-size:12px;">Jan 15, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Jan 15, 2027</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>FEMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit Marcus Reyes ICS-100 cert">Edit</button></td></tr>
+              <tr><td>Marcus Reyes</td><td>ICS-200</td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 2, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 2, 2027</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>FEMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Denise Okafor</td><td>First Aid/CPR</td><td><span style="font-family:var(--font-mono);font-size:12px;">May 10, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 10, 2026</span></td><td><span class="badge badge-standby" aria-label="Status: Expiring Soon"><span class="badge-icon" aria-hidden="true"></span>Expiring Soon</span></td><td>Red Cross</td><td><button class="btn btn-ghost btn-sm" aria-label="Renew Denise Okafor First Aid/CPR">Renew</button></td></tr>
+              <tr><td>Denise Okafor</td><td>ICS-100</td><td><span style="font-family:var(--font-mono);font-size:12px;">Jan 15, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Jan 15, 2027</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>FEMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>James Whitfield</td><td>ICS-100</td><td><span style="font-family:var(--font-mono);font-size:12px;">Feb 8, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Feb 8, 2027</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>FEMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>James Whitfield</td><td>First Aid/CPR</td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 5, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 5, 2026</span></td><td><span class="badge badge-standby" aria-label="Status: Expiring Soon"><span class="badge-icon" aria-hidden="true"></span>Expiring Soon</span></td><td>Red Cross</td><td><button class="btn btn-ghost btn-sm" aria-label="Renew">Renew</button></td></tr>
+              <tr><td>Aisha Mohammed</td><td>ICS-700</td><td><span style="font-family:var(--font-mono);font-size:12px;">Jun 12, 2023</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Jun 12, 2026</span></td><td><span class="badge badge-standby" aria-label="Status: Expiring Soon"><span class="badge-icon" aria-hidden="true"></span>Expiring Soon</span></td><td>FEMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Renew Aisha Mohammed ICS-700">Renew</button></td></tr>
+              <tr><td>Travis Buchanan</td><td>Chainsaw Safety</td><td><span style="font-family:var(--font-mono);font-size:12px;">Sep 20, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Sep 20, 2026</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>TDRN</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Priya Nair</td><td>ICS-200</td><td><span style="font-family:var(--font-mono);font-size:12px;">Nov 3, 2023</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Nov 3, 2026</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>FEMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Priya Nair</td><td>CERT Basic</td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 14, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 14, 2027</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>Warren Co. EMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Nathan Park</td><td>HAM Radio</td><td><span style="font-family:var(--font-mono);font-size:12px;">Jul 7, 2019</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Jul 7, 2029</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>FCC</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Earl Thompson</td><td>Chainsaw Safety</td><td><span style="font-family:var(--font-mono);font-size:12px;">Oct 1, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Oct 1, 2026</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>TDRN</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Roy Danforth</td><td>ICS-100</td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 3, 2022</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 3, 2025</span></td><td><span class="badge badge-critical" aria-label="Status: Expired"><span class="badge-icon" aria-hidden="true"></span>Expired</span></td><td>FEMA</td><td><button class="btn btn-sm" style="background:var(--red-light);color:var(--red);border:1px solid rgba(248,113,113,0.3);" aria-label="Renew Roy Danforth ICS-100">Renew</button></td></tr>
+              <tr><td>Sandra Hobbs</td><td>ICS-800</td><td><span style="font-family:var(--font-mono);font-size:12px;">Dec 12, 2023</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Dec 12, 2026</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>FEMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Derek Chen</td><td>Heavy Equipment</td><td><span style="font-family:var(--font-mono);font-size:12px;">Aug 18, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Aug 18, 2026</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>TDRN</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Rosa Martinez</td><td>First Aid/CPR</td><td><span style="font-family:var(--font-mono);font-size:12px;">Feb 2, 2026</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Feb 2, 2028</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>AHA</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Latasha Williams</td><td>ICS-100</td><td><span style="font-family:var(--font-mono);font-size:12px;">Jan 28, 2025</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Jan 28, 2028</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>FEMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Carmen Iglesias</td><td>CERT Basic</td><td><span style="font-family:var(--font-mono);font-size:12px;">May 6, 2023</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 6, 2026</span></td><td><span class="badge badge-standby" aria-label="Status: Expiring Soon"><span class="badge-icon" aria-hidden="true"></span>Expiring Soon</span></td><td>Warren Co. EMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Renew">Renew</button></td></tr>
+              <tr><td>Tyrone Jackson</td><td>ICS-200</td><td><span style="font-family:var(--font-mono);font-size:12px;">Aug 11, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Aug 11, 2027</span></td><td><span class="badge badge-operational" aria-label="Status: Current"><span class="badge-icon" aria-hidden="true"></span>Current</span></td><td>FEMA</td><td><button class="btn btn-ghost btn-sm" aria-label="Edit">Edit</button></td></tr>
+              <tr><td>Tyrone Jackson</td><td>First Aid/CPR</td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 19, 2024</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 19, 2026</span></td><td><span class="badge badge-standby" aria-label="Status: Expiring Soon"><span class="badge-icon" aria-hidden="true"></span>Expiring Soon</span></td><td>Red Cross</td><td><button class="btn btn-ghost btn-sm" aria-label="Renew">Renew</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel-footer">
+          <span style="font-size:13px;color:var(--text-muted);">Showing 20 of 387 certifications</span>
+          <a href="#" class="btn btn-sm btn-ghost" aria-label="View all 387 certifications">View All →</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ISSUE CERTIFICATION MODAL -->
+<div id="modal-issue-cert" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-cert-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-cert-title">Issue Certification</h2>
+      <button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-issue-cert')">✕</button>
+    </div>
+    <form id="form-issue-cert" class="modal-body" data-validate-form novalidate>
+      <div class="form-group">
+        <label class="form-label" for="cert-member">Member <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+        <select id="cert-member" class="form-select" required>
+          <option value="">Search or select member…</option>
+          <option>Marcus Reyes</option><option>Denise Okafor</option><option>James Whitfield</option>
+          <option>Aisha Mohammed</option><option>Travis Buchanan</option><option>Priya Nair</option>
+          <option>Nathan Park</option><option>Latasha Williams</option><option>Derek Chen</option>
+          <option>Rosa Martinez</option><option>Earl Thompson</option><option>Sandra Hobbs</option>
+          <option>Roy Danforth</option><option>Carmen Iglesias</option><option>Tyrone Jackson</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cert-type">Certification Type <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+        <select id="cert-type" class="form-select" required>
+          <option value="">Select type…</option>
+          <option>ICS-100</option><option>ICS-200</option><option>ICS-700 NIMS</option><option>ICS-800</option>
+          <option>First Aid / CPR</option><option>Chainsaw Safety</option><option>Heavy Equipment Safety</option>
+          <option>CERT Basic</option><option>HAM Radio (FCC)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="cert-issue-date">Issue Date <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="date" id="cert-issue-date" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cert-expiry-date">Expiry Date <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="date" id="cert-expiry-date" class="form-input" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="cert-issued-by">Issued By <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="text" id="cert-issued-by" class="form-input" required placeholder="FEMA / Red Cross / TDRN / FCC">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cert-number">Certificate Number</label>
+          <input type="text" id="cert-number" class="form-input" placeholder="Optional cert ID" style="font-family:var(--font-mono);">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cert-notes">Notes</label>
+        <textarea id="cert-notes" class="form-textarea" rows="2" placeholder="Instructor, training location, any special notes…"></textarea>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-issue-cert')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" aria-label="Issue certification" onclick="TDRN.forms.validateForm(document.getElementById('form-issue-cert')) && TDRN.toast.success('Certification issued') && TDRN.modal.close('modal-issue-cert')"><span aria-hidden="true">🏅</span> Issue Certification</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CERT TYPE MODAL -->
+<div id="modal-add-cert-type" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-certtype-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-certtype-title">Add Certification Type</h2>
+      <button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-add-cert-type')">✕</button>
+    </div>
+    <form id="form-add-cert-type" class="modal-body" data-validate-form novalidate>
+      <div class="form-group">
+        <label class="form-label" for="certtype-name">Certification Name <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+        <input type="text" id="certtype-name" class="form-input" required placeholder="e.g. Swift Water Rescue">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="certtype-issuer">Issuing Authority</label>
+          <input type="text" id="certtype-issuer" class="form-input" placeholder="FEMA / AHA / TDRN">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="certtype-validity">Validity (years)</label>
+          <input type="number" id="certtype-validity" class="form-input" placeholder="2" min="1" max="10">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="certtype-description">Description</label>
+        <textarea id="certtype-description" class="form-textarea" rows="2" placeholder="What this certification covers and who needs it…"></textarea>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-add-cert-type')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" aria-label="Save new certification type" onclick="TDRN.forms.validateForm(document.getElementById('form-add-cert-type')) && TDRN.toast.success('Certification type added') && TDRN.modal.close('modal-add-cert-type')"><span aria-hidden="true">＋</span> Add Type</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

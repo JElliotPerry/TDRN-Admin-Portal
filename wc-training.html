@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County — Training Records — 87% compliance">
+  <meta name="theme-color" content="#0F1011">
+  <title>Training — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .cert-check { display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%; }
+    .cert-check.complete { background:var(--green-light);color:var(--green);font-size:13px; }
+    .cert-check.incomplete { background:rgba(107,114,128,0.12);color:var(--text-disabled);font-size:13px; }
+    .compliance-bar { margin-bottom:16px; }
+    .compliance-bar-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:5px; }
+    .compliance-bar-label { font-size:14px;font-weight:600;color:var(--text-body); }
+    .compliance-bar-stats { font-size:12px;color:var(--text-muted);font-family:var(--font-mono); }
+    .compliance-bar-track { height:8px;background:var(--bg-body);border-radius:4px;overflow:hidden; }
+    .compliance-bar-fill { height:100%;border-radius:4px;transition:width 0.4s ease; }
+    .compliance-bar-fill.high { background:var(--green); }
+    .compliance-bar-fill.mid { background:var(--yellow); }
+    .compliance-bar-fill.low { background:var(--orange); }
+    .event-card { background:var(--bg-panel);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:16px 20px;display:flex;flex-direction:column;gap:8px;transition:var(--transition); }
+    .event-card:hover { border-color:var(--border-hover);box-shadow:var(--shadow-sm); }
+    .event-card-date { font-family:var(--font-mono);font-size:12px;color:var(--text-muted); }
+    .event-card-title { font-family:var(--font-heading);font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:0.03em; }
+    .event-card-meta { display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-muted); }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .modal-backdrop[hidden] { display:none; }
+    .modal { background:var(--bg-panel);border:1px solid var(--border-hover);border-radius:var(--radius-lg);width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg); }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-panel);z-index:1; }
+    .modal-title { font-family:var(--font-heading);font-size:18px;font-weight:700;color:var(--text-primary); }
+    .modal-body { padding:24px; }
+    .modal-footer { display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<div class="admin-shell">
+  <nav class="admin-sidebar" aria-label="Main navigation">
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — National dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text"><span class="logo-name">TDRN</span><span class="logo-tagline">Disaster Response Network</span></div>
+    </a>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-nat"><span class="sidebar-section-label" id="nav-nat">National</span>
+      <a href="index.html" class="nav-item" aria-label="National Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="#" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="#" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="#" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="#" class="nav-item" aria-label="Alerts"><span class="nav-item-icon" aria-hidden="true">🔔</span><span>Alerts</span><span class="nav-item-badge">3</span></a>
+      <a href="#" class="nav-item" aria-label="Reports"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Reports</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-tn"><span class="sidebar-section-label" id="nav-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee Dashboard"><span class="nav-item-icon" aria-hidden="true">🗺</span><span>TN Dashboard</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-wc"><span class="sidebar-section-label" id="nav-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item" aria-label="Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="wc-members.html" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="wc-teams.html" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="wc-training.html" class="nav-item active" aria-current="page" aria-label="Training — currently viewing"><span class="nav-item-icon" aria-hidden="true">🎓</span><span>Training</span></a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span><span class="nav-item-badge">23</span></a>
+      <a href="wc-events.html" class="nav-item" aria-label="Events"><span class="nav-item-icon" aria-hidden="true">📅</span><span>Events</span></a>
+      <a href="wc-communications.html" class="nav-item" aria-label="Communications"><span class="nav-item-icon" aria-hidden="true">📡</span><span>Communications</span></a>
+      <a href="wc-documents.html" class="nav-item" aria-label="Documents"><span class="nav-item-icon" aria-hidden="true">📄</span><span>Documents</span></a>
+      <a href="wc-certifications.html" class="nav-item" aria-label="Certifications"><span class="nav-item-icon" aria-hidden="true">🏅</span><span>Certifications</span></a>
+      <a href="wc-applicants.html" class="nav-item" aria-label="Applicants"><span class="nav-item-icon" aria-hidden="true">📋</span><span>Applicants</span><span class="nav-item-badge">3</span></a>
+      <a href="wc-partners.html" class="nav-item" aria-label="Partners"><span class="nav-item-icon" aria-hidden="true">🤝</span><span>Partners</span></a>
+      <a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Readiness</span></a>
+      <a href="wc-settings.html" class="nav-item" aria-label="Settings"><span class="nav-item-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin"><div class="user-avatar" aria-hidden="true">JA</div><div class="user-info"><div class="user-name">Jason</div><div class="user-role">County Admin — WC</div></div></a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode"><span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span><span class="focus-mode-label">Focus Mode</span></button>
+    </div>
+  </nav>
+
+  <div class="admin-main">
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb"><ol>
+        <li><a href="index.html">National</a></li><li><a href="tennessee.html">Tennessee</a></li>
+        <li><a href="warren-county.html">Warren County</a></li><li><span class="current" aria-current="page">Training</span></li>
+      </ol></nav>
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-tr">Search training records</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-tr" placeholder="Search training…" autocomplete="off">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill operational" role="status" aria-label="Training status: 87% compliant"><span class="status-pill-icon" aria-hidden="true">✓</span> 87% Compliant</span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread"><span aria-hidden="true">🔔</span><span class="notification-badge" aria-hidden="true"></span></button>
+        <button class="topbar-btn secondary" aria-label="Export training report" onclick="TDRN.print.exportToCSV([],'warren-training.csv')"><span aria-hidden="true">📥</span> Export Report</button>
+        <button class="topbar-btn primary" aria-label="Schedule a new training session" onclick="TDRN.modal.open('modal-schedule-training')"><span aria-hidden="true">📅</span> Schedule Training</button>
+      </div>
+    </header>
+
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html"     class="subnav-tab">Dashboard</a>
+      <a href="wc-members.html"        class="subnav-tab">Members</a>
+      <a href="wc-teams.html"          class="subnav-tab">Teams</a>
+      <a href="wc-training.html"       class="subnav-tab active" aria-current="page" aria-label="Training — currently active">Training</a>
+      <a href="wc-equipment.html"      class="subnav-tab">Equipment</a>
+      <a href="wc-events.html"         class="subnav-tab">Events</a>
+      <a href="wc-communications.html" class="subnav-tab">Communications</a>
+      <a href="wc-documents.html"      class="subnav-tab">Documents</a>
+      <a href="wc-certifications.html" class="subnav-tab">Certifications</a>
+      <a href="wc-applicants.html"     class="subnav-tab">Applicants</a>
+      <a href="wc-partners.html"       class="subnav-tab">Partners</a>
+      <a href="wc-readiness.html"      class="subnav-tab">Readiness</a>
+      <a href="wc-settings.html"       class="subnav-tab">Settings</a>
+    </nav>
+
+    <main id="main-content" class="admin-content" aria-label="Training Records">
+
+      <div class="content-header">
+        <div class="content-header-left">
+          <h1 class="content-title">Training Records</h1>
+          <p class="content-subtitle">Compliance tracking for 142 members across 8 required certifications</p>
+        </div>
+        <div class="content-actions">
+          <button class="btn btn-ghost" aria-label="Export training compliance report" onclick="TDRN.print.exportToCSV([],'warren-training.csv')"><span aria-hidden="true">📥</span> Export Report</button>
+          <button class="btn btn-primary" aria-label="Schedule a new training session" onclick="TDRN.modal.open('modal-schedule-training')"><span aria-hidden="true">📅</span> Schedule Training</button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <section aria-labelledby="training-stats-heading">
+        <h2 id="training-stats-heading" class="sr-only">Training Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card accent-green" role="article" aria-label="Overall Compliance: 87%"><div class="stat-label">Overall Compliance</div><div class="stat-value">87<span style="font-size:16px;color:var(--text-muted);font-weight:400;">%</span></div><div class="stat-change up"><span aria-hidden="true">↑</span> +3% this month</div><span class="stat-icon" aria-hidden="true">📊</span></div>
+          <div class="stat-card accent-orange" role="article" aria-label="Certifications Due: 12"><div class="stat-label">Certs Due Soon</div><div class="stat-value">12</div><div class="stat-change down"><span aria-hidden="true">⚠</span> Within 30 days</div><span class="stat-icon" aria-hidden="true">⏰</span></div>
+          <div class="stat-card accent-blue" role="article" aria-label="Upcoming Sessions: 3"><div class="stat-label">Upcoming Sessions</div><div class="stat-value">3</div><div class="stat-change flat"><span aria-hidden="true">→</span> May–Jun 2026</div><span class="stat-icon" aria-hidden="true">📅</span></div>
+          <div class="stat-card accent-green" role="article" aria-label="Completed This Quarter: 47"><div class="stat-label">Completed (Quarter)</div><div class="stat-value">47</div><div class="stat-change up"><span aria-hidden="true">↑</span> Record high</div><span class="stat-icon" aria-hidden="true">🎓</span></div>
+        </div>
+      </section>
+
+      <!-- GRID 2-1: COMPLIANCE + UPCOMING -->
+      <div class="grid-2-1" style="margin-bottom:24px;">
+
+        <!-- LEFT: Compliance overview -->
+        <section class="panel" aria-labelledby="compliance-panel-title">
+          <div class="panel-header">
+            <h2 class="panel-title" id="compliance-panel-title"><span aria-hidden="true">📊</span> Certification Compliance</h2>
+            <button class="btn btn-ghost btn-sm" aria-label="View detailed compliance breakdown">Details</button>
+          </div>
+          <div class="panel-body">
+
+            <div class="compliance-bar">
+              <div class="compliance-bar-header">
+                <span class="compliance-bar-label">ICS-100 Introduction to ICS</span>
+                <span class="compliance-bar-stats" aria-label="134 of 142 members certified">134/142 &nbsp;<strong style="color:var(--green);">94%</strong></span>
+              </div>
+              <div class="compliance-bar-track"><div class="compliance-bar-fill high" style="width:94%" role="progressbar" aria-valuenow="94" aria-valuemin="0" aria-valuemax="100" aria-label="ICS-100 compliance: 94%"></div></div>
+            </div>
+
+            <div class="compliance-bar">
+              <div class="compliance-bar-header">
+                <span class="compliance-bar-label">ICS-200 Basic ICS</span>
+                <span class="compliance-bar-stats" aria-label="111 of 142 members certified">111/142 &nbsp;<strong style="color:var(--yellow);">78%</strong></span>
+              </div>
+              <div class="compliance-bar-track"><div class="compliance-bar-fill mid" style="width:78%" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100" aria-label="ICS-200 compliance: 78%"></div></div>
+            </div>
+
+            <div class="compliance-bar">
+              <div class="compliance-bar-header">
+                <span class="compliance-bar-label">ICS-700 NIMS</span>
+                <span class="compliance-bar-stats" aria-label="92 of 142 members certified">92/142 &nbsp;<strong style="color:var(--orange);">65%</strong></span>
+              </div>
+              <div class="compliance-bar-track"><div class="compliance-bar-fill low" style="width:65%" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="ICS-700 compliance: 65%"></div></div>
+            </div>
+
+            <div class="compliance-bar">
+              <div class="compliance-bar-header">
+                <span class="compliance-bar-label">ICS-800 National Response Framework</span>
+                <span class="compliance-bar-stats" aria-label="82 of 142 members certified">82/142 &nbsp;<strong style="color:var(--orange);">58%</strong></span>
+              </div>
+              <div class="compliance-bar-track"><div class="compliance-bar-fill low" style="width:58%" role="progressbar" aria-valuenow="58" aria-valuemin="0" aria-valuemax="100" aria-label="ICS-800 compliance: 58%"></div></div>
+            </div>
+
+            <div class="compliance-bar">
+              <div class="compliance-bar-header">
+                <span class="compliance-bar-label">First Aid / CPR</span>
+                <span class="compliance-bar-stats" aria-label="117 of 142 members certified">117/142 &nbsp;<strong style="color:var(--yellow);">82%</strong></span>
+              </div>
+              <div class="compliance-bar-track"><div class="compliance-bar-fill mid" style="width:82%" role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100" aria-label="First Aid/CPR compliance: 82%"></div></div>
+            </div>
+
+            <div class="compliance-bar">
+              <div class="compliance-bar-header">
+                <span class="compliance-bar-label">Chainsaw Safety <span style="font-size:11px;color:var(--text-disabled);">(operators only)</span></span>
+                <span class="compliance-bar-stats" aria-label="41 of 45 operators certified">41/45 &nbsp;<strong style="color:var(--green);">91%</strong></span>
+              </div>
+              <div class="compliance-bar-track"><div class="compliance-bar-fill high" style="width:91%" role="progressbar" aria-valuenow="91" aria-valuemin="0" aria-valuemax="100" aria-label="Chainsaw Safety compliance: 91%"></div></div>
+            </div>
+
+            <div class="compliance-bar">
+              <div class="compliance-bar-header">
+                <span class="compliance-bar-label">Heavy Equipment Safety <span style="font-size:11px;color:var(--text-disabled);">(operators only)</span></span>
+                <span class="compliance-bar-stats" aria-label="29 of 33 operators certified">29/33 &nbsp;<strong style="color:var(--green);">88%</strong></span>
+              </div>
+              <div class="compliance-bar-track"><div class="compliance-bar-fill high" style="width:88%" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" aria-label="Heavy Equipment Safety compliance: 88%"></div></div>
+            </div>
+
+            <div class="compliance-bar">
+              <div class="compliance-bar-header">
+                <span class="compliance-bar-label">CERT Basic Training</span>
+                <span class="compliance-bar-stats" aria-label="101 of 142 members certified">101/142 &nbsp;<strong style="color:var(--yellow);">71%</strong></span>
+              </div>
+              <div class="compliance-bar-track"><div class="compliance-bar-fill mid" style="width:71%" role="progressbar" aria-valuenow="71" aria-valuemin="0" aria-valuemax="100" aria-label="CERT Basic Training compliance: 71%"></div></div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- RIGHT: Upcoming events -->
+        <aside aria-label="Upcoming training sessions">
+          <section class="panel" aria-labelledby="upcoming-training-title">
+            <div class="panel-header">
+              <h2 class="panel-title" id="upcoming-training-title"><span aria-hidden="true">📅</span> Upcoming Sessions</h2>
+              <button class="btn btn-ghost btn-sm" aria-label="Schedule new training" onclick="TDRN.modal.open('modal-schedule-training')">＋ Add</button>
+            </div>
+            <div class="panel-body" style="display:flex;flex-direction:column;gap:12px;">
+
+              <div class="event-card" aria-label="ICS-100 Certification — May 10">
+                <div class="event-card-date">May 10, 2026 · 08:00 CDT</div>
+                <div class="event-card-title">ICS-100 Certification</div>
+                <div class="event-card-meta">
+                  <span><span aria-hidden="true">📍</span> McMinnville Fire Hall</span>
+                  <span><span aria-hidden="true">👥</span> 30 seats (12 enrolled)</span>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:4px;">
+                  <span class="badge badge-training" style="font-size:10px;" aria-label="Type: ICS Training"><span class="badge-icon" aria-hidden="true"></span>ICS</span>
+                  <button class="btn btn-ghost btn-sm" aria-label="Register members for ICS-100">Register Members</button>
+                </div>
+              </div>
+
+              <div class="event-card" aria-label="CERT Basic Cohort 8 — June 7">
+                <div class="event-card-date">Jun 7, 2026 · 08:00 CDT</div>
+                <div class="event-card-title">CERT Basic — Cohort 8</div>
+                <div class="event-card-meta">
+                  <span><span aria-hidden="true">📍</span> Warren County EOC</span>
+                  <span><span aria-hidden="true">👥</span> 25 seats (8 enrolled)</span>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:4px;">
+                  <span class="badge badge-training" style="font-size:10px;" aria-label="Type: CERT Training"><span class="badge-icon" aria-hidden="true"></span>CERT</span>
+                  <button class="btn btn-ghost btn-sm" aria-label="Register members for CERT Basic">Register Members</button>
+                </div>
+              </div>
+
+              <div class="event-card" aria-label="Swift Water Rescue — June 14">
+                <div class="event-card-date">Jun 14, 2026 · 07:00 CDT</div>
+                <div class="event-card-title">Swift Water Rescue</div>
+                <div class="event-card-meta">
+                  <span><span aria-hidden="true">📍</span> Collins River Access</span>
+                  <span><span aria-hidden="true">👥</span> 15 seats (6 enrolled)</span>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:4px;">
+                  <span class="badge badge-standby" style="font-size:10px;" aria-label="Type: Specialty Training"><span class="badge-icon" aria-hidden="true"></span>Specialty</span>
+                  <button class="btn btn-ghost btn-sm" aria-label="Register members for Swift Water Rescue">Register Members</button>
+                </div>
+              </div>
+
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <!-- MEMBER COMPLIANCE TABLE -->
+      <section class="panel" aria-labelledby="compliance-table-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="compliance-table-heading"><span aria-hidden="true">📋</span> Member Compliance</h2>
+          <div class="panel-actions">
+            <button class="btn btn-ghost btn-sm" aria-label="Export compliance table to CSV" onclick="TDRN.print.exportToCSV([],'warren-compliance.csv')"><span aria-hidden="true">📥</span> Export</button>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" aria-label="Member training compliance — checkmarks indicate completed certifications">
+            <thead>
+              <tr>
+                <th scope="col">Member</th>
+                <th scope="col" style="text-align:center;">ICS-100</th>
+                <th scope="col" style="text-align:center;">ICS-200</th>
+                <th scope="col" style="text-align:center;">ICS-700</th>
+                <th scope="col" style="text-align:center;">First Aid</th>
+                <th scope="col" style="text-align:center;">Chainsaw</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Marcus Reyes</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-700: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="Chainsaw: Completed">✓</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Compliant"><span class="badge-icon" aria-hidden="true"></span>Compliant</span></td>
+              </tr>
+              <tr>
+                <td><strong>Denise Okafor</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-700: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Compliant"><span class="badge-icon" aria-hidden="true"></span>Compliant</span></td>
+              </tr>
+              <tr>
+                <td><strong>James Whitfield</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-700: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-standby" aria-label="Status: Partial"><span class="badge-icon" aria-hidden="true"></span>Partial</span></td>
+              </tr>
+              <tr>
+                <td><strong>Aisha Mohammed</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-700: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Compliant"><span class="badge-icon" aria-hidden="true"></span>Compliant</span></td>
+              </tr>
+              <tr>
+                <td><strong>Travis Buchanan</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-200: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-700: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="Chainsaw: Completed">✓</span></td>
+                <td><span class="badge badge-training" aria-label="Status: In Progress"><span class="badge-icon" aria-hidden="true"></span>In Progress</span></td>
+              </tr>
+              <tr>
+                <td><strong>Priya Nair</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-700: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-standby" aria-label="Status: Partial"><span class="badge-icon" aria-hidden="true"></span>Partial</span></td>
+              </tr>
+              <tr>
+                <td><strong>Nathan Park</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-700: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Compliant"><span class="badge-icon" aria-hidden="true"></span>Compliant</span></td>
+              </tr>
+              <tr>
+                <td><strong>Latasha Williams</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-200: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-700: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-training" aria-label="Status: In Progress"><span class="badge-icon" aria-hidden="true"></span>In Progress</span></td>
+              </tr>
+              <tr>
+                <td><strong>Derek Chen</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-700: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="Chainsaw: Completed">✓</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Compliant"><span class="badge-icon" aria-hidden="true"></span>Compliant</span></td>
+              </tr>
+              <tr>
+                <td><strong>Rosa Martinez</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-700: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-standby" aria-label="Status: Partial"><span class="badge-icon" aria-hidden="true"></span>Partial</span></td>
+              </tr>
+              <tr>
+                <td><strong>Earl Thompson</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-700: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="Chainsaw: Completed">✓</span></td>
+                <td><span class="badge badge-standby" aria-label="Status: Partial"><span class="badge-icon" aria-hidden="true"></span>Partial</span></td>
+              </tr>
+              <tr>
+                <td><strong>Sandra Hobbs</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-700: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-operational" aria-label="Status: Compliant"><span class="badge-icon" aria-hidden="true"></span>Compliant</span></td>
+              </tr>
+              <tr>
+                <td><strong>Roy Danforth</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-200: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-700: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="First Aid: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-inactive" aria-label="Status: Inactive — compliance incomplete"><span class="badge-icon" aria-hidden="true"></span>Inactive</span></td>
+              </tr>
+              <tr>
+                <td><strong>Carmen Iglesias</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-700: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-standby" aria-label="Status: Partial"><span class="badge-icon" aria-hidden="true"></span>Partial</span></td>
+              </tr>
+              <tr>
+                <td><strong>Tyrone Jackson</strong></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-100: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="ICS-200: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="ICS-700: Not completed">✗</span></td>
+                <td style="text-align:center;"><span class="cert-check complete" aria-label="First Aid: Completed">✓</span></td>
+                <td style="text-align:center;"><span class="cert-check incomplete" aria-label="Chainsaw: Not completed">✗</span></td>
+                <td><span class="badge badge-standby" aria-label="Status: Partial"><span class="badge-icon" aria-hidden="true"></span>Partial</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel-footer">
+          <span style="font-size:13px;color:var(--text-muted);">Showing 15 of 142 members</span>
+          <a href="#" class="btn btn-sm btn-ghost" aria-label="View all 142 members compliance">View All Members →</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- SCHEDULE TRAINING MODAL -->
+<div id="modal-schedule-training" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-training-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-training-title">Schedule Training Session</h2>
+      <button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-schedule-training')">✕</button>
+    </div>
+    <form id="form-schedule-training" class="modal-body" data-validate-form novalidate>
+      <div class="form-group">
+        <label class="form-label" for="tr-title">Training Title <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+        <input type="text" id="tr-title" class="form-input" required placeholder="e.g. ICS-200 Certification Cohort 4">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="tr-date">Date <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="date" id="tr-date" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tr-time">Start Time <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="time" id="tr-time" class="form-input" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="tr-location">Location <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+        <input type="text" id="tr-location" class="form-input" required placeholder="e.g. Warren County EOC, McMinnville Fire Hall">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="tr-instructor">Instructor</label>
+          <input type="text" id="tr-instructor" class="form-input" placeholder="Instructor name or TBD">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tr-capacity">Max Capacity</label>
+          <input type="number" id="tr-capacity" class="form-input" placeholder="30" min="1" max="500">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="tr-req-certs">Required Certifications</label>
+        <input type="text" id="tr-req-certs" class="form-input" placeholder="ICS-100, CERT Basic, etc.">
+        <div class="form-hint">Prerequisites members must hold to attend</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="tr-description">Description</label>
+        <textarea id="tr-description" class="form-textarea" rows="3" placeholder="Training objectives, materials needed, notes for attendees…"></textarea>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-schedule-training')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" aria-label="Schedule training session" onclick="TDRN.forms.validateForm(document.getElementById('form-schedule-training')) && TDRN.toast.success('Training session scheduled') && TDRN.modal.close('modal-schedule-training')"><span aria-hidden="true">📅</span> Schedule</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

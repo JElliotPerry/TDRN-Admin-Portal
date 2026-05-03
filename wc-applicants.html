@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County — Applicant Pipeline — 18 applicants under review">
+  <meta name="theme-color" content="#0F1011">
+  <title>Applicants — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Kanban Board */
+    .kanban-board { display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:start;margin-bottom:32px; }
+    @media (max-width:1200px) { .kanban-board { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:768px) { .kanban-board { grid-template-columns:1fr; } }
+    .kanban-col { background:var(--bg-panel);border:1px solid var(--border-color);border-radius:var(--radius-lg);display:flex;flex-direction:column;overflow:hidden; }
+    .kanban-col-header { padding:14px 16px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg-panel);z-index:1; }
+    .kanban-col-title { font-family:var(--font-heading);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted); }
+    .kanban-col-count { display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--bg-body);font-size:12px;font-weight:700;color:var(--text-muted);font-family:var(--font-mono); }
+    .kanban-col.col-new .kanban-col-header { border-top:3px solid var(--blue); }
+    .kanban-col.col-received .kanban-col-header { border-top:3px solid var(--purple); }
+    .kanban-col.col-interview .kanban-col-header { border-top:3px solid var(--yellow); }
+    .kanban-col.col-approved .kanban-col-header { border-top:3px solid var(--green); }
+    .kanban-cards { padding:12px;display:flex;flex-direction:column;gap:10px; }
+    /* Applicant cards in kanban */
+    .app-card { background:var(--bg-body);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:14px;display:flex;flex-direction:column;gap:8px;transition:var(--transition);cursor:pointer; }
+    .app-card:hover { border-color:var(--border-hover);box-shadow:var(--shadow-sm);transform:translateY(-1px); }
+    .app-card:focus-visible { outline:2px solid var(--yellow);outline-offset:2px; }
+    .app-card-name { font-weight:700;font-size:14px;color:var(--text-primary); }
+    .app-card-role { font-size:12px;color:var(--text-muted); }
+    .app-card-skills { display:flex;flex-wrap:wrap;gap:4px; }
+    .app-skill-tag { display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:var(--bg-panel);border:1px solid var(--border-color);color:var(--text-muted); }
+    .app-card-meta { display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-disabled); }
+    .app-card-days { display:inline-flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:11px; }
+    .app-card-days.urgent { color:var(--orange); }
+    .app-card-action { width:100%;margin-top:4px; }
+    /* Modals */
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .modal-backdrop[hidden] { display:none; }
+    .modal { background:var(--bg-panel);border:1px solid var(--border-hover);border-radius:var(--radius-lg);width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg); }
+    .modal-sm { max-width:420px; }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-panel);z-index:1; }
+    .modal-title { font-family:var(--font-heading);font-size:18px;font-weight:700;color:var(--text-primary); }
+    .modal-body { padding:24px; }
+    .modal-footer { display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<div class="admin-shell">
+  <nav class="admin-sidebar" aria-label="Main navigation">
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — National dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text"><span class="logo-name">TDRN</span><span class="logo-tagline">Disaster Response Network</span></div>
+    </a>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-nat"><span class="sidebar-section-label" id="nav-nat">National</span>
+      <a href="index.html" class="nav-item" aria-label="National Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="#" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="#" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="#" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="#" class="nav-item" aria-label="Alerts"><span class="nav-item-icon" aria-hidden="true">🔔</span><span>Alerts</span><span class="nav-item-badge">3</span></a>
+      <a href="#" class="nav-item" aria-label="Reports"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Reports</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-tn"><span class="sidebar-section-label" id="nav-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee Dashboard"><span class="nav-item-icon" aria-hidden="true">🗺</span><span>TN Dashboard</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-wc"><span class="sidebar-section-label" id="nav-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item" aria-label="Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="wc-members.html" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="wc-teams.html" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="wc-training.html" class="nav-item" aria-label="Training"><span class="nav-item-icon" aria-hidden="true">🎓</span><span>Training</span></a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span><span class="nav-item-badge">23</span></a>
+      <a href="wc-events.html" class="nav-item" aria-label="Events"><span class="nav-item-icon" aria-hidden="true">📅</span><span>Events</span></a>
+      <a href="wc-communications.html" class="nav-item" aria-label="Communications"><span class="nav-item-icon" aria-hidden="true">📡</span><span>Communications</span></a>
+      <a href="wc-documents.html" class="nav-item" aria-label="Documents"><span class="nav-item-icon" aria-hidden="true">📄</span><span>Documents</span></a>
+      <a href="wc-certifications.html" class="nav-item" aria-label="Certifications"><span class="nav-item-icon" aria-hidden="true">🏅</span><span>Certifications</span></a>
+      <a href="wc-applicants.html" class="nav-item active" aria-current="page" aria-label="Applicants — currently viewing"><span class="nav-item-icon" aria-hidden="true">📋</span><span>Applicants</span><span class="nav-item-badge">18</span></a>
+      <a href="wc-partners.html" class="nav-item" aria-label="Partners"><span class="nav-item-icon" aria-hidden="true">🤝</span><span>Partners</span></a>
+      <a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Readiness</span></a>
+      <a href="wc-settings.html" class="nav-item" aria-label="Settings"><span class="nav-item-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin"><div class="user-avatar" aria-hidden="true">JA</div><div class="user-info"><div class="user-name">Jason</div><div class="user-role">County Admin — WC</div></div></a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode"><span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span><span class="focus-mode-label">Focus Mode</span></button>
+    </div>
+  </nav>
+
+  <div class="admin-main">
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb"><ol>
+        <li><a href="index.html">National</a></li><li><a href="tennessee.html">Tennessee</a></li>
+        <li><a href="warren-county.html">Warren County</a></li><li><span class="current" aria-current="page">Applicants</span></li>
+      </ol></nav>
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-app">Search applicants</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-app" placeholder="Search applicants…" autocomplete="off">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill training" role="status" aria-label="18 applicants in pipeline"><span class="status-pill-icon" aria-hidden="true">📋</span> 18 in Pipeline</span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread"><span aria-hidden="true">🔔</span><span class="notification-badge" aria-hidden="true"></span></button>
+        <button class="topbar-btn secondary" aria-label="Export applicant list" onclick="TDRN.print.exportToCSV([],'warren-applicants.csv')"><span aria-hidden="true">📥</span> Export</button>
+        <button class="topbar-btn primary" aria-label="Add new applicant" onclick="TDRN.modal.open('modal-add-applicant')"><span aria-hidden="true">＋</span> Add Applicant</button>
+      </div>
+    </header>
+
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html"     class="subnav-tab">Dashboard</a>
+      <a href="wc-members.html"        class="subnav-tab">Members</a>
+      <a href="wc-teams.html"          class="subnav-tab">Teams</a>
+      <a href="wc-training.html"       class="subnav-tab">Training</a>
+      <a href="wc-equipment.html"      class="subnav-tab">Equipment</a>
+      <a href="wc-events.html"         class="subnav-tab">Events</a>
+      <a href="wc-communications.html" class="subnav-tab">Communications</a>
+      <a href="wc-documents.html"      class="subnav-tab">Documents</a>
+      <a href="wc-certifications.html" class="subnav-tab">Certifications</a>
+      <a href="wc-applicants.html"     class="subnav-tab active" aria-current="page" aria-label="Applicants — currently active">Applicants</a>
+      <a href="wc-partners.html"       class="subnav-tab">Partners</a>
+      <a href="wc-readiness.html"      class="subnav-tab">Readiness</a>
+      <a href="wc-settings.html"       class="subnav-tab">Settings</a>
+    </nav>
+
+    <main id="main-content" class="admin-content" aria-label="Applicant Pipeline">
+
+      <div class="content-header">
+        <div class="content-header-left">
+          <h1 class="content-title">Applicant Pipeline</h1>
+          <p class="content-subtitle">Volunteer and contractor recruitment — 18 applicants across 4 stages</p>
+        </div>
+        <div class="content-actions">
+          <button class="btn btn-ghost" aria-label="Export applicant list" onclick="TDRN.print.exportToCSV([],'warren-applicants.csv')"><span aria-hidden="true">📥</span> Export</button>
+          <button class="btn btn-primary" aria-label="Add new applicant" onclick="TDRN.modal.open('modal-add-applicant')"><span aria-hidden="true">＋</span> Add Applicant</button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <section aria-labelledby="app-stats-heading">
+        <h2 id="app-stats-heading" class="sr-only">Applicant Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card accent-blue" role="article" aria-label="Total Applicants: 18"><div class="stat-label">Total Applicants</div><div class="stat-value">18</div><div class="stat-change flat"><span aria-hidden="true">→</span> 4 stages</div><span class="stat-icon" aria-hidden="true">📋</span></div>
+          <div class="stat-card accent-purple" role="article" aria-label="Under Review: 7"><div class="stat-label">Under Review</div><div class="stat-value">7</div><div class="stat-change flat"><span aria-hidden="true">→</span> Needs action</div><span class="stat-icon" aria-hidden="true">🔍</span></div>
+          <div class="stat-card accent-yellow" role="article" aria-label="Interview Scheduled: 4"><div class="stat-label">Interview Stage</div><div class="stat-value">4</div><div class="stat-change flat"><span aria-hidden="true">→</span> Vetting active</div><span class="stat-icon" aria-hidden="true">🗓</span></div>
+          <div class="stat-card accent-green" role="article" aria-label="Approved This Month: 6"><div class="stat-label">Approved (Month)</div><div class="stat-value">6</div><div class="stat-change up"><span aria-hidden="true">↑</span> +2 vs last month</div><span class="stat-icon" aria-hidden="true">✓</span></div>
+        </div>
+      </section>
+
+      <!-- KANBAN PIPELINE -->
+      <section aria-labelledby="kanban-heading">
+        <h2 id="kanban-heading" style="font-family:var(--font-heading);font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:0.04em;margin-bottom:16px;">Pipeline Board</h2>
+        <div class="kanban-board" role="list" aria-label="Applicant pipeline stages">
+
+          <!-- COLUMN 1: NEW INQUIRY -->
+          <div class="kanban-col col-new" role="listitem" aria-label="New Inquiry stage — 5 applicants">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title"><span aria-hidden="true">📥</span> New Inquiry</span>
+              <span class="kanban-col-count" aria-label="5 applicants">5</span>
+            </div>
+            <div class="kanban-cards" role="list" aria-label="New Inquiry applicants">
+
+              <article class="app-card" role="listitem" aria-label="Brian Kowalski — New Inquiry" tabindex="0">
+                <div class="app-card-name">Brian Kowalski</div>
+                <div class="app-card-role">Desired role: Chainsaw Operator</div>
+                <div class="app-card-skills"><span class="app-skill-tag">Chainsaw</span><span class="app-skill-tag">Forestry</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 30, 2026</span>
+                  <span class="app-card-days"><span aria-hidden="true">⏱</span> 2 days</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Review Brian Kowalski's application">Review</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Monica Shepherd — New Inquiry" tabindex="0">
+                <div class="app-card-name">Monica Shepherd</div>
+                <div class="app-card-role">Desired role: Volunteer / General</div>
+                <div class="app-card-skills"><span class="app-skill-tag">Logistics</span><span class="app-skill-tag">Admin</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 29, 2026</span>
+                  <span class="app-card-days"><span aria-hidden="true">⏱</span> 3 days</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Review Monica Shepherd's application">Review</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Jerome Pittman — New Inquiry" tabindex="0">
+                <div class="app-card-name">Jerome Pittman</div>
+                <div class="app-card-role">Desired role: Medical Support</div>
+                <div class="app-card-skills"><span class="app-skill-tag">EMT</span><span class="app-skill-tag">First Aid</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 28, 2026</span>
+                  <span class="app-card-days"><span aria-hidden="true">⏱</span> 4 days</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Review Jerome Pittman's application">Review</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Anna Thornton — New Inquiry" tabindex="0">
+                <div class="app-card-name">Anna Thornton</div>
+                <div class="app-card-role">Desired role: Communications</div>
+                <div class="app-card-skills"><span class="app-skill-tag">HAM Radio</span><span class="app-skill-tag">IT</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 27, 2026</span>
+                  <span class="app-card-days"><span aria-hidden="true">⏱</span> 5 days</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Review Anna Thornton's application">Review</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Dale Hutchins — New Inquiry" tabindex="0">
+                <div class="app-card-name">Dale Hutchins</div>
+                <div class="app-card-role">Desired role: Heavy Equipment Op.</div>
+                <div class="app-card-skills"><span class="app-skill-tag">Heavy Equip.</span><span class="app-skill-tag">CDL</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 25, 2026</span>
+                  <span class="app-card-days urgent"><span aria-hidden="true">⏱</span> 7 days</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Review Dale Hutchins's application">Review</button>
+              </article>
+
+            </div>
+          </div>
+
+          <!-- COLUMN 2: APPLICATION RECEIVED -->
+          <div class="kanban-col col-received" role="listitem" aria-label="Application Received stage — 4 applicants">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title"><span aria-hidden="true">📄</span> Application Received</span>
+              <span class="kanban-col-count" aria-label="4 applicants">4</span>
+            </div>
+            <div class="kanban-cards" role="list" aria-label="Application Received applicants">
+
+              <article class="app-card" role="listitem" aria-label="Wendy Gallagher — Application Received" tabindex="0">
+                <div class="app-card-name">Wendy Gallagher</div>
+                <div class="app-card-role">Desired role: Team Leader</div>
+                <div class="app-card-skills"><span class="app-skill-tag">ICS-200</span><span class="app-skill-tag">Leadership</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 22, 2026</span>
+                  <span class="app-card-days urgent"><span aria-hidden="true">⏱</span> 10 days</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Advance Wendy Gallagher to interview stage">Advance to Interview</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Marcus Osei — Application Received" tabindex="0">
+                <div class="app-card-name">Marcus Osei</div>
+                <div class="app-card-role">Desired role: Volunteer / General</div>
+                <div class="app-card-skills"><span class="app-skill-tag">Logistics</span><span class="app-skill-tag">Comms</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 21, 2026</span>
+                  <span class="app-card-days urgent"><span aria-hidden="true">⏱</span> 11 days</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Advance Marcus Osei to interview">Advance to Interview</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Laura Fitch — Application Received" tabindex="0">
+                <div class="app-card-name">Laura Fitch</div>
+                <div class="app-card-role">Desired role: Medical Support</div>
+                <div class="app-card-skills"><span class="app-skill-tag">Nursing</span><span class="app-skill-tag">First Aid</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 19, 2026</span>
+                  <span class="app-card-days urgent"><span aria-hidden="true">⏱</span> 13 days</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Advance Laura Fitch to interview">Advance to Interview</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Gerald Nash — Application Received" tabindex="0">
+                <div class="app-card-name">Gerald Nash</div>
+                <div class="app-card-role">Desired role: Chainsaw Operator</div>
+                <div class="app-card-skills"><span class="app-skill-tag">Chainsaw</span><span class="app-skill-tag">Forestry</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 18, 2026</span>
+                  <span class="app-card-days urgent"><span aria-hidden="true">⏱</span> 14 days</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Advance Gerald Nash to interview">Advance to Interview</button>
+              </article>
+
+            </div>
+          </div>
+
+          <!-- COLUMN 3: INTERVIEW / VETTING -->
+          <div class="kanban-col col-interview" role="listitem" aria-label="Interview and Vetting stage — 4 applicants">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title"><span aria-hidden="true">🗓</span> Interview / Vetting</span>
+              <span class="kanban-col-count" aria-label="4 applicants">4</span>
+            </div>
+            <div class="kanban-cards" role="list" aria-label="Interview stage applicants">
+
+              <article class="app-card" role="listitem" aria-label="Kelly Drummond — Interview Stage" tabindex="0">
+                <div class="app-card-name">Kelly Drummond</div>
+                <div class="app-card-role">Desired role: Coordinator</div>
+                <div class="app-card-skills"><span class="app-skill-tag">Admin</span><span class="app-skill-tag">CERT</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 12, 2026</span>
+                  <span class="app-card-days urgent"><span aria-hidden="true">⏱</span> 20 days</span>
+                </div>
+                <button class="btn btn-sm app-card-action" style="background:var(--green-light);color:var(--green);border:1px solid rgba(52,211,153,0.3);" aria-label="Approve Kelly Drummond" onclick="TDRN.modal.open('modal-approve-confirm'); document.getElementById('approve-name').textContent='Kelly Drummond';">Approve</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Vincent Russo — Interview Stage" tabindex="0">
+                <div class="app-card-name">Vincent Russo</div>
+                <div class="app-card-role">Desired role: Heavy Equipment Op.</div>
+                <div class="app-card-skills"><span class="app-skill-tag">Heavy Equip.</span><span class="app-skill-tag">CDL-A</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 10, 2026</span>
+                  <span class="app-card-days urgent"><span aria-hidden="true">⏱</span> 22 days</span>
+                </div>
+                <button class="btn btn-sm app-card-action" style="background:var(--green-light);color:var(--green);border:1px solid rgba(52,211,153,0.3);" aria-label="Approve Vincent Russo" onclick="TDRN.modal.open('modal-approve-confirm'); document.getElementById('approve-name').textContent='Vincent Russo';">Approve</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Heather Simmons — Interview Stage" tabindex="0">
+                <div class="app-card-name">Heather Simmons</div>
+                <div class="app-card-role">Desired role: Volunteer / General</div>
+                <div class="app-card-skills"><span class="app-skill-tag">First Aid</span><span class="app-skill-tag">CERT</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 8, 2026</span>
+                  <span class="app-card-days urgent"><span aria-hidden="true">⏱</span> 24 days</span>
+                </div>
+                <button class="btn btn-sm app-card-action" style="background:var(--green-light);color:var(--green);border:1px solid rgba(52,211,153,0.3);" aria-label="Approve Heather Simmons" onclick="TDRN.modal.open('modal-approve-confirm'); document.getElementById('approve-name').textContent='Heather Simmons';">Approve</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Omar Khalid — Interview Stage" tabindex="0">
+                <div class="app-card-name">Omar Khalid</div>
+                <div class="app-card-role">Desired role: Communications</div>
+                <div class="app-card-skills"><span class="app-skill-tag">HAM Radio</span><span class="app-skill-tag">Network</span></div>
+                <div class="app-card-meta">
+                  <span>Applied Apr 5, 2026</span>
+                  <span class="app-card-days urgent"><span aria-hidden="true">⏱</span> 27 days</span>
+                </div>
+                <button class="btn btn-sm app-card-action" style="background:var(--green-light);color:var(--green);border:1px solid rgba(52,211,153,0.3);" aria-label="Approve Omar Khalid" onclick="TDRN.modal.open('modal-approve-confirm'); document.getElementById('approve-name').textContent='Omar Khalid';">Approve</button>
+              </article>
+
+            </div>
+          </div>
+
+          <!-- COLUMN 4: APPROVED / ONBOARDING -->
+          <div class="kanban-col col-approved" role="listitem" aria-label="Approved and Onboarding stage — 5 applicants">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title"><span aria-hidden="true">✓</span> Approved / Onboarding</span>
+              <span class="kanban-col-count" aria-label="5 applicants">5</span>
+            </div>
+            <div class="kanban-cards" role="list" aria-label="Approved and onboarding applicants">
+
+              <article class="app-card" role="listitem" aria-label="Patricia Leung — Onboarding" tabindex="0" style="border-color:rgba(52,211,153,0.25);">
+                <div class="app-card-name">Patricia Leung</div>
+                <div class="app-card-role">Approved: Coordinator</div>
+                <div class="app-card-skills"><span class="app-skill-tag">CERT</span><span class="app-skill-tag">ICS-100</span></div>
+                <div class="app-card-meta">
+                  <span>Approved Apr 28, 2026</span>
+                  <span class="app-card-days"><span aria-hidden="true">✓</span> Day 4</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Convert Patricia Leung to full member">Convert to Member</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Sam Rivera — Onboarding" tabindex="0" style="border-color:rgba(52,211,153,0.25);">
+                <div class="app-card-name">Sam Rivera</div>
+                <div class="app-card-role">Approved: Chainsaw Operator</div>
+                <div class="app-card-skills"><span class="app-skill-tag">Chainsaw</span><span class="app-skill-tag">First Aid</span></div>
+                <div class="app-card-meta">
+                  <span>Approved Apr 25, 2026</span>
+                  <span class="app-card-days"><span aria-hidden="true">✓</span> Day 7</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Convert Sam Rivera to full member">Convert to Member</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Keisha Malone — Onboarding" tabindex="0" style="border-color:rgba(52,211,153,0.25);">
+                <div class="app-card-name">Keisha Malone</div>
+                <div class="app-card-role">Approved: Medical Support</div>
+                <div class="app-card-skills"><span class="app-skill-tag">EMT-B</span><span class="app-skill-tag">First Aid</span></div>
+                <div class="app-card-meta">
+                  <span>Approved Apr 22, 2026</span>
+                  <span class="app-card-days"><span aria-hidden="true">✓</span> Day 10</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Convert Keisha Malone to full member">Convert to Member</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Darnell Brooks — Onboarding" tabindex="0" style="border-color:rgba(52,211,153,0.25);">
+                <div class="app-card-name">Darnell Brooks</div>
+                <div class="app-card-role">Approved: Volunteer / General</div>
+                <div class="app-card-skills"><span class="app-skill-tag">Logistics</span></div>
+                <div class="app-card-meta">
+                  <span>Approved Apr 20, 2026</span>
+                  <span class="app-card-days"><span aria-hidden="true">✓</span> Day 12</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Convert Darnell Brooks to full member">Convert to Member</button>
+              </article>
+
+              <article class="app-card" role="listitem" aria-label="Tina Bergmann — Onboarding" tabindex="0" style="border-color:rgba(52,211,153,0.25);">
+                <div class="app-card-name">Tina Bergmann</div>
+                <div class="app-card-role">Approved: Communications</div>
+                <div class="app-card-skills"><span class="app-skill-tag">HAM Radio</span><span class="app-skill-tag">IT</span></div>
+                <div class="app-card-meta">
+                  <span>Approved Apr 16, 2026</span>
+                  <span class="app-card-days"><span aria-hidden="true">✓</span> Day 16</span>
+                </div>
+                <button class="btn btn-ghost btn-sm app-card-action" aria-label="Convert Tina Bergmann to full member">Convert to Member</button>
+              </article>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- APPLICANT DETAIL TABLE -->
+      <section class="panel" aria-labelledby="app-table-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="app-table-heading"><span aria-hidden="true">📋</span> All Applicants</h2>
+          <div class="panel-actions">
+            <button class="btn btn-ghost btn-sm" aria-label="Export applicant list" onclick="TDRN.print.exportToCSV([],'warren-applicants.csv')"><span aria-hidden="true">📥</span> Export</button>
+            <button class="btn btn-sm btn-primary" aria-label="Add new applicant" onclick="TDRN.modal.open('modal-add-applicant')"><span aria-hidden="true">＋</span> Add Applicant</button>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" aria-label="Full applicant list with pipeline stage and reviewer">
+            <thead><tr>
+              <th scope="col" data-sortable>Name</th>
+              <th scope="col" data-sortable>Applied</th>
+              <th scope="col">Desired Role</th>
+              <th scope="col">Skills</th>
+              <th scope="col">Stage</th>
+              <th scope="col">Reviewer</th>
+              <th scope="col">Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr><td><strong>Brian Kowalski</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 30</span></td><td>Chainsaw Operator</td><td>Chainsaw, Forestry</td><td><span class="badge badge-training" aria-label="Stage: New Inquiry"><span class="badge-icon" aria-hidden="true"></span>New Inquiry</span></td><td>Unassigned</td><td><button class="btn btn-ghost btn-sm" aria-label="Review Brian Kowalski">Review</button></td></tr>
+              <tr><td><strong>Monica Shepherd</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 29</span></td><td>Volunteer / General</td><td>Logistics, Admin</td><td><span class="badge badge-training" aria-label="Stage: New Inquiry"><span class="badge-icon" aria-hidden="true"></span>New Inquiry</span></td><td>Unassigned</td><td><button class="btn btn-ghost btn-sm" aria-label="Review Monica Shepherd">Review</button></td></tr>
+              <tr><td><strong>Jerome Pittman</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 28</span></td><td>Medical Support</td><td>EMT, First Aid</td><td><span class="badge badge-training" aria-label="Stage: New Inquiry"><span class="badge-icon" aria-hidden="true"></span>New Inquiry</span></td><td>D. Okafor</td><td><button class="btn btn-ghost btn-sm" aria-label="Review Jerome Pittman">Review</button></td></tr>
+              <tr><td><strong>Anna Thornton</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 27</span></td><td>Communications</td><td>HAM Radio, IT</td><td><span class="badge badge-training" aria-label="Stage: New Inquiry"><span class="badge-icon" aria-hidden="true"></span>New Inquiry</span></td><td>N. Park</td><td><button class="btn btn-ghost btn-sm" aria-label="Review Anna Thornton">Review</button></td></tr>
+              <tr><td><strong>Dale Hutchins</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 25</span></td><td>Heavy Equipment Op.</td><td>Heavy Equip., CDL</td><td><span class="badge badge-training" aria-label="Stage: New Inquiry"><span class="badge-icon" aria-hidden="true"></span>New Inquiry</span></td><td>Unassigned</td><td><button class="btn btn-ghost btn-sm" aria-label="Review Dale Hutchins">Review</button></td></tr>
+              <tr><td><strong>Wendy Gallagher</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 22</span></td><td>Team Leader</td><td>ICS-200, Leadership</td><td><span class="badge badge-standby" aria-label="Stage: Application Received"><span class="badge-icon" aria-hidden="true"></span>App. Received</span></td><td>M. Reyes</td><td><button class="btn btn-ghost btn-sm" aria-label="Advance Wendy Gallagher">Advance</button></td></tr>
+              <tr><td><strong>Marcus Osei</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 21</span></td><td>Volunteer / General</td><td>Logistics, Comms</td><td><span class="badge badge-standby" aria-label="Stage: Application Received"><span class="badge-icon" aria-hidden="true"></span>App. Received</span></td><td>J. Whitfield</td><td><button class="btn btn-ghost btn-sm" aria-label="Advance Marcus Osei">Advance</button></td></tr>
+              <tr><td><strong>Laura Fitch</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 19</span></td><td>Medical Support</td><td>Nursing, First Aid</td><td><span class="badge badge-standby" aria-label="Stage: Application Received"><span class="badge-icon" aria-hidden="true"></span>App. Received</span></td><td>D. Okafor</td><td><button class="btn btn-ghost btn-sm" aria-label="Advance Laura Fitch">Advance</button></td></tr>
+              <tr><td><strong>Gerald Nash</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 18</span></td><td>Chainsaw Operator</td><td>Chainsaw, Forestry</td><td><span class="badge badge-standby" aria-label="Stage: Application Received"><span class="badge-icon" aria-hidden="true"></span>App. Received</span></td><td>E. Thompson</td><td><button class="btn btn-ghost btn-sm" aria-label="Advance Gerald Nash">Advance</button></td></tr>
+              <tr><td><strong>Kelly Drummond</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 12</span></td><td>Coordinator</td><td>Admin, CERT</td><td><span class="badge badge-standby" aria-label="Stage: Interview"><span class="badge-icon" aria-hidden="true"></span>Interview</span></td><td>A. Mohammed</td><td><button class="btn btn-sm" style="background:var(--green-light);color:var(--green);border:1px solid rgba(52,211,153,0.3);" aria-label="Approve Kelly Drummond" onclick="TDRN.modal.open('modal-approve-confirm'); document.getElementById('approve-name').textContent='Kelly Drummond';">Approve</button></td></tr>
+              <tr><td><strong>Vincent Russo</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 10</span></td><td>Heavy Equipment Op.</td><td>Heavy Equip., CDL-A</td><td><span class="badge badge-standby" aria-label="Stage: Interview"><span class="badge-icon" aria-hidden="true"></span>Interview</span></td><td>M. Reyes</td><td><button class="btn btn-sm" style="background:var(--green-light);color:var(--green);border:1px solid rgba(52,211,153,0.3);" aria-label="Approve Vincent Russo" onclick="TDRN.modal.open('modal-approve-confirm'); document.getElementById('approve-name').textContent='Vincent Russo';">Approve</button></td></tr>
+              <tr><td><strong>Heather Simmons</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 8</span></td><td>Volunteer / General</td><td>First Aid, CERT</td><td><span class="badge badge-standby" aria-label="Stage: Interview"><span class="badge-icon" aria-hidden="true"></span>Interview</span></td><td>P. Nair</td><td><button class="btn btn-sm" style="background:var(--green-light);color:var(--green);border:1px solid rgba(52,211,153,0.3);" aria-label="Approve Heather Simmons" onclick="TDRN.modal.open('modal-approve-confirm'); document.getElementById('approve-name').textContent='Heather Simmons';">Approve</button></td></tr>
+              <tr><td><strong>Omar Khalid</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 5</span></td><td>Communications</td><td>HAM Radio, Network</td><td><span class="badge badge-standby" aria-label="Stage: Interview"><span class="badge-icon" aria-hidden="true"></span>Interview</span></td><td>N. Park</td><td><button class="btn btn-sm" style="background:var(--green-light);color:var(--green);border:1px solid rgba(52,211,153,0.3);" aria-label="Approve Omar Khalid" onclick="TDRN.modal.open('modal-approve-confirm'); document.getElementById('approve-name').textContent='Omar Khalid';">Approve</button></td></tr>
+              <tr><td><strong>Patricia Leung</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 3</span></td><td>Coordinator</td><td>CERT, ICS-100</td><td><span class="badge badge-operational" aria-label="Stage: Approved — Onboarding"><span class="badge-icon" aria-hidden="true"></span>Onboarding</span></td><td>A. Mohammed</td><td><button class="btn btn-ghost btn-sm" aria-label="Convert Patricia Leung to member">Convert</button></td></tr>
+              <tr><td><strong>Sam Rivera</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 1</span></td><td>Chainsaw Operator</td><td>Chainsaw, First Aid</td><td><span class="badge badge-operational" aria-label="Stage: Approved — Onboarding"><span class="badge-icon" aria-hidden="true"></span>Onboarding</span></td><td>E. Thompson</td><td><button class="btn btn-ghost btn-sm" aria-label="Convert Sam Rivera to member">Convert</button></td></tr>
+              <tr><td><strong>Keisha Malone</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 29</span></td><td>Medical Support</td><td>EMT-B, First Aid</td><td><span class="badge badge-operational" aria-label="Stage: Approved — Onboarding"><span class="badge-icon" aria-hidden="true"></span>Onboarding</span></td><td>D. Okafor</td><td><button class="btn btn-ghost btn-sm" aria-label="Convert Keisha Malone to member">Convert</button></td></tr>
+              <tr><td><strong>Darnell Brooks</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 27</span></td><td>Volunteer / General</td><td>Logistics</td><td><span class="badge badge-operational" aria-label="Stage: Approved — Onboarding"><span class="badge-icon" aria-hidden="true"></span>Onboarding</span></td><td>J. Whitfield</td><td><button class="btn btn-ghost btn-sm" aria-label="Convert Darnell Brooks to member">Convert</button></td></tr>
+              <tr><td><strong>Tina Bergmann</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">Mar 22</span></td><td>Communications</td><td>HAM Radio, IT</td><td><span class="badge badge-operational" aria-label="Stage: Approved — Onboarding"><span class="badge-icon" aria-hidden="true"></span>Onboarding</span></td><td>N. Park</td><td><button class="btn btn-ghost btn-sm" aria-label="Convert Tina Bergmann to member">Convert</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel-footer">
+          <span style="font-size:13px;color:var(--text-muted);">Showing all 18 applicants</span>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ADD APPLICANT MODAL -->
+<div id="modal-add-applicant" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-app-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-app-title">Add Applicant</h2>
+      <button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-add-applicant')">✕</button>
+    </div>
+    <form id="form-add-applicant" class="modal-body" data-validate-form novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="app-name">Full Name <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="text" id="app-name" class="form-input" required placeholder="First Last">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="app-role">Desired Role <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <select id="app-role" class="form-select" required>
+            <option value="">Select role…</option>
+            <option>Team Leader</option><option>Chainsaw Operator</option><option>Heavy Equipment Operator</option>
+            <option>Medical Support</option><option>Communications</option><option>Logistics</option>
+            <option>Coordinator</option><option>Volunteer / General</option><option>Contractor</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="app-email">Email <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="email" id="app-email" class="form-input" required placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="app-phone">Phone <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label>
+          <input type="tel" id="app-phone" class="form-input" required placeholder="(615) 555-0100">
+        </div>
+      </div>
+      <fieldset style="border:none;padding:0;">
+        <legend class="form-label" style="margin-bottom:8px;">Skills &amp; Experience</legend>
+        <div class="checkbox-group" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="chainsaw" aria-label="Chainsaw operations"> Chainsaw Ops</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="heavy-equip" aria-label="Heavy equipment"> Heavy Equipment</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="medical" aria-label="Medical skills"> Medical / First Aid</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="logistics" aria-label="Logistics"> Logistics</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="comms" aria-label="Communications"> Communications</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="ham" aria-label="HAM radio"> HAM Radio</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="cert" aria-label="CERT certified"> CERT Certified</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-body);cursor:pointer;"><input type="checkbox" value="ics" aria-label="ICS trained"> ICS Trained</label>
+        </div>
+      </fieldset>
+      <div class="form-group" style="margin-top:12px;">
+        <label class="form-label" for="app-source">How Did You Hear About TDRN?</label>
+        <select id="app-source" class="form-select">
+          <option value="">Select…</option>
+          <option>Social Media</option><option>Friend / Family</option><option>County EMA</option>
+          <option>Local News</option><option>Church / Community Org.</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="app-notes">Notes</label>
+        <textarea id="app-notes" class="form-textarea" rows="2" placeholder="Any relevant background, referrals, or additional information…"></textarea>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-add-applicant')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" aria-label="Submit new applicant" onclick="TDRN.forms.validateForm(document.getElementById('form-add-applicant')) && TDRN.toast.success('Applicant added to pipeline') && TDRN.modal.close('modal-add-applicant')"><span aria-hidden="true">＋</span> Add Applicant</button>
+    </div>
+  </div>
+</div>
+
+<!-- APPROVE CONFIRMATION MODAL -->
+<div id="modal-approve-confirm" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-approve-title">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-approve-title">Confirm Approval</h2>
+      <button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-approve-confirm')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:15px;color:var(--text-body);line-height:1.6;">
+        Approve <strong id="approve-name">this applicant</strong> and move them to the
+        <span style="color:var(--green);font-weight:700;">Onboarding</span> stage?
+      </p>
+      <p style="font-size:13px;color:var(--text-muted);margin-top:8px;">
+        <span aria-hidden="true">ℹ</span> They will appear in the Approved / Onboarding column. Use <strong>Convert to Member</strong> once orientation is complete.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-approve-confirm')" aria-label="Cancel approval">Cancel</button>
+      <button class="btn btn-primary" style="background:var(--green);border-color:var(--green);color:#000;" aria-label="Confirm approve and move to onboarding"
+        onclick="TDRN.modal.close('modal-approve-confirm'); TDRN.toast.success('Applicant approved and moved to Onboarding');"><span aria-hidden="true">✓</span> Approve &amp; Move</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

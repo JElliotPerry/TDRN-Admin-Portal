@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Operations Map — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Map layout overrides */
+    .map-shell { display:flex; gap:0; height:calc(100vh - 64px - 48px); overflow:hidden; }
+    .map-container { flex:1; position:relative; }
+    #tdrn-map { width:100%; height:100%; min-height:600px; }
+    .map-side-panel { width:300px; min-width:300px; background:var(--bg-sidebar); border-left:1px solid var(--border-color); display:flex; flex-direction:column; overflow:hidden; }
+    /* Map Controls Bar */
+    .map-controls { background:var(--bg-panel); border-bottom:1px solid var(--border-color); padding:10px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex-shrink:0; }
+    .map-control-label { font-size:11px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; }
+    .layer-toggle { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:5px; font-size:12px; font-weight:500; border:1px solid var(--border-color); background:var(--bg-panel-hover); color:var(--text-muted); cursor:pointer; transition:var(--transition); font-family:var(--font-base); min-height:32px; }
+    .layer-toggle.active { border-color:rgba(245,196,0,0.35); background:var(--yellow-light); color:var(--yellow); }
+    .layer-toggle input[type="checkbox"] { min-height:unset; width:12px; height:12px; accent-color:var(--yellow); }
+    .map-sep { color:var(--border-hover); }
+    /* Side panel sections */
+    .side-panel-header { padding:14px 16px 10px; border-bottom:1px solid var(--border-color); flex-shrink:0; }
+    .side-panel-title { font-family:var(--font-heading); font-size:14px; color:var(--text-primary); font-weight:600; }
+    .field-units-list { flex:1; overflow-y:auto; padding:8px; }
+    .field-unit-card { background:var(--bg-panel); border:1px solid var(--border-color); border-radius:8px; padding:12px; margin-bottom:8px; cursor:pointer; transition:var(--transition); }
+    .field-unit-card:hover { border-color:var(--border-hover); background:var(--bg-panel-hover); }
+    .field-unit-card:focus { outline:2px solid var(--yellow); outline-offset:2px; }
+    .field-unit-name { font-size:13px; font-weight:600; color:var(--text-primary); }
+    .field-unit-leader { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .field-unit-coords { font-family:var(--font-mono); font-size:10px; color:var(--text-disabled); margin-top:4px; }
+    .field-unit-checkin { font-size:11px; color:var(--text-muted); }
+    /* Leaflet popup overrides */
+    .leaflet-popup-content-wrapper { background:#16181D; border:1px solid #252830; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.6); color:#D1D5DB; }
+    .leaflet-popup-tip { background:#16181D; }
+    .leaflet-popup-content { font-family:'Inter',sans-serif; font-size:13px; line-height:1.5; color:#D1D5DB; margin:10px 14px; }
+    .leaflet-popup-content h4 { font-family:'Oswald',sans-serif; font-size:14px; color:#F9FAFB; margin:0 0 6px; }
+    .popup-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; margin-bottom:6px; }
+    .popup-badge.green { background:rgba(52,211,153,0.15); color:#34D399; }
+    .popup-badge.yellow { background:rgba(245,196,0,0.15); color:#F5C400; }
+    .popup-badge.red { background:rgba(248,113,113,0.15); color:#F87171; }
+    .popup-badge.blue { background:rgba(96,165,250,0.15); color:#60A5FA; }
+    .popup-badge.orange { background:rgba(251,146,60,0.15); color:#FB923C; }
+    .popup-row { font-size:12px; margin:3px 0; }
+    .popup-row strong { color:#F9FAFB; }
+    /* Map legend */
+    .map-legend { background:rgba(22,24,29,0.95); border:1px solid #252830; border-radius:8px; padding:12px 14px; }
+    .legend-title { font-size:12px; font-weight:700; color:#F9FAFB; margin-bottom:8px; font-family:'Oswald',sans-serif; letter-spacing:0.05em; }
+    .legend-item { display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:11px; color:#9CA3AF; }
+    .legend-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+    .legend-line { width:16px; height:3px; border-radius:2px; flex-shrink:0; }
+    .legend-poly { width:14px; height:10px; border-radius:2px; flex-shrink:0; }
+    /* Incident log below map */
+    .incident-log-strip { background:var(--bg-panel); border-top:1px solid var(--border-color); max-height:220px; overflow-y:auto; flex-shrink:0; }
+    .incident-log-header { padding:10px 16px 6px; font-family:var(--font-heading); font-size:13px; font-weight:600; color:var(--text-primary); border-bottom:1px solid var(--border-color); position:sticky; top:0; background:var(--bg-panel); }
+    .log-entry { display:flex; align-items:flex-start; gap:10px; padding:8px 16px; border-bottom:1px solid rgba(37,40,48,0.5); font-size:12px; }
+    .log-entry-time { font-family:var(--font-mono); font-size:10px; color:var(--text-disabled); white-space:nowrap; margin-top:2px; }
+    .log-entry-badge { padding:2px 6px; border-radius:3px; font-size:10px; font-weight:700; white-space:nowrap; margin-top:1px; }
+    .log-badge-deploy { background:var(--blue-light); color:var(--blue); }
+    .log-badge-comms  { background:var(--purple-light); color:var(--purple); }
+    .log-badge-status { background:var(--green-light); color:var(--green); }
+    .log-badge-resource { background:var(--orange-light); color:var(--orange); }
+    .log-entry-msg { color:var(--text-body); flex:1; line-height:1.4; }
+    @media (max-width:768px) { .map-side-panel { display:none; } }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <div class="admin-shell">
+    <!-- SIDEBAR -->
+    <nav class="admin-sidebar" aria-label="TDRN Warren County navigation">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark" aria-hidden="true">T</div>
+        <div class="sidebar-logo-text">
+          <span class="sidebar-logo-name">TDRN</span>
+          <span class="sidebar-logo-sub">Warren County</span>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label" id="nav-label-main">County Portal</div>
+        <ul role="list" aria-labelledby="nav-label-main">
+          <li><a href="warren-county.html" class="nav-item" aria-label="Dashboard"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Dashboard</span></a></li>
+          <li><a href="wc-members.html" class="nav-item" aria-label="Members"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Members</span></a></li>
+          <li><a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Readiness</span></a></li>
+          <li><a href="wc-analytics.html" class="nav-item" aria-label="Analytics"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Analytics</span></a></li>
+          <li><a href="wc-ai-center.html" class="nav-item" aria-label="AI Center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>AI Center</span></a></li>
+          <li><a href="wc-map.html" class="nav-item active" aria-label="Live Map" aria-current="page"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg><span>Live Map</span></a></li>
+          <li><a href="wc-ics-forms.html" class="nav-item" aria-label="ICS Forms"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>ICS Forms</span></a></li>
+          <li><a href="wc-communications.html" class="nav-item" aria-label="Communications"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Communications</span></a></li>
+          <li><a href="wc-documents.html" class="nav-item" aria-label="Documents"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Documents</span></a></li>
+          <li><a href="wc-settings.html" class="nav-item" aria-label="Settings"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></a></li>
+        </ul>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="user-chip-avatar" aria-hidden="true">JA</div>
+          <div class="user-chip-info"><span class="user-chip-name">Jason</span><span class="user-chip-role">National Admin</span></div>
+        </div>
+        <button class="focus-mode-toggle" id="focus-toggle" aria-pressed="false" onclick="TDRN.toggleFocusMode()" aria-label="Toggle focus mode">
+          <svg class="focus-mode-toggle-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Focus Mode</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="admin-main" style="overflow:hidden;">
+      <!-- TOPBAR -->
+      <header class="admin-topbar" role="banner">
+        <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">National</a></li>
+            <li><a href="tennessee.html">Tennessee</a></li>
+            <li><a href="warren-county.html">Warren County</a></li>
+            <li><span class="current" aria-current="page">Live Map</span></li>
+          </ol>
+        </nav>
+        <div class="topbar-search">
+          <label for="topbar-search-input" class="sr-only">Search portal</label>
+          <svg class="topbar-search-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="topbar-search-input" placeholder="Search…" autocomplete="off">
+        </div>
+        <div class="topbar-actions">
+          <span id="tdrn-clock" aria-live="off"></span>
+          <div class="status-pill critical" role="status" aria-label="Incident active: Tornado Response Day 3">
+            <svg class="status-pill-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            Incident Active
+          </div>
+          <button class="topbar-btn secondary" onclick="map.setView([35.6834,-85.7697],11)" aria-label="Zoom to Warren County">
+            <svg class="topbar-btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            Zoom to County
+          </button>
+          <button class="topbar-btn primary" onclick="window.print()" aria-label="Print map">
+            <svg class="topbar-btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print Map
+          </button>
+          <button class="notification-btn" aria-label="Notifications — 3 unread">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notification-badge" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- SUBNAV -->
+      <nav class="admin-subnav" aria-label="Warren County sections">
+        <a href="warren-county.html" class="subnav-tab">Dashboard</a>
+        <a href="wc-members.html" class="subnav-tab">Members</a>
+        <a href="wc-teams.html" class="subnav-tab">Teams</a>
+        <a href="wc-training.html" class="subnav-tab">Training</a>
+        <a href="wc-equipment.html" class="subnav-tab">Equipment</a>
+        <a href="wc-events.html" class="subnav-tab">Events</a>
+        <a href="wc-communications.html" class="subnav-tab">Communications</a>
+        <a href="wc-documents.html" class="subnav-tab">Documents</a>
+        <a href="wc-certifications.html" class="subnav-tab">Certifications</a>
+        <a href="wc-applicants.html" class="subnav-tab">Applicants</a>
+        <a href="wc-partners.html" class="subnav-tab">Partners</a>
+        <a href="wc-readiness.html" class="subnav-tab">Readiness</a>
+        <a href="wc-settings.html" class="subnav-tab">Settings</a>
+        <a href="wc-analytics.html" class="subnav-tab">Analytics</a>
+        <a href="wc-ics-forms.html" class="subnav-tab">ICS Forms</a>
+        <a href="wc-map.html" class="subnav-tab active" aria-current="page">Live Map</a>
+        <a href="wc-ai-center.html" class="subnav-tab">AI Center</a>
+      </nav>
+
+      <!-- MAP CONTROLS BAR -->
+      <div class="map-controls" role="toolbar" aria-label="Map layer controls">
+        <span class="map-control-label">Layers:</span>
+        <label class="layer-toggle active">
+          <input type="checkbox" checked onchange="toggleLayer('teams',this)" aria-label="Toggle Teams layer"> Teams
+        </label>
+        <label class="layer-toggle active">
+          <input type="checkbox" checked onchange="toggleLayer('equipment',this)" aria-label="Toggle Equipment layer"> Equipment
+        </label>
+        <label class="layer-toggle active">
+          <input type="checkbox" checked onchange="toggleLayer('damage',this)" aria-label="Toggle Damage layer"> Damage Zones
+        </label>
+        <label class="layer-toggle active">
+          <input type="checkbox" checked onchange="toggleLayer('shelters',this)" aria-label="Toggle Shelters layer"> Shelters
+        </label>
+        <label class="layer-toggle active">
+          <input type="checkbox" checked onchange="toggleLayer('closures',this)" aria-label="Toggle Road Closures layer"> Road Closures
+        </label>
+        <span class="map-sep" aria-hidden="true">|</span>
+        <button class="layer-toggle" onclick="map.setView([35.6834,-85.7697],11)" aria-label="Reset map to Warren County">Reset View</button>
+        <button class="layer-toggle" onclick="toggleFullscreen()" aria-label="Toggle fullscreen map">Fullscreen</button>
+      </div>
+
+      <!-- MAP + SIDE PANEL -->
+      <main id="main-content">
+        <div class="map-shell">
+          <!-- MAP -->
+          <div class="map-container">
+            <div id="tdrn-map" role="application" aria-label="Warren County live operations map — 8 field units active"></div>
+          </div>
+
+          <!-- SIDE PANEL: Field Units -->
+          <aside class="map-side-panel" aria-label="Active field units">
+            <div class="side-panel-header">
+              <div class="side-panel-title">Active Field Units</div>
+              <div style="font-size:11px;color:var(--green);margin-top:3px;display:flex;align-items:center;gap:5px;">
+                <span style="width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block" aria-hidden="true"></span>
+                8 units deployed
+              </div>
+            </div>
+            <div class="field-units-list" role="list" aria-label="Field unit positions">
+
+              <div class="field-unit-card" role="listitem" tabindex="0" onclick="panToUnit(35.6890,-85.7580)" onkeydown="if(event.key==='Enter')panToUnit(35.6890,-85.7580)" aria-label="Team Alpha — deployed, Sector A">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="field-unit-name">Team Alpha</div>
+                  <span class="badge-operational"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Deployed</span>
+                </div>
+                <div class="field-unit-leader">Leader: Sgt. Kevin Walsh &nbsp;·&nbsp; 14 members</div>
+                <div class="field-unit-coords">N 35.6890, W 85.7580 — Sector A (Hwy 70S East)</div>
+                <div class="field-unit-checkin" style="margin-top:4px">Last check-in: <strong style="color:var(--green)">4 min ago</strong></div>
+              </div>
+
+              <div class="field-unit-card" role="listitem" tabindex="0" onclick="panToUnit(35.6720,-85.7820)" onkeydown="if(event.key==='Enter')panToUnit(35.6720,-85.7820)" aria-label="Team Bravo — deployed, Sector B">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="field-unit-name">Team Bravo</div>
+                  <span class="badge-operational"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Deployed</span>
+                </div>
+                <div class="field-unit-leader">Leader: Lt. Mara Jennings &nbsp;·&nbsp; 12 members</div>
+                <div class="field-unit-coords">N 35.6720, W 85.7820 — Oak Ridge Subdivision</div>
+                <div class="field-unit-checkin" style="margin-top:4px">Last check-in: <strong style="color:var(--green)">11 min ago</strong></div>
+              </div>
+
+              <div class="field-unit-card" role="listitem" tabindex="0" onclick="panToUnit(35.7010,-85.7340)" onkeydown="if(event.key==='Enter')panToUnit(35.7010,-85.7340)" aria-label="Team Charlie — deployed, Barren Fork Road">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="field-unit-name">Team Charlie</div>
+                  <span class="badge-operational"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Deployed</span>
+                </div>
+                <div class="field-unit-leader">Leader: Cpl. Andre Harrison &nbsp;·&nbsp; 8 members</div>
+                <div class="field-unit-coords">N 35.7010, W 85.7340 — Barren Fork Road</div>
+                <div class="field-unit-checkin" style="margin-top:4px">Last check-in: <strong style="color:var(--yellow)">28 min ago</strong></div>
+              </div>
+
+              <div class="field-unit-card" role="listitem" tabindex="0" onclick="panToUnit(35.6834,-85.7697)" onkeydown="if(event.key==='Enter')panToUnit(35.6834,-85.7697)" aria-label="Team Delta — standby at Staging Area A">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="field-unit-name">Team Delta</div>
+                  <span class="badge-standby"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Standby</span>
+                </div>
+                <div class="field-unit-leader">Leader: Pvt. Tanya Ortiz &nbsp;·&nbsp; 10 members</div>
+                <div class="field-unit-coords">N 35.6834, W 85.7697 — Staging Area A</div>
+                <div class="field-unit-checkin" style="margin-top:4px">Last check-in: <strong style="color:var(--green)">2 min ago</strong></div>
+              </div>
+
+              <div class="field-unit-card" role="listitem" tabindex="0" onclick="panToUnit(35.6950,-85.7500)" onkeydown="if(event.key==='Enter')panToUnit(35.6950,-85.7500)" aria-label="Team Echo — deployed, Viola Road">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="field-unit-name">Team Echo</div>
+                  <span class="badge-operational"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Deployed</span>
+                </div>
+                <div class="field-unit-leader">Leader: Sgt. Lisa Park &nbsp;·&nbsp; 9 members</div>
+                <div class="field-unit-coords">N 35.6950, W 85.7500 — Viola Road Sector</div>
+                <div class="field-unit-checkin" style="margin-top:4px">Last check-in: <strong style="color:var(--green)">7 min ago</strong></div>
+              </div>
+
+              <div class="field-unit-card" role="listitem" tabindex="0" onclick="panToUnit(35.6780,-85.7900)" onkeydown="if(event.key==='Enter')panToUnit(35.6780,-85.7900)" aria-label="EOC — Emergency Operations Center">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="field-unit-name">EOC</div>
+                  <span class="badge-operational"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Active</span>
+                </div>
+                <div class="field-unit-leader">IC: Capt. Robert Morgan &nbsp;·&nbsp; 18 staff</div>
+                <div class="field-unit-coords">N 35.6780, W 85.7900 — McMinnville City Hall</div>
+                <div class="field-unit-checkin" style="margin-top:4px">Status: <strong style="color:var(--green)">Fully Operational</strong></div>
+              </div>
+
+              <div class="field-unit-card" role="listitem" tabindex="0" onclick="panToUnit(35.6800,-85.7750)" onkeydown="if(event.key==='Enter')panToUnit(35.6800,-85.7750)" aria-label="Shelter — McMinnville Civic Center">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="field-unit-name">Civic Center Shelter</div>
+                  <span class="badge-training"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Open</span>
+                </div>
+                <div class="field-unit-leader">Capacity: 23 / 50 residents</div>
+                <div class="field-unit-coords">N 35.6800, W 85.7750 — ARC transitioning Day 4</div>
+                <div class="field-unit-checkin" style="margin-top:4px">Status: <strong style="color:var(--blue)">87% capacity</strong></div>
+              </div>
+
+              <div class="field-unit-card" role="listitem" tabindex="0" onclick="panToUnit(35.6820,-85.7600)" onkeydown="if(event.key==='Enter')panToUnit(35.6820,-85.7600)" aria-label="River Park Hospital">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="field-unit-name">River Park Hospital</div>
+                  <span class="badge-operational"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Receiving</span>
+                </div>
+                <div class="field-unit-leader">Liaison: Dr. Nina Castillo</div>
+                <div class="field-unit-coords">N 35.6820, W 85.7600 — 1Ped Hospital Drive</div>
+                <div class="field-unit-checkin" style="margin-top:4px">Casualties treated: <strong style="color:var(--text-primary)">2 minor</strong></div>
+              </div>
+
+            </div><!-- /.field-units-list -->
+
+            <!-- Incident Log in side panel -->
+            <div class="incident-log-strip">
+              <div class="incident-log-header">Recent Log Entries</div>
+
+              <div class="log-entry">
+                <div class="log-entry-time">06:14</div>
+                <span class="log-entry-badge log-badge-status">STATUS</span>
+                <div class="log-entry-msg">Alpha reports 65% clearance on Sector A debris field</div>
+              </div>
+              <div class="log-entry">
+                <div class="log-entry-time">05:47</div>
+                <span class="log-entry-badge log-badge-comms">COMMS</span>
+                <div class="log-entry-msg">Radio check confirmed — all 8 units reporting</div>
+              </div>
+              <div class="log-entry">
+                <div class="log-entry-time">05:30</div>
+                <span class="log-entry-badge log-badge-resource">RESOURCE</span>
+                <div class="log-entry-msg">Fuel resupply completed at Staging Area A</div>
+              </div>
+              <div class="log-entry">
+                <div class="log-entry-time">04:55</div>
+                <span class="log-entry-badge log-badge-deploy">DEPLOY</span>
+                <div class="log-entry-msg">Team Charlie repositioned to Barren Fork Road access</div>
+              </div>
+              <div class="log-entry">
+                <div class="log-entry-time">03:22</div>
+                <span class="log-entry-badge log-badge-status">STATUS</span>
+                <div class="log-entry-msg">Shelter count updated: 23 residents, down from 27</div>
+              </div>
+            </div>
+          </aside>
+        </div><!-- /.map-shell -->
+      </main>
+    </div><!-- /.admin-main -->
+  </div><!-- /.admin-shell -->
+
+  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLbZo=" crossorigin=""></script>
+  <script src="tdrn-core.js"></script>
+  <script>
+    TDRN.init();
+
+    // ── Layer groups ──────────────────────────────────────────────────────────
+    const layers = {};
+
+    // ── Custom div icon factory ───────────────────────────────────────────────
+    function makeIcon(color, label, shape = 'circle') {
+      return L.divIcon({
+        className: '',
+        html: `<div style="width:${shape==='star'?22:16}px;height:${shape==='star'?22:16}px;background:${color};border:2px solid rgba(255,255,255,0.8);border-radius:${shape==='circle'?'50%':shape==='square'?'3px':'50% 50% 50% 0'};box-shadow:0 2px 6px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;"><span style="font-size:8px;font-weight:700;color:#000;">${label}</span></div>`,
+        iconSize: [shape==='star'?22:16, shape==='star'?22:16],
+        iconAnchor: [shape==='star'?11:8, shape==='star'?11:8],
+        popupAnchor: [0, -10]
+      });
+    }
+
+    // ── Initialize Leaflet map ────────────────────────────────────────────────
+    const map = L.map('tdrn-map', {
+      center: [35.6834, -85.7697],
+      zoom: 11,
+      zoomControl: true,
+      attributionControl: true
+    });
+
+    // OpenStreetMap tiles with dark filter via CSS
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Dark map via CSS inversion on the tile pane
+    const mapPane = document.querySelector('.leaflet-tile-pane');
+    if (mapPane) {
+      mapPane.style.filter = 'invert(100%) hue-rotate(180deg) brightness(0.85) contrast(0.95)';
+    }
+
+    // ── EOC Marker (yellow star) ──────────────────────────────────────────────
+    layers.eoc = L.layerGroup();
+    L.marker([35.6780, -85.7900], { icon: makeIcon('#F5C400','EOC','star'), alt: 'Emergency Operations Center' })
+      .bindPopup(`<h4>Emergency Operations Center</h4><span class="popup-badge yellow">Active Command</span><div class="popup-row"><strong>IC:</strong> Capt. Robert Morgan</div><div class="popup-row"><strong>Staff:</strong> 18 personnel</div><div class="popup-row"><strong>Location:</strong> McMinnville City Hall</div><div class="popup-row"><strong>Updated:</strong> 2 min ago</div>`)
+      .addTo(layers.eoc);
+    layers.eoc.addTo(map);
+
+    // ── Team Markers (green) ──────────────────────────────────────────────────
+    layers.teams = L.layerGroup();
+    const teamData = [
+      { ll:[35.6890,-85.7580], label:'α', name:'Team Alpha', leader:'Sgt. Kevin Walsh', count:14, sector:'Sector A — Hwy 70S East', status:'Deployed', checkin:'4 min ago' },
+      { ll:[35.6720,-85.7820], label:'β', name:'Team Bravo', leader:'Lt. Mara Jennings', count:12, sector:'Oak Ridge Subdivision', status:'Deployed', checkin:'11 min ago' },
+      { ll:[35.7010,-85.7340], label:'γ', name:'Team Charlie', leader:'Cpl. Andre Harrison', count:8, sector:'Barren Fork Road', status:'Deployed', checkin:'28 min ago' },
+      { ll:[35.6834,-85.7697], label:'δ', name:'Team Delta', leader:'Pvt. Tanya Ortiz', count:10, sector:'Staging Area A', status:'Standby', checkin:'2 min ago' },
+      { ll:[35.6950,-85.7500], label:'ε', name:'Team Echo', leader:'Sgt. Lisa Park', count:9, sector:'Viola Road Sector', status:'Deployed', checkin:'7 min ago' },
+    ];
+    teamData.forEach(t => {
+      const color = t.status === 'Standby' ? '#F5C400' : '#34D399';
+      L.marker(t.ll, { icon: makeIcon(color, t.label), alt: t.name + ' position' })
+        .bindPopup(`<h4>${t.name}</h4><span class="popup-badge ${t.status==='Standby'?'yellow':'green'}">${t.status}</span><div class="popup-row"><strong>Leader:</strong> ${t.leader}</div><div class="popup-row"><strong>Members:</strong> ${t.count}</div><div class="popup-row"><strong>Sector:</strong> ${t.sector}</div><div class="popup-row"><strong>Last Check-in:</strong> ${t.checkin}</div>`)
+        .addTo(layers.teams);
+    });
+    layers.teams.addTo(map);
+
+    // ── Equipment Staging (orange) ────────────────────────────────────────────
+    layers.equipment = L.layerGroup();
+    L.marker([35.6700, -85.7760], { icon: makeIcon('#FB923C','EQ','square'), alt: 'Equipment staging area' })
+      .bindPopup(`<h4>Equipment Staging — Home Depot Lot</h4><span class="popup-badge orange">Active Staging</span><div class="popup-row"><strong>Units:</strong> 8 equipment items</div><div class="popup-row"><strong>Fuel:</strong> Available</div><div class="popup-row"><strong>Coords:</strong> N 35.6700, W 85.7760</div><div class="popup-row"><strong>Updated:</strong> 12 min ago</div>`)
+      .addTo(layers.equipment);
+    layers.equipment.addTo(map);
+
+    // ── Damage Zone (red polygon) ─────────────────────────────────────────────
+    layers.damage = L.layerGroup();
+    L.polygon([
+      [35.6860, -85.7650],
+      [35.7020, -85.7320],
+      [35.7050, -85.7200],
+      [35.6980, -85.7150],
+      [35.6820, -85.7400],
+      [35.6780, -85.7550]
+    ], {
+      color: '#F87171',
+      fillColor: '#F87171',
+      fillOpacity: 0.15,
+      weight: 2,
+      dashArray: '6 4'
+    }).bindPopup(`<h4>Debris Field Zone A</h4><span class="popup-badge red">Active Zone</span><div class="popup-row">EF-2 tornado debris field — primary response area</div><div class="popup-row"><strong>Teams Active:</strong> Alpha, Charlie, Echo</div><div class="popup-row"><strong>Clearance:</strong> ~65% complete</div>`)
+      .addTo(layers.damage);
+    layers.damage.addTo(map);
+
+    // ── Shelters (blue) ───────────────────────────────────────────────────────
+    layers.shelters = L.layerGroup();
+    L.marker([35.6800, -85.7750], { icon: makeIcon('#60A5FA','SH','square'), alt: 'Shelter location' })
+      .bindPopup(`<h4>Shelter — McMinnville Civic Center</h4><span class="popup-badge blue">Open</span><div class="popup-row"><strong>Capacity:</strong> 23 / 50 residents</div><div class="popup-row"><strong>Status:</strong> ARC handover Day 4</div><div class="popup-row"><strong>Coords:</strong> N 35.6800, W 85.7750</div>`)
+      .addTo(layers.shelters);
+    layers.shelters.addTo(map);
+
+    // ── Hospital (blue cross) ─────────────────────────────────────────────────
+    L.marker([35.6820, -85.7600], { icon: makeIcon('#60A5FA','H+','square'), alt: 'Hospital location' })
+      .bindPopup(`<h4>River Park Hospital</h4><span class="popup-badge blue">Receiving</span><div class="popup-row"><strong>Liaison:</strong> Dr. Nina Castillo</div><div class="popup-row"><strong>Treated:</strong> 2 minor injuries</div><div class="popup-row"><strong>ER Status:</strong> Normal operations</div>`)
+      .addTo(map);
+
+    // ── Road Closure (red polyline) ───────────────────────────────────────────
+    layers.closures = L.layerGroup();
+    L.polyline([
+      [35.6700, -85.7480],
+      [35.6800, -85.7350],
+      [35.6920, -85.7220]
+    ], {
+      color: '#F87171',
+      weight: 5,
+      opacity: 0.8,
+      dashArray: '10 6'
+    }).bindPopup(`<h4>Road Closure — Hwy 70S</h4><span class="popup-badge red">CLOSED</span><div class="popup-row">Debris obstruction — heavy equipment needed</div><div class="popup-row"><strong>Team Alpha</strong> clearing — ETA 16:00</div>`)
+      .addTo(layers.closures);
+    layers.closures.addTo(map);
+
+    // ── Map Legend (bottom-right control) ────────────────────────────────────
+    const legend = L.control({ position: 'bottomright' });
+    legend.onAdd = function() {
+      const div = L.DomUtil.create('div', 'map-legend');
+      div.setAttribute('aria-label', 'Map legend');
+      div.innerHTML = `
+        <div class="legend-title">MAP LEGEND</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#F5C400" aria-hidden="true"></span>EOC / Command</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#34D399" aria-hidden="true"></span>Team — Deployed</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#F5C400;border:1px solid #363A45" aria-hidden="true"></span>Team — Standby</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#FB923C" aria-hidden="true"></span>Equipment Staging</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#60A5FA" aria-hidden="true"></span>Shelter / Hospital</div>
+        <div class="legend-item"><span class="legend-poly" style="background:rgba(248,113,113,0.3);border:1px dashed #F87171" aria-hidden="true"></span>Damage Zone</div>
+        <div class="legend-item"><span class="legend-line" style="background:#F87171" aria-hidden="true"></span>Road Closure</div>
+      `;
+      return div;
+    };
+    legend.addTo(map);
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+    function panToUnit(lat, lng) {
+      map.flyTo([lat, lng], 13, { duration: 1.2 });
+      TDRN.announceToScreenReader('Map panned to coordinates ' + lat + ', ' + lng);
+    }
+
+    function toggleLayer(name, checkbox) {
+      const label = checkbox.closest('.layer-toggle');
+      if (checkbox.checked) {
+        if (layers[name]) layers[name].addTo(map);
+        label.classList.add('active');
+      } else {
+        if (layers[name]) map.removeLayer(layers[name]);
+        label.classList.remove('active');
+      }
+      TDRN.announceToScreenReader(name + ' layer ' + (checkbox.checked ? 'shown' : 'hidden'));
+    }
+
+    function toggleFullscreen() {
+      const mapEl = document.getElementById('tdrn-map');
+      if (!document.fullscreenElement) {
+        mapEl.requestFullscreen().catch(e => TDRN.toast.info('Fullscreen not available: ' + e.message));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Refresh map size after sidebar renders
+    setTimeout(() => map.invalidateSize(), 300);
+  </script>
+</body>
+</html>

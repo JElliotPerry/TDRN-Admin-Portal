@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County — Incident Readiness Board">
+  <meta name="theme-color" content="#0F1011">
+  <title>Readiness — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Status Banner */
+    .readiness-banner { border-radius:var(--radius-lg);padding:28px 32px;margin-bottom:24px;border:2px solid; }
+    .readiness-banner.incident { background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.5); }
+    .readiness-banner.ready { background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.5); }
+    .readiness-banner-title { font-family:var(--font-heading);font-size:28px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase; }
+    .readiness-banner.incident .readiness-banner-title { color:var(--red); }
+    .readiness-banner.ready .readiness-banner-title { color:var(--green); }
+    .readiness-banner-sub { font-size:14px;color:var(--text-muted);margin-top:6px;line-height:1.6; }
+    /* Gauge circles — CSS only */
+    .gauge-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:20px; }
+    .gauge-item { display:flex;flex-direction:column;align-items:center;gap:8px; }
+    .gauge-circle { width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:18px;font-weight:900;border:4px solid;position:relative; }
+    .gauge-circle.green { border-color:var(--green);color:var(--green);background:rgba(52,211,153,0.1); }
+    .gauge-circle.yellow { border-color:var(--yellow);color:var(--yellow);background:rgba(245,196,0,0.1); }
+    .gauge-circle.red { border-color:var(--red);color:var(--red);background:rgba(248,113,113,0.1); }
+    .gauge-label { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);text-align:center; }
+    /* ICS Org Chart */
+    .ics-chart { display:flex;flex-direction:column;align-items:center;gap:0; }
+    .ics-row { display:flex;justify-content:center;gap:12px;position:relative; }
+    .ics-row + .ics-row { margin-top:0; }
+    .ics-node { background:var(--bg-body);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:10px 14px;min-width:140px;text-align:center;position:relative; }
+    .ics-node.commander { background:var(--yellow-light);border-color:rgba(245,196,0,0.5); }
+    .ics-node-title { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-disabled);margin-bottom:3px; }
+    .ics-node-name { font-size:13px;font-weight:700;color:var(--text-primary); }
+    .ics-connector { width:2px;height:20px;background:var(--border-hover);margin:0 auto; }
+    .ics-connector-h { display:flex;align-items:flex-start;gap:0;justify-content:center; }
+    .ics-branch { display:flex;flex-direction:column;align-items:center; }
+    .ics-branch-line { width:2px;height:20px;background:var(--border-hover); }
+    .ics-h-line { height:2px;background:var(--border-hover);align-self:flex-start;margin-top:0; }
+    /* Log items */
+    .log-item { display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-color);align-items:flex-start; }
+    .log-item:last-child { border-bottom:none; }
+    .log-time { font-family:var(--font-mono);font-size:11px;color:var(--text-disabled);white-space:nowrap;min-width:60px;padding-top:2px; }
+    .log-content { flex:1; }
+    .log-message { font-size:13px;color:var(--text-body);line-height:1.5; }
+    .log-by { font-size:11px;color:var(--text-disabled);margin-top:2px; }
+    /* Modal */
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .modal-backdrop[hidden] { display:none; }
+    .modal { background:var(--bg-panel);border:1px solid var(--border-hover);border-radius:var(--radius-lg);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg); }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-panel);z-index:1; }
+    .modal-title { font-family:var(--font-heading);font-size:18px;font-weight:700;color:var(--text-primary); }
+    .modal-body { padding:24px; }
+    .modal-footer { display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border-color); }
+    @media (max-width:900px) { .gauge-grid { grid-template-columns:repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+<div class="admin-shell">
+  <nav class="admin-sidebar" aria-label="Main navigation">
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — National dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text"><span class="logo-name">TDRN</span><span class="logo-tagline">Disaster Response Network</span></div>
+    </a>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-nat"><span class="sidebar-section-label" id="nav-nat">National</span>
+      <a href="index.html" class="nav-item" aria-label="National Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="#" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="#" class="nav-item" aria-label="Alerts"><span class="nav-item-icon" aria-hidden="true">🔔</span><span>Alerts</span><span class="nav-item-badge">3</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-tn"><span class="sidebar-section-label" id="nav-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee Dashboard"><span class="nav-item-icon" aria-hidden="true">🗺</span><span>TN Dashboard</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-wc"><span class="sidebar-section-label" id="nav-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item" aria-label="Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="wc-members.html" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="wc-teams.html" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="wc-training.html" class="nav-item" aria-label="Training"><span class="nav-item-icon" aria-hidden="true">🎓</span><span>Training</span></a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="wc-events.html" class="nav-item" aria-label="Events"><span class="nav-item-icon" aria-hidden="true">📅</span><span>Events</span></a>
+      <a href="wc-communications.html" class="nav-item" aria-label="Communications"><span class="nav-item-icon" aria-hidden="true">📡</span><span>Communications</span></a>
+      <a href="wc-documents.html" class="nav-item" aria-label="Documents"><span class="nav-item-icon" aria-hidden="true">📄</span><span>Documents</span></a>
+      <a href="wc-certifications.html" class="nav-item" aria-label="Certifications"><span class="nav-item-icon" aria-hidden="true">🏅</span><span>Certifications</span></a>
+      <a href="wc-applicants.html" class="nav-item" aria-label="Applicants"><span class="nav-item-icon" aria-hidden="true">📋</span><span>Applicants</span><span class="nav-item-badge">18</span></a>
+      <a href="wc-partners.html" class="nav-item" aria-label="Partners"><span class="nav-item-icon" aria-hidden="true">🤝</span><span>Partners</span></a>
+      <a href="wc-readiness.html" class="nav-item active" aria-current="page" aria-label="Readiness — currently viewing"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Readiness</span></a>
+      <a href="wc-settings.html" class="nav-item" aria-label="Settings"><span class="nav-item-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin"><div class="user-avatar" aria-hidden="true">JA</div><div class="user-info"><div class="user-name">Jason</div><div class="user-role">County Admin — WC</div></div></a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode"><span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span><span class="focus-mode-label">Focus Mode</span></button>
+    </div>
+  </nav>
+  <div class="admin-main">
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb"><ol>
+        <li><a href="index.html">National</a></li><li><a href="tennessee.html">Tennessee</a></li>
+        <li><a href="warren-county.html">Warren County</a></li><li><span class="current" aria-current="page">Readiness</span></li>
+      </ol></nav>
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-rdns">Search readiness</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-rdns" placeholder="Search…" autocomplete="off">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill critical" role="status" aria-label="Incident Active"><span class="status-pill-icon" aria-hidden="true">🚨</span> Incident Active</span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread"><span aria-hidden="true">🔔</span><span class="notification-badge" aria-hidden="true"></span></button>
+        <button class="topbar-btn secondary" aria-label="Generate ICS Report" onclick="TDRN.modal.open('modal-ics-report')"><span aria-hidden="true">📄</span> ICS Report</button>
+        <button class="topbar-btn primary" style="background:var(--green);border-color:var(--green);color:#000;" aria-label="Stand down — return to normal" onclick="TDRN.modal.open('modal-stand-down')"><span aria-hidden="true">✓</span> Stand Down</button>
+      </div>
+    </header>
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html" class="subnav-tab">Dashboard</a>
+      <a href="wc-members.html" class="subnav-tab">Members</a>
+      <a href="wc-teams.html" class="subnav-tab">Teams</a>
+      <a href="wc-training.html" class="subnav-tab">Training</a>
+      <a href="wc-equipment.html" class="subnav-tab">Equipment</a>
+      <a href="wc-events.html" class="subnav-tab">Events</a>
+      <a href="wc-communications.html" class="subnav-tab">Communications</a>
+      <a href="wc-documents.html" class="subnav-tab">Documents</a>
+      <a href="wc-certifications.html" class="subnav-tab">Certifications</a>
+      <a href="wc-applicants.html" class="subnav-tab">Applicants</a>
+      <a href="wc-partners.html" class="subnav-tab">Partners</a>
+      <a href="wc-readiness.html" class="subnav-tab active" aria-current="page">Readiness</a>
+      <a href="wc-settings.html" class="subnav-tab">Settings</a>
+    </nav>
+    <main id="main-content" class="admin-content" aria-label="Incident Readiness Board">
+      <!-- READINESS STATUS BANNER -->
+      <div class="readiness-banner incident" role="status" aria-label="Incident Active: Tornado Response, Day 3">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div>
+            <div class="readiness-banner-title"><span aria-hidden="true">🚨</span> Incident Active — Tornado Response</div>
+            <div class="readiness-banner-sub">Day 3 of response &nbsp;·&nbsp; ICS Type 3 structure active &nbsp;·&nbsp; All hands deployed &nbsp;·&nbsp; Declared: April 29, 2026 19:42 CDT</div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-ghost" aria-label="Generate ICS Report" onclick="TDRN.modal.open('modal-ics-report')"><span aria-hidden="true">📄</span> ICS Report</button>
+            <button style="background:var(--green);border:1px solid var(--green);color:#000;padding:0 20px;border-radius:var(--radius-md);font-weight:700;font-size:13px;cursor:pointer;min-height:44px;" aria-label="Stand down — return to normal operations" onclick="TDRN.modal.open('modal-stand-down')"><span aria-hidden="true">✓</span> Stand Down</button>
+          </div>
+        </div>
+        <div class="gauge-grid" role="group" aria-label="Readiness metric gauges">
+          <div class="gauge-item">
+            <div class="gauge-circle green" role="meter" aria-valuenow="94" aria-valuemin="0" aria-valuemax="100" aria-label="Personnel readiness: 94%">94%</div>
+            <div class="gauge-label">Personnel</div>
+          </div>
+          <div class="gauge-item">
+            <div class="gauge-circle yellow" role="meter" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" aria-label="Equipment readiness: 88%">88%</div>
+            <div class="gauge-label">Equipment</div>
+          </div>
+          <div class="gauge-item">
+            <div class="gauge-circle green" role="meter" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="Communications readiness: 100%">100%</div>
+            <div class="gauge-label">Communications</div>
+          </div>
+          <div class="gauge-item">
+            <div class="gauge-circle yellow" role="meter" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100" aria-label="Logistics readiness: 82%">82%</div>
+            <div class="gauge-label">Logistics</div>
+          </div>
+        </div>
+      </div>
+      <!-- ICS STRUCTURE -->
+      <section class="panel" aria-labelledby="ics-structure-h" style="margin-bottom:24px;">
+        <div class="panel-header"><h2 class="panel-title" id="ics-structure-h"><span aria-hidden="true">🏛</span> ICS Structure — Type 3 Incident Command</h2></div>
+        <div class="panel-body">
+          <div class="ics-chart" role="img" aria-label="ICS organizational chart: Marcus Reyes is Incident Commander. Below are four sections: Operations (E. Thompson), Planning (D. Chen), Logistics (J. Whitfield), Finance/Admin (R. Martinez).">
+            <!-- IC -->
+            <div class="ics-node commander" style="min-width:200px;">
+              <div class="ics-node-title">Incident Commander</div>
+              <div class="ics-node-name">Marcus Reyes</div>
+              <span class="badge badge-operational" style="font-size:10px;margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Active</span>
+            </div>
+            <div class="ics-connector" aria-hidden="true"></div>
+            <!-- Section row -->
+            <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">
+              <div class="ics-branch">
+                <div class="ics-branch-line" aria-hidden="true"></div>
+                <div class="ics-node">
+                  <div class="ics-node-title">Operations Section</div>
+                  <div class="ics-node-name">E. Thompson</div>
+                  <span class="badge badge-operational" style="font-size:10px;margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Active</span>
+                </div>
+              </div>
+              <div class="ics-branch">
+                <div class="ics-branch-line" aria-hidden="true"></div>
+                <div class="ics-node">
+                  <div class="ics-node-title">Planning Section</div>
+                  <div class="ics-node-name">D. Chen</div>
+                  <span class="badge badge-operational" style="font-size:10px;margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Active</span>
+                </div>
+              </div>
+              <div class="ics-branch">
+                <div class="ics-branch-line" aria-hidden="true"></div>
+                <div class="ics-node">
+                  <div class="ics-node-title">Logistics Section</div>
+                  <div class="ics-node-name">J. Whitfield</div>
+                  <span class="badge badge-operational" style="font-size:10px;margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Active</span>
+                </div>
+              </div>
+              <div class="ics-branch">
+                <div class="ics-branch-line" aria-hidden="true"></div>
+                <div class="ics-node">
+                  <div class="ics-node-title">Finance / Admin</div>
+                  <div class="ics-node-name">R. Martinez</div>
+                  <span class="badge badge-operational" style="font-size:10px;margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Active</span>
+                </div>
+              </div>
+              <div class="ics-branch">
+                <div class="ics-branch-line" aria-hidden="true"></div>
+                <div class="ics-node">
+                  <div class="ics-node-title">Safety Officer</div>
+                  <div class="ics-node-name">N. Park</div>
+                  <span class="badge badge-operational" style="font-size:10px;margin-top:4px;"><span class="badge-icon" aria-hidden="true"></span>Active</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- GRID 2: DEPLOYED RESOURCES + EQUIPMENT -->
+      <div class="grid-2" style="margin-bottom:24px;">
+        <section class="panel" aria-labelledby="deployed-h">
+          <div class="panel-header"><h2 class="panel-title" id="deployed-h"><span aria-hidden="true">🛡</span> Deployed Teams</h2></div>
+          <div class="table-wrapper">
+            <table class="data-table" aria-label="Deployed teams">
+              <thead><tr><th scope="col">Team</th><th scope="col">Leader</th><th scope="col">Members</th><th scope="col">Sector</th><th scope="col">Status</th><th scope="col">Last Check-In</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Alpha</strong></td><td>E. Thompson</td><td>18</td><td>Hwy 70S Grid C4</td><td><span class="badge badge-operational" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td><td><span style="font-family:var(--font-mono);font-size:11px;">01:30</span></td></tr>
+                <tr><td><strong>Bravo</strong></td><td>D. Okafor</td><td>12</td><td>Staging Area B</td><td><span class="badge badge-operational" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td><td><span style="font-family:var(--font-mono);font-size:11px;">00:45</span></td></tr>
+                <tr><td><strong>Charlie</strong></td><td>P. Nair</td><td>10</td><td>McMinnville HS Shelter</td><td><span class="badge badge-operational" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td><td><span style="font-family:var(--font-mono);font-size:11px;">22:30</span></td></tr>
+                <tr><td><strong>Delta</strong></td><td>A. Mohammed</td><td>9</td><td>EOC Comms Room</td><td><span class="badge badge-operational" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td><td><span style="font-family:var(--font-mono);font-size:11px;">21:05</span></td></tr>
+                <tr><td><strong>Echo</strong></td><td>L. Williams</td><td>14</td><td>Oakdale Community</td><td><span class="badge badge-operational" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td><td><span style="font-family:var(--font-mono);font-size:11px;">20:15</span></td></tr>
+                <tr><td><strong>Foxtrot</strong></td><td>D. Chen</td><td>11</td><td>Grid B3 Assessment</td><td><span class="badge badge-standby" aria-label="Status: Standby — rotating"><span class="badge-icon" aria-hidden="true"></span>Standby</span></td><td><span style="font-family:var(--font-mono);font-size:11px;">19:00</span></td></tr>
+                <tr><td><strong>Sierra</strong></td><td>K. Patel</td><td>15</td><td>Debris Grid D2</td><td><span class="badge badge-operational" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td><td><span style="font-family:var(--font-mono);font-size:11px;">18:45</span></td></tr>
+                <tr><td><strong>Omega</strong></td><td>T. Brooks</td><td>13</td><td>Logistics Hub</td><td><span class="badge badge-operational" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td><td><span style="font-family:var(--font-mono);font-size:11px;">17:30</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="panel" aria-labelledby="equip-deploy-h">
+          <div class="panel-header"><h2 class="panel-title" id="equip-deploy-h"><span aria-hidden="true">🔧</span> Equipment Deployment</h2></div>
+          <div class="table-wrapper">
+            <table class="data-table" aria-label="Deployed equipment">
+              <thead><tr><th scope="col">Item</th><th scope="col">Type</th><th scope="col">Operator</th><th scope="col">Deployed To</th><th scope="col">Status</th><th scope="col">Hrs Active</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Kubota SVL75</strong></td><td>Skid Steer</td><td>G. Hutchins</td><td>Hwy 70S</td><td><span class="badge badge-operational" aria-label="In Use"><span class="badge-icon" aria-hidden="true"></span>In Use</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">48h</span></td></tr>
+                <tr><td><strong>Stihl MS 661</strong></td><td>Chainsaw</td><td>D. Pruett</td><td>Grid C4</td><td><span class="badge badge-operational" aria-label="In Use"><span class="badge-icon" aria-hidden="true"></span>In Use</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">36h</span></td></tr>
+                <tr><td><strong>F-350 Rescue</strong></td><td>Vehicle</td><td>E. Thompson</td><td>Mobile</td><td><span class="badge badge-operational" aria-label="In Use"><span class="badge-icon" aria-hidden="true"></span>In Use</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">72h</span></td></tr>
+                <tr><td><strong>20kW Generator</strong></td><td>Power</td><td>N. Park</td><td>EOC</td><td><span class="badge badge-operational" aria-label="In Use"><span class="badge-icon" aria-hidden="true"></span>In Use</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">72h</span></td></tr>
+                <tr><td><strong>Medical Cache A</strong></td><td>Medical</td><td>D. Okafor</td><td>Staging B</td><td><span class="badge badge-operational" aria-label="In Use"><span class="badge-icon" aria-hidden="true"></span>In Use</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">72h</span></td></tr>
+                <tr><td><strong>Light Tower Unit 2</strong></td><td>Lighting</td><td>T. Brooks</td><td>Grid D2</td><td><span class="badge badge-operational" aria-label="In Use"><span class="badge-icon" aria-hidden="true"></span>In Use</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">30h</span></td></tr>
+                <tr><td><strong>HAM Base Station</strong></td><td>Comms</td><td>A. Mohammed</td><td>EOC</td><td><span class="badge badge-operational" aria-label="In Use"><span class="badge-icon" aria-hidden="true"></span>In Use</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">72h</span></td></tr>
+                <tr><td><strong>Trailer — Sanitation</strong></td><td>Sanitation</td><td>Unassigned</td><td>Logistics Hub</td><td><span class="badge badge-standby" aria-label="Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">0h</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <!-- INCIDENT LOG -->
+      <section class="panel" aria-labelledby="incident-log-h">
+        <div class="panel-header">
+          <h2 class="panel-title" id="incident-log-h"><span aria-hidden="true">📋</span> Real-Time Incident Log</h2>
+          <button class="btn btn-ghost btn-sm" aria-label="Export incident log"><span aria-hidden="true">📥</span> Export</button>
+        </div>
+        <div class="panel-body" style="padding:0;">
+          <div role="log" aria-label="Incident event log" aria-live="polite">
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">01:45</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-operational" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Status</span></div>
+                <div class="log-message">Sector C4 cleared. Team Alpha transitioning to overnight standby rotation.</div>
+                <div class="log-by">Logged by E. Thompson (Alpha)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">01:20</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-training" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Comms</span></div>
+                <div class="log-message">ICS-201 updated to v4. Uploaded to Document Vault by IC Reyes.</div>
+                <div class="log-by">Logged by M. Reyes (IC)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">00:45</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-critical" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Resource</span></div>
+                <div class="log-message">Medical Cache A restocked at Staging Area B. Water and first-aid supplies replenished.</div>
+                <div class="log-by">Logged by D. Okafor (Bravo)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">23:12</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-standby" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Deployment</span></div>
+                <div class="log-message">ICS-204s for all 8 teams submitted. Operational period 3 objectives confirmed.</div>
+                <div class="log-by">Logged by D. Chen (Planning)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">22:30</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-standby" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Status</span></div>
+                <div class="log-message">McMinnville HS shelter at 347/400 capacity. Echo Team managing. Overflow assessment underway.</div>
+                <div class="log-by">Logged by P. Nair (Charlie)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">21:05</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-training" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Comms</span></div>
+                <div class="log-message">HAM frequency shift to 146.52 MHz simplex for sector comms. All teams notified.</div>
+                <div class="log-by">Logged by A. Mohammed (Delta)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">20:00</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-operational" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Status</span></div>
+                <div class="log-message">Operational Period 3 briefing complete. All section chiefs present. Priorities confirmed.</div>
+                <div class="log-by">Logged by M. Reyes (IC)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">18:45</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-critical" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Resource</span></div>
+                <div class="log-message">Ridgeline Tree &amp; Debris (contractor) on-site, Hwy 70S sector. Bucket truck operational.</div>
+                <div class="log-by">Logged by E. Thompson (Alpha)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">17:30</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-standby" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Deployment</span></div>
+                <div class="log-message">Team Omega assigned to Logistics Hub. Supply manifest updated.</div>
+                <div class="log-by">Logged by J. Whitfield (Logistics)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">16:00</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-training" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Comms</span></div>
+                <div class="log-message">TN EMA notified of ICS Type 2 transition request. Response expected within 24 hours.</div>
+                <div class="log-by">Logged by Jason (Admin)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">14:00</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-operational" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Status</span></div>
+                <div class="log-message">Welfare checks complete in Oakdale and Morrison communities. 12 households requiring support identified.</div>
+                <div class="log-by">Logged by L. Williams (Echo)</div>
+              </div>
+            </div>
+            <div class="log-item" style="padding:10px 20px;">
+              <span class="log-time">Apr 29 19:42</span>
+              <div class="log-content">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span class="badge badge-critical" style="font-size:10px;"><span class="badge-icon" aria-hidden="true"></span>Deployment</span></div>
+                <div class="log-message"><strong>INCIDENT DECLARED.</strong> EF2 tornado confirmed Warren County. ICS Type 3 activated. All teams mobilized.</div>
+                <div class="log-by">Logged by Jason (Admin)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<!-- STAND DOWN MODAL -->
+<div id="modal-stand-down" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-sd-title">
+  <div class="modal">
+    <div class="modal-header" style="border-bottom-color:rgba(52,211,153,0.3);"><h2 class="modal-title" id="modal-sd-title" style="color:var(--green);"><span aria-hidden="true">✓</span> Confirm Stand Down</h2><button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-stand-down')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--text-body);line-height:1.7;margin-bottom:16px;">You are about to <strong>stand down the active incident</strong> and return Warren County to normal operations. This action will:</p>
+      <ul style="font-size:14px;color:var(--text-muted);line-height:2;padding-left:20px;list-style:disc;">
+        <li>Deactivate ICS structure</li>
+        <li>Release all deployed teams to standby</li>
+        <li>Mark incident as resolved</li>
+        <li>Trigger after-action report workflow</li>
+      </ul>
+      <div style="background:var(--yellow-light);border:1px solid rgba(245,196,0,0.4);border-radius:var(--radius-md);padding:12px 16px;margin-top:16px;font-size:13px;color:var(--yellow);"><span aria-hidden="true">⚠</span> This action cannot be undone without re-activating the incident.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-stand-down')" aria-label="Cancel">Cancel</button>
+      <button style="background:var(--green);border:1px solid var(--green);color:#000;padding:0 20px;border-radius:var(--radius-md);font-weight:700;font-size:14px;cursor:pointer;min-height:44px;" aria-label="Confirm stand down" onclick="TDRN.toast.success('Incident stood down — after-action report initiated') && TDRN.modal.close('modal-stand-down')"><span aria-hidden="true">✓</span> Confirm Stand Down</button>
+    </div>
+  </div>
+</div>
+<!-- ICS REPORT MODAL -->
+<div id="modal-ics-report" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-ics-title">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="modal-ics-title"><span aria-hidden="true">📄</span> Generate ICS Report</h2><button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-ics-report')">✕</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:10px;">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">Select the ICS report type to generate and download:</p>
+      <button class="btn btn-ghost" style="justify-content:flex-start;text-align:left;padding:12px 16px;height:auto;min-height:52px;" aria-label="Generate ICS-201 Incident Briefing" onclick="TDRN.toast.info('Generating ICS-201…') && TDRN.modal.close('modal-ics-report')"><span aria-hidden="true">📄</span> <span><strong>ICS-201</strong> — Incident Briefing</span></button>
+      <button class="btn btn-ghost" style="justify-content:flex-start;text-align:left;padding:12px 16px;height:auto;min-height:52px;" aria-label="Generate ICS-204 Assignment List" onclick="TDRN.toast.info('Generating ICS-204…') && TDRN.modal.close('modal-ics-report')"><span aria-hidden="true">📄</span> <span><strong>ICS-204</strong> — Assignment List</span></button>
+      <button class="btn btn-ghost" style="justify-content:flex-start;text-align:left;padding:12px 16px;height:auto;min-height:52px;" aria-label="Generate ICS-209 Incident Status Summary" onclick="TDRN.toast.info('Generating ICS-209…') && TDRN.modal.close('modal-ics-report')"><span aria-hidden="true">📄</span> <span><strong>ICS-209</strong> — Incident Status Summary</span></button>
+      <button class="btn btn-ghost" style="justify-content:flex-start;text-align:left;padding:12px 16px;height:auto;min-height:52px;" aria-label="Generate After Action Report" onclick="TDRN.toast.info('Generating After Action Report…') && TDRN.modal.close('modal-ics-report')"><span aria-hidden="true">📄</span> <span><strong>After Action Report</strong> — Full incident summary</span></button>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="TDRN.modal.close('modal-ics-report')" aria-label="Cancel">Close</button></div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Tennessee State Dashboard — 95 Counties — Thrive Disaster Response Network">
+  <meta name="theme-color" content="#0F1011">
+  <title>Tennessee — TDRN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tdrn-core.css">
+  <style>
+    /* Tennessee-specific county grid */
+    .county-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .county-card-ghost {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .county-card-ghost:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-panel-hover);
+    }
+    .county-card-featured {
+      background: var(--bg-panel);
+      border: 2px solid var(--yellow);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 0 0 1px rgba(245,196,0,0.15), var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+      grid-column: span 2;
+    }
+    .county-card-featured::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--yellow);
+    }
+    @media (max-width: 900px) {
+      .county-card-featured { grid-column: span 1; }
+    }
+    .tn-stat-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .tn-stat-item {
+      text-align: center;
+      min-width: 60px;
+    }
+    .tn-stat-val {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    .tn-stat-lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Skip Navigation -->
+<a class="skip-link" href="#admin-main-content">Skip to main content</a>
+
+<!-- Screen Reader Announce Region -->
+<div id="tdrn-announce" aria-live="polite" aria-atomic="true" class="sr-only" role="status"></div>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<div class="admin-shell">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <nav class="admin-sidebar" aria-label="Main navigation">
+
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — Go to national dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text">
+        <span class="logo-name">TDRN</span>
+        <span class="logo-tagline">Disaster Response Network</span>
+      </div>
+    </a>
+
+    <!-- National Section -->
+    <div class="sidebar-section" role="group" aria-labelledby="nav-label-national">
+      <span class="sidebar-section-label" id="nav-label-national">National</span>
+      <a href="index.html" class="nav-item" aria-label="Go to National Dashboard">
+        <span class="nav-item-icon" aria-hidden="true">⊞</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" aria-label="All members">
+        <span class="nav-item-icon" aria-hidden="true">👥</span>
+        <span>Members</span>
+        <span class="nav-item-badge" aria-label="142 members">142</span>
+      </a>
+      <a href="#" class="nav-item" aria-label="All teams">
+        <span class="nav-item-icon" aria-hidden="true">🛡</span>
+        <span>Teams</span>
+      </a>
+      <a href="#" class="nav-item" aria-label="Equipment inventory">
+        <span class="nav-item-icon" aria-hidden="true">🔧</span>
+        <span>Equipment</span>
+      </a>
+      <a href="#" class="nav-item" aria-label="Active alerts">
+        <span class="nav-item-icon" aria-hidden="true">🔔</span>
+        <span>Alerts</span>
+        <span class="nav-item-badge" aria-label="3 active alerts">3</span>
+      </a>
+      <a href="#" class="nav-item" aria-label="Reports">
+        <span class="nav-item-icon" aria-hidden="true">📊</span>
+        <span>Reports</span>
+      </a>
+    </div>
+
+    <!-- States Section -->
+    <div class="sidebar-section" role="group" aria-labelledby="nav-label-states">
+      <span class="sidebar-section-label" id="nav-label-states">States</span>
+      <div class="state-search">
+        <label class="state-search-label" for="state-search-input">Search states</label>
+        <input type="search" id="state-search-input" placeholder="Search states…" aria-label="Search states" autocomplete="off">
+      </div>
+      <ul class="state-list" id="state-list" role="list" aria-label="State portals">
+        <li>
+          <a href="tennessee.html" class="state-item" aria-current="page" aria-label="Tennessee — Active — Currently viewing">
+            <span class="state-item-name">Tennessee</span>
+            <span class="state-status operational" aria-label="Status: Active"><span aria-hidden="true">✓</span> Active</span>
+          </a>
+        </li>
+        <li><a href="#" class="state-item" aria-label="Texas — Pending"><span class="state-item-name">Texas</span><span class="state-status standby" aria-label="Status: Pending"><span aria-hidden="true">⏱</span> Pending</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Florida — Pending"><span class="state-item-name">Florida</span><span class="state-status standby" aria-label="Status: Pending"><span aria-hidden="true">⏱</span> Pending</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Georgia — Pending"><span class="state-item-name">Georgia</span><span class="state-status standby" aria-label="Status: Pending"><span aria-hidden="true">⏱</span> Pending</span></a></li>
+        <li><a href="#" class="state-item" aria-label="North Carolina — Pending"><span class="state-item-name">N. Carolina</span><span class="state-status standby" aria-label="Status: Pending"><span aria-hidden="true">⏱</span> Pending</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Kentucky — Pending"><span class="state-item-name">Kentucky</span><span class="state-status standby" aria-label="Status: Pending"><span aria-hidden="true">⏱</span> Pending</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Alabama — Inactive"><span class="state-item-name">Alabama</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Arkansas — Inactive"><span class="state-item-name">Arkansas</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Mississippi — Inactive"><span class="state-item-name">Mississippi</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Missouri — Inactive"><span class="state-item-name">Missouri</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Virginia — Inactive"><span class="state-item-name">Virginia</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+      </ul>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Tennessee State Admin — View profile">
+        <div class="user-avatar" aria-hidden="true">JA</div>
+        <div class="user-info">
+          <div class="user-name">Jason</div>
+          <div class="user-role">State Admin — TN</div>
+        </div>
+      </a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode — reduces visual noise for better reading">
+        <span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span>
+        <span class="focus-mode-label">Focus Mode</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       MAIN
+       ============================================================ -->
+  <div class="admin-main" id="admin-main-content" tabindex="-1">
+
+    <!-- TOP BAR -->
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb">
+        <ol>
+          <li><a href="index.html" aria-label="Go to National Dashboard">National</a></li>
+          <li><a href="tennessee.html" aria-label="Go to Tennessee dashboard">Tennessee</a></li>
+          <li><span class="current" aria-current="page">Dashboard</span></li>
+        </ol>
+      </nav>
+
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-tn">Search Tennessee — counties, members, incidents</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-tn" placeholder="Search Tennessee…" autocomplete="off" aria-label="Search Tennessee portal">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill operational" role="status" aria-label="Tennessee state status: Active">
+          <span class="status-pill-icon" aria-hidden="true">✓</span>
+          TN Active
+        </span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread">
+          <span aria-hidden="true">🔔</span>
+          <span class="notification-badge" aria-hidden="true"></span>
+        </button>
+        <button class="topbar-btn secondary" aria-label="Export Tennessee state report">
+          <span aria-hidden="true">📥</span> Export
+        </button>
+        <button class="topbar-btn primary" aria-label="Activate a new Tennessee county">
+          <span aria-hidden="true">＋</span> Activate County
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="admin-content" id="main-content" aria-label="Tennessee State Dashboard">
+
+      <!-- ALERT STRIP -->
+      <div class="alert-strip operational" role="status" aria-label="Tennessee state portal status" style="background:var(--green-light);border-color:rgba(52,211,153,0.25);color:var(--green);">
+        <div class="alert-strip-text">
+          <span aria-hidden="true">✓</span>
+          <strong>Tennessee State Portal</strong> — 95 Counties — 1 Operational (Warren County)
+          <a href="warren-county.html" style="color:inherit;margin-left:8px;font-weight:700;">View Warren County →</a>
+        </div>
+      </div>
+
+      <!-- CONTENT HEADER -->
+      <div class="content-header" style="margin-top:24px;">
+        <div class="content-header-left">
+          <h1 class="content-title">Tennessee</h1>
+          <p class="content-subtitle">State operations dashboard — 95 counties, 1 active, 94 available for activation.</p>
+        </div>
+        <div class="content-actions">
+          <button class="btn btn-ghost" aria-label="Filter counties by status">
+            <span aria-hidden="true">🔽</span> Filter
+          </button>
+          <button class="btn btn-secondary" aria-label="View Tennessee state map">
+            <span aria-hidden="true">🗺</span> State Map
+          </button>
+          <button class="btn btn-primary" aria-label="Activate a new county in Tennessee">
+            <span aria-hidden="true">＋</span> Activate County
+          </button>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <section aria-labelledby="tn-stats-heading">
+        <h2 id="tn-stats-heading" class="sr-only">Tennessee Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card accent-green" role="article" aria-label="Counties Active: 1 of 95">
+            <div class="stat-label">Counties Active</div>
+            <div class="stat-value">1<span style="font-size:16px;color:var(--text-muted);font-weight:400;">/95</span></div>
+            <div class="stat-change up"><span aria-hidden="true">↑</span> +1 this month</div>
+            <span class="stat-icon" aria-hidden="true">📍</span>
+          </div>
+          <div class="stat-card accent-blue" role="article" aria-label="State Members: 142">
+            <div class="stat-label">State Members</div>
+            <div class="stat-value">142</div>
+            <div class="stat-change up"><span aria-hidden="true">↑</span> +12 this month</div>
+            <span class="stat-icon" aria-hidden="true">👥</span>
+          </div>
+          <div class="stat-card accent-orange" role="article" aria-label="Equipment Units: 23">
+            <div class="stat-label">Equipment Units</div>
+            <div class="stat-value">23</div>
+            <div class="stat-change flat"><span aria-hidden="true">→</span> No change</div>
+            <span class="stat-icon" aria-hidden="true">🔧</span>
+          </div>
+          <div class="stat-card accent-yellow" role="article" aria-label="Training Compliance: 78%">
+            <div class="stat-label">Training Compliance</div>
+            <div class="stat-value">78<span style="font-size:18px;color:var(--text-muted);font-weight:400;">%</span></div>
+            <div class="stat-change up"><span aria-hidden="true">↑</span> +4% this quarter</div>
+            <span class="stat-icon" aria-hidden="true">🎓</span>
+          </div>
+          <div class="stat-card accent-red" role="article" aria-label="Active Incidents: 1">
+            <div class="stat-label">Active Incidents</div>
+            <div class="stat-value">1</div>
+            <div class="stat-change flat"><span aria-hidden="true">→</span> Warren Co. tornado</div>
+            <span class="stat-icon" aria-hidden="true">🚨</span>
+          </div>
+          <div class="stat-card accent-purple" role="article" aria-label="Mutual Aid Agreements: 3">
+            <div class="stat-label">Mutual Aid Agreements</div>
+            <div class="stat-value">3</div>
+            <div class="stat-change flat"><span aria-hidden="true">→</span> EMA, Red Cross, TEMA</div>
+            <span class="stat-icon" aria-hidden="true">🤝</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- GRID 2-1: COUNTY GRID + RIGHT PANEL -->
+      <div class="grid-2-1">
+
+        <!-- LEFT: County Grid -->
+        <section aria-labelledby="county-grid-heading">
+          <div class="content-header" style="margin-bottom:16px;">
+            <div class="content-header-left">
+              <h2 class="content-title" id="county-grid-heading" style="font-size:20px;">All 95 Counties</h2>
+              <p class="content-subtitle" style="font-size:13px;">Warren County is the only active county. All others available for activation.</p>
+            </div>
+            <div class="content-actions">
+              <div role="search">
+                <label class="sr-only" for="county-search">Search counties</label>
+                <input type="search" id="county-search" class="form-input" style="height:36px;font-size:13px;" placeholder="Search counties…" aria-label="Search counties" data-live-search data-search-container="#county-grid" data-search-items=".county-card-ghost, .county-card-featured">
+              </div>
+            </div>
+          </div>
+
+          <div class="county-grid" id="county-grid" role="list" aria-label="Tennessee county portals">
+
+            <!-- ====================================================
+                 WARREN COUNTY — FEATURED / ACTIVE
+                 ==================================================== -->
+            <article class="county-card-featured" role="listitem" aria-label="Warren County — Active — 142 members, 23 equipment">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                <div>
+                  <div style="font-family:var(--font-heading);font-size:20px;font-weight:700;color:var(--yellow);letter-spacing:0.04em;">Warren County</div>
+                  <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">County Seat: McMinnville</div>
+                </div>
+                <span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span>
+              </div>
+              <div class="tn-stat-row" aria-label="Warren County statistics">
+                <div class="tn-stat-item">
+                  <div class="tn-stat-val">142</div>
+                  <div class="tn-stat-lbl">Members</div>
+                </div>
+                <div class="tn-stat-item">
+                  <div class="tn-stat-val">8</div>
+                  <div class="tn-stat-lbl">Teams</div>
+                </div>
+                <div class="tn-stat-item">
+                  <div class="tn-stat-val">23</div>
+                  <div class="tn-stat-lbl">Equipment</div>
+                </div>
+                <div class="tn-stat-item">
+                  <div class="tn-stat-val" style="color:var(--green);">87%</div>
+                  <div class="tn-stat-lbl">Readiness</div>
+                </div>
+              </div>
+              <div style="padding-top:8px;border-top:1px solid rgba(245,196,0,0.2);display:flex;gap:8px;">
+                <a href="warren-county.html" class="btn btn-primary btn-sm" aria-label="Go to Warren County dashboard">Open Dashboard</a>
+                <a href="warren-county.html#incident" class="btn btn-sm" style="background:var(--red-light);color:var(--red);border:1px solid rgba(248,113,113,0.3);" aria-label="View active tornado incident">
+                  <span aria-hidden="true">🚨</span> Active Incident
+                </a>
+              </div>
+            </article>
+
+            <!-- ====================================================
+                 94 INACTIVE COUNTIES (alphabetical, excluding Warren)
+                 ==================================================== -->
+            <!-- Anderson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Anderson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Anderson</div>
+                  <div style="font-size:11px;color:var(--text-muted);">Clinton</div>
+                </div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Anderson County">＋ Activate</button>
+            </article>
+
+            <!-- Bedford -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Bedford County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Bedford</div><div style="font-size:11px;color:var(--text-muted);">Shelbyville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Bedford County">＋ Activate</button>
+            </article>
+
+            <!-- Benton -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Benton County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Benton</div><div style="font-size:11px;color:var(--text-muted);">Camden</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Benton County">＋ Activate</button>
+            </article>
+
+            <!-- Bledsoe -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Bledsoe County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Bledsoe</div><div style="font-size:11px;color:var(--text-muted);">Pikeville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Bledsoe County">＋ Activate</button>
+            </article>
+
+            <!-- Blount -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Blount County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Blount</div><div style="font-size:11px;color:var(--text-muted);">Maryville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Blount County">＋ Activate</button>
+            </article>
+
+            <!-- Bradley -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Bradley County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Bradley</div><div style="font-size:11px;color:var(--text-muted);">Cleveland</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Bradley County">＋ Activate</button>
+            </article>
+
+            <!-- Campbell -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Campbell County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Campbell</div><div style="font-size:11px;color:var(--text-muted);">Jacksboro</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Campbell County">＋ Activate</button>
+            </article>
+
+            <!-- Cannon -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Cannon County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Cannon</div><div style="font-size:11px;color:var(--text-muted);">Woodbury</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Cannon County">＋ Activate</button>
+            </article>
+
+            <!-- Carroll -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Carroll County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Carroll</div><div style="font-size:11px;color:var(--text-muted);">Huntingdon</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Carroll County">＋ Activate</button>
+            </article>
+
+            <!-- Carter -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Carter County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Carter</div><div style="font-size:11px;color:var(--text-muted);">Elizabethton</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Carter County">＋ Activate</button>
+            </article>
+
+            <!-- Cheatham -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Cheatham County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Cheatham</div><div style="font-size:11px;color:var(--text-muted);">Ashland City</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Cheatham County">＋ Activate</button>
+            </article>
+
+            <!-- Chester -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Chester County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Chester</div><div style="font-size:11px;color:var(--text-muted);">Henderson</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Chester County">＋ Activate</button>
+            </article>
+
+            <!-- Claiborne -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Claiborne County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Claiborne</div><div style="font-size:11px;color:var(--text-muted);">Tazewell</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Claiborne County">＋ Activate</button>
+            </article>
+
+            <!-- Clay -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Clay County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Clay</div><div style="font-size:11px;color:var(--text-muted);">Celina</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Clay County">＋ Activate</button>
+            </article>
+
+            <!-- Cocke -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Cocke County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Cocke</div><div style="font-size:11px;color:var(--text-muted);">Newport</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Cocke County">＋ Activate</button>
+            </article>
+
+            <!-- Coffee -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Coffee County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Coffee</div><div style="font-size:11px;color:var(--text-muted);">Manchester</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Coffee County">＋ Activate</button>
+            </article>
+
+            <!-- Crockett -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Crockett County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Crockett</div><div style="font-size:11px;color:var(--text-muted);">Alamo</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Crockett County">＋ Activate</button>
+            </article>
+
+            <!-- Cumberland -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Cumberland County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Cumberland</div><div style="font-size:11px;color:var(--text-muted);">Crossville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Cumberland County">＋ Activate</button>
+            </article>
+
+            <!-- Davidson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Davidson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Davidson</div><div style="font-size:11px;color:var(--text-muted);">Nashville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Davidson County">＋ Activate</button>
+            </article>
+
+            <!-- Decatur -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Decatur County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Decatur</div><div style="font-size:11px;color:var(--text-muted);">Decaturville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Decatur County">＋ Activate</button>
+            </article>
+
+            <!-- DeKalb -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="DeKalb County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">DeKalb</div><div style="font-size:11px;color:var(--text-muted);">Smithville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate DeKalb County">＋ Activate</button>
+            </article>
+
+            <!-- Dickson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Dickson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Dickson</div><div style="font-size:11px;color:var(--text-muted);">Charlotte</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Dickson County">＋ Activate</button>
+            </article>
+
+            <!-- Dyer -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Dyer County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Dyer</div><div style="font-size:11px;color:var(--text-muted);">Dyersburg</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Dyer County">＋ Activate</button>
+            </article>
+
+            <!-- Fayette -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Fayette County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Fayette</div><div style="font-size:11px;color:var(--text-muted);">Somerville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Fayette County">＋ Activate</button>
+            </article>
+
+            <!-- Fentress -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Fentress County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Fentress</div><div style="font-size:11px;color:var(--text-muted);">Jamestown</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Fentress County">＋ Activate</button>
+            </article>
+
+            <!-- Franklin -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Franklin County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Franklin</div><div style="font-size:11px;color:var(--text-muted);">Winchester</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Franklin County">＋ Activate</button>
+            </article>
+
+            <!-- Gibson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Gibson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Gibson</div><div style="font-size:11px;color:var(--text-muted);">Trenton</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Gibson County">＋ Activate</button>
+            </article>
+
+            <!-- Giles -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Giles County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Giles</div><div style="font-size:11px;color:var(--text-muted);">Pulaski</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Giles County">＋ Activate</button>
+            </article>
+
+            <!-- Grainger -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Grainger County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Grainger</div><div style="font-size:11px;color:var(--text-muted);">Rutledge</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Grainger County">＋ Activate</button>
+            </article>
+
+            <!-- Greene -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Greene County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Greene</div><div style="font-size:11px;color:var(--text-muted);">Greeneville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Greene County">＋ Activate</button>
+            </article>
+
+            <!-- Grundy -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Grundy County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Grundy</div><div style="font-size:11px;color:var(--text-muted);">Altamont</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Grundy County">＋ Activate</button>
+            </article>
+
+            <!-- Hamblen -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Hamblen County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Hamblen</div><div style="font-size:11px;color:var(--text-muted);">Morristown</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Hamblen County">＋ Activate</button>
+            </article>
+
+            <!-- Hamilton -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Hamilton County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Hamilton</div><div style="font-size:11px;color:var(--text-muted);">Chattanooga</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Hamilton County">＋ Activate</button>
+            </article>
+
+            <!-- Hancock -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Hancock County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Hancock</div><div style="font-size:11px;color:var(--text-muted);">Sneedville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Hancock County">＋ Activate</button>
+            </article>
+
+            <!-- Hardeman -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Hardeman County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Hardeman</div><div style="font-size:11px;color:var(--text-muted);">Bolivar</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Hardeman County">＋ Activate</button>
+            </article>
+
+            <!-- Hardin -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Hardin County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Hardin</div><div style="font-size:11px;color:var(--text-muted);">Savannah</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Hardin County">＋ Activate</button>
+            </article>
+
+            <!-- Hawkins -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Hawkins County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Hawkins</div><div style="font-size:11px;color:var(--text-muted);">Rogersville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Hawkins County">＋ Activate</button>
+            </article>
+
+            <!-- Haywood -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Haywood County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Haywood</div><div style="font-size:11px;color:var(--text-muted);">Brownsville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Haywood County">＋ Activate</button>
+            </article>
+
+            <!-- Henderson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Henderson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Henderson</div><div style="font-size:11px;color:var(--text-muted);">Lexington</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Henderson County">＋ Activate</button>
+            </article>
+
+            <!-- Henry -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Henry County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Henry</div><div style="font-size:11px;color:var(--text-muted);">Paris</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Henry County">＋ Activate</button>
+            </article>
+
+            <!-- Hickman -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Hickman County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Hickman</div><div style="font-size:11px;color:var(--text-muted);">Centerville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Hickman County">＋ Activate</button>
+            </article>
+
+            <!-- Houston -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Houston County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Houston</div><div style="font-size:11px;color:var(--text-muted);">Erin</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Houston County">＋ Activate</button>
+            </article>
+
+            <!-- Humphreys -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Humphreys County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Humphreys</div><div style="font-size:11px;color:var(--text-muted);">Waverly</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Humphreys County">＋ Activate</button>
+            </article>
+
+            <!-- Jackson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Jackson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Jackson</div><div style="font-size:11px;color:var(--text-muted);">Gainesboro</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Jackson County">＋ Activate</button>
+            </article>
+
+            <!-- Jefferson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Jefferson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Jefferson</div><div style="font-size:11px;color:var(--text-muted);">Dandridge</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Jefferson County">＋ Activate</button>
+            </article>
+
+            <!-- Johnson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Johnson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Johnson</div><div style="font-size:11px;color:var(--text-muted);">Mountain City</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Johnson County">＋ Activate</button>
+            </article>
+
+            <!-- Knox -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Knox County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Knox</div><div style="font-size:11px;color:var(--text-muted);">Knoxville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Knox County">＋ Activate</button>
+            </article>
+
+            <!-- Lake -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Lake County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Lake</div><div style="font-size:11px;color:var(--text-muted);">Tiptonville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Lake County">＋ Activate</button>
+            </article>
+
+            <!-- Lauderdale -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Lauderdale County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Lauderdale</div><div style="font-size:11px;color:var(--text-muted);">Ripley</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Lauderdale County">＋ Activate</button>
+            </article>
+
+            <!-- Lawrence -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Lawrence County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Lawrence</div><div style="font-size:11px;color:var(--text-muted);">Lawrenceburg</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Lawrence County">＋ Activate</button>
+            </article>
+
+            <!-- Lewis -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Lewis County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Lewis</div><div style="font-size:11px;color:var(--text-muted);">Hohenwald</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Lewis County">＋ Activate</button>
+            </article>
+
+            <!-- Lincoln -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Lincoln County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Lincoln</div><div style="font-size:11px;color:var(--text-muted);">Fayetteville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Lincoln County">＋ Activate</button>
+            </article>
+
+            <!-- Loudon -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Loudon County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Loudon</div><div style="font-size:11px;color:var(--text-muted);">Loudon</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Loudon County">＋ Activate</button>
+            </article>
+
+            <!-- McMinn -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="McMinn County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">McMinn</div><div style="font-size:11px;color:var(--text-muted);">Athens</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate McMinn County">＋ Activate</button>
+            </article>
+
+            <!-- McNairy -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="McNairy County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">McNairy</div><div style="font-size:11px;color:var(--text-muted);">Selmer</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate McNairy County">＋ Activate</button>
+            </article>
+
+            <!-- Macon -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Macon County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Macon</div><div style="font-size:11px;color:var(--text-muted);">Lafayette</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Macon County">＋ Activate</button>
+            </article>
+
+            <!-- Madison -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Madison County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Madison</div><div style="font-size:11px;color:var(--text-muted);">Jackson</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Madison County">＋ Activate</button>
+            </article>
+
+            <!-- Marion -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Marion County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Marion</div><div style="font-size:11px;color:var(--text-muted);">Jasper</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Marion County">＋ Activate</button>
+            </article>
+
+            <!-- Marshall -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Marshall County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Marshall</div><div style="font-size:11px;color:var(--text-muted);">Lewisburg</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Marshall County">＋ Activate</button>
+            </article>
+
+            <!-- Maury -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Maury County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Maury</div><div style="font-size:11px;color:var(--text-muted);">Columbia</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Maury County">＋ Activate</button>
+            </article>
+
+            <!-- Meigs -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Meigs County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Meigs</div><div style="font-size:11px;color:var(--text-muted);">Decatur</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Meigs County">＋ Activate</button>
+            </article>
+
+            <!-- Monroe -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Monroe County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Monroe</div><div style="font-size:11px;color:var(--text-muted);">Madisonville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Monroe County">＋ Activate</button>
+            </article>
+
+            <!-- Montgomery -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Montgomery County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Montgomery</div><div style="font-size:11px;color:var(--text-muted);">Clarksville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Montgomery County">＋ Activate</button>
+            </article>
+
+            <!-- Moore -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Moore County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Moore</div><div style="font-size:11px;color:var(--text-muted);">Lynchburg</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Moore County">＋ Activate</button>
+            </article>
+
+            <!-- Morgan -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Morgan County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Morgan</div><div style="font-size:11px;color:var(--text-muted);">Wartburg</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Morgan County">＋ Activate</button>
+            </article>
+
+            <!-- Obion -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Obion County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Obion</div><div style="font-size:11px;color:var(--text-muted);">Union City</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Obion County">＋ Activate</button>
+            </article>
+
+            <!-- Overton -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Overton County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Overton</div><div style="font-size:11px;color:var(--text-muted);">Livingston</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Overton County">＋ Activate</button>
+            </article>
+
+            <!-- Perry -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Perry County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Perry</div><div style="font-size:11px;color:var(--text-muted);">Linden</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Perry County">＋ Activate</button>
+            </article>
+
+            <!-- Pickett -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Pickett County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Pickett</div><div style="font-size:11px;color:var(--text-muted);">Byrdstown</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Pickett County">＋ Activate</button>
+            </article>
+
+            <!-- Polk -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Polk County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Polk</div><div style="font-size:11px;color:var(--text-muted);">Benton</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Polk County">＋ Activate</button>
+            </article>
+
+            <!-- Putnam -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Putnam County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Putnam</div><div style="font-size:11px;color:var(--text-muted);">Cookeville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Putnam County">＋ Activate</button>
+            </article>
+
+            <!-- Rhea -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Rhea County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Rhea</div><div style="font-size:11px;color:var(--text-muted);">Dayton</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Rhea County">＋ Activate</button>
+            </article>
+
+            <!-- Roane -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Roane County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Roane</div><div style="font-size:11px;color:var(--text-muted);">Kingston</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Roane County">＋ Activate</button>
+            </article>
+
+            <!-- Robertson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Robertson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Robertson</div><div style="font-size:11px;color:var(--text-muted);">Springfield</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Robertson County">＋ Activate</button>
+            </article>
+
+            <!-- Rutherford -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Rutherford County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Rutherford</div><div style="font-size:11px;color:var(--text-muted);">Murfreesboro</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Rutherford County">＋ Activate</button>
+            </article>
+
+            <!-- Scott -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Scott County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Scott</div><div style="font-size:11px;color:var(--text-muted);">Huntsville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Scott County">＋ Activate</button>
+            </article>
+
+            <!-- Sequatchie -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Sequatchie County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Sequatchie</div><div style="font-size:11px;color:var(--text-muted);">Dunlap</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Sequatchie County">＋ Activate</button>
+            </article>
+
+            <!-- Sevier -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Sevier County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Sevier</div><div style="font-size:11px;color:var(--text-muted);">Sevierville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Sevier County">＋ Activate</button>
+            </article>
+
+            <!-- Shelby -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Shelby County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Shelby</div><div style="font-size:11px;color:var(--text-muted);">Memphis</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Shelby County">＋ Activate</button>
+            </article>
+
+            <!-- Smith -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Smith County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Smith</div><div style="font-size:11px;color:var(--text-muted);">Carthage</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Smith County">＋ Activate</button>
+            </article>
+
+            <!-- Stewart -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Stewart County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Stewart</div><div style="font-size:11px;color:var(--text-muted);">Dover</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Stewart County">＋ Activate</button>
+            </article>
+
+            <!-- Sullivan -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Sullivan County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Sullivan</div><div style="font-size:11px;color:var(--text-muted);">Blountville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Sullivan County">＋ Activate</button>
+            </article>
+
+            <!-- Sumner -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Sumner County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Sumner</div><div style="font-size:11px;color:var(--text-muted);">Gallatin</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Sumner County">＋ Activate</button>
+            </article>
+
+            <!-- Tipton -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Tipton County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Tipton</div><div style="font-size:11px;color:var(--text-muted);">Covington</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Tipton County">＋ Activate</button>
+            </article>
+
+            <!-- Trousdale -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Trousdale County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Trousdale</div><div style="font-size:11px;color:var(--text-muted);">Hartsville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Trousdale County">＋ Activate</button>
+            </article>
+
+            <!-- Unicoi -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Unicoi County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Unicoi</div><div style="font-size:11px;color:var(--text-muted);">Erwin</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Unicoi County">＋ Activate</button>
+            </article>
+
+            <!-- Union -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Union County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Union</div><div style="font-size:11px;color:var(--text-muted);">Maynardville</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Union County">＋ Activate</button>
+            </article>
+
+            <!-- Van Buren -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Van Buren County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Van Buren</div><div style="font-size:11px;color:var(--text-muted);">Spencer</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Van Buren County">＋ Activate</button>
+            </article>
+
+            <!-- Washington -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Washington County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Washington</div><div style="font-size:11px;color:var(--text-muted);">Jonesborough</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Washington County">＋ Activate</button>
+            </article>
+
+            <!-- Wayne -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Wayne County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Wayne</div><div style="font-size:11px;color:var(--text-muted);">Waynesboro</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Wayne County">＋ Activate</button>
+            </article>
+
+            <!-- Weakley -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Weakley County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Weakley</div><div style="font-size:11px;color:var(--text-muted);">Dresden</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Weakley County">＋ Activate</button>
+            </article>
+
+            <!-- White -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="White County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">White</div><div style="font-size:11px;color:var(--text-muted);">Sparta</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate White County">＋ Activate</button>
+            </article>
+
+            <!-- Williamson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Williamson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Williamson</div><div style="font-size:11px;color:var(--text-muted);">Franklin</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Williamson County">＋ Activate</button>
+            </article>
+
+            <!-- Wilson -->
+            <article class="county-card-ghost" role="listitem" data-status="inactive" aria-label="Wilson County — Inactive">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div><div style="font-size:14px;font-weight:600;color:var(--text-primary);">Wilson</div><div style="font-size:11px;color:var(--text-muted);">Lebanon</div></div>
+                <span class="badge badge-inactive" style="font-size:10px;" aria-label="Status: Inactive"><span class="badge-icon" aria-hidden="true"></span>Inactive</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:12px;justify-content:flex-start;" aria-label="Activate Wilson County">＋ Activate</button>
+            </article>
+
+          </div>
+          <!-- /county-grid -->
+        </section>
+        <!-- /LEFT -->
+
+        <!-- RIGHT: State Metrics Panel -->
+        <aside aria-label="Tennessee state metrics and information">
+
+          <!-- State Leadership -->
+          <section class="panel" aria-labelledby="leadership-panel-title" style="margin-bottom:16px;">
+            <div class="panel-header">
+              <h2 class="panel-title" id="leadership-panel-title">
+                <span aria-hidden="true">👤</span> State Leadership
+              </h2>
+            </div>
+            <div class="panel-body">
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div class="user-chip" style="cursor:default;">
+                  <div class="user-avatar" style="background:var(--blue-light);border-color:var(--blue);color:var(--blue);">JA</div>
+                  <div class="user-info">
+                    <div class="user-name">Jason</div>
+                    <div class="user-role">State Director — Tennessee</div>
+                  </div>
+                </div>
+                <div class="user-chip" style="cursor:default;">
+                  <div class="user-avatar" style="background:var(--green-light);border-color:var(--green);color:var(--green);">MR</div>
+                  <div class="user-info">
+                    <div class="user-name">Marcus Reyes</div>
+                    <div class="user-role">Warren County Lead</div>
+                  </div>
+                </div>
+                <div class="user-chip" style="cursor:default;">
+                  <div class="user-avatar" style="background:var(--purple-light);border-color:var(--purple);color:var(--purple);">DO</div>
+                  <div class="user-info">
+                    <div class="user-name">Denise Okafor</div>
+                    <div class="user-role">Medical Officer — TN</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Training Compliance -->
+          <section class="panel" aria-labelledby="training-panel-title" style="margin-bottom:16px;">
+            <div class="panel-header">
+              <h2 class="panel-title" id="training-panel-title">
+                <span aria-hidden="true">🎓</span> Training Compliance
+              </h2>
+              <span class="badge badge-standby" aria-label="State compliance level: 78%"><span class="badge-icon" aria-hidden="true"></span>78%</span>
+            </div>
+            <div class="panel-body">
+
+              <div class="progress-bar" aria-label="ICS-100 compliance: 94%">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">ICS-100</span>
+                  <span class="progress-bar-value">94%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill green" style="width:94%" role="progressbar" aria-valuenow="94" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+
+              <div class="progress-bar" style="margin-top:12px;" aria-label="ICS-200 compliance: 78%">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">ICS-200</span>
+                  <span class="progress-bar-value">78%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" style="width:78%" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+
+              <div class="progress-bar" style="margin-top:12px;" aria-label="NIMS-700 compliance: 65%">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">NIMS-700</span>
+                  <span class="progress-bar-value">65%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill orange" style="width:65%" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+
+              <div class="progress-bar" style="margin-top:12px;" aria-label="First Aid and CPR compliance: 82%">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">First Aid / CPR</span>
+                  <span class="progress-bar-value">82%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill green" style="width:82%" role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+
+              <div class="progress-bar" style="margin-top:12px;" aria-label="CERT compliance: 71%">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">CERT</span>
+                  <span class="progress-bar-value">71%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" style="width:71%" role="progressbar" aria-valuenow="71" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Upcoming Events -->
+          <section class="panel" aria-labelledby="events-panel-title">
+            <div class="panel-header">
+              <h2 class="panel-title" id="events-panel-title">
+                <span aria-hidden="true">📅</span> Upcoming Events
+              </h2>
+              <a href="#" class="btn btn-sm btn-ghost" aria-label="View all Tennessee events">View all</a>
+            </div>
+            <div class="panel-body" style="padding:0;">
+              <ul role="list" aria-label="Upcoming Tennessee events">
+
+                <li style="padding:12px 20px;border-bottom:1px solid var(--border-color);">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:var(--text-primary);">ICS-100 Training</div>
+                      <div style="font-size:12px;color:var(--text-muted);">May 10 · Austin EOC · 30 seats</div>
+                    </div>
+                    <span class="badge badge-training" style="font-size:10px;" aria-label="Event type: Training"><span class="badge-icon" aria-hidden="true"></span>Training</span>
+                  </div>
+                </li>
+
+                <li style="padding:12px 20px;border-bottom:1px solid var(--border-color);">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Regional Flood Exercise</div>
+                      <div style="font-size:12px;color:var(--text-muted);">May 17 · Brazos River · 50 seats</div>
+                    </div>
+                    <span class="badge badge-standby" style="font-size:10px;" aria-label="Event type: Exercise"><span class="badge-icon" aria-hidden="true"></span>Exercise</span>
+                  </div>
+                </li>
+
+                <li style="padding:12px 20px;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:var(--text-primary);">State Leadership Summit</div>
+                      <div style="font-size:12px;color:var(--text-muted);">Jun 21 · TDRN HQ · 100 seats</div>
+                    </div>
+                    <span class="badge badge-operational" style="font-size:10px;" aria-label="Event type: Summit"><span class="badge-icon" aria-hidden="true"></span>Summit</span>
+                  </div>
+                </li>
+
+              </ul>
+            </div>
+          </section>
+
+        </aside>
+        <!-- /RIGHT -->
+
+      </div>
+      <!-- /grid-2-1 -->
+
+      <!-- ACTIVITY FEED -->
+      <section class="panel" aria-labelledby="activity-heading" style="margin-top:8px;">
+        <div class="panel-header">
+          <h2 class="panel-title" id="activity-heading">
+            <span aria-hidden="true">⚡</span> State Activity Feed
+          </h2>
+          <button class="btn btn-sm btn-ghost" aria-label="Refresh activity feed">
+            <span aria-hidden="true">↺</span> Refresh
+          </button>
+        </div>
+        <div class="panel-body" style="padding:0 24px;">
+          <ol class="activity-feed" role="list" aria-label="Recent Tennessee state activity">
+
+            <li class="activity-item">
+              <div class="activity-icon red" aria-label="Incident icon">🚨</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Tornado Response</strong> activated — Warren County, Day 3 of incident</div>
+                <div class="activity-time">3 days ago</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon green" aria-label="Member icon">👤</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>12 new members</strong> onboarded — Warren County roster updated</div>
+                <div class="activity-time">4 days ago</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon blue" aria-label="Training icon">🎓</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>ICS-200</strong> cohort completed — 14 members certified, compliance up 4%</div>
+                <div class="activity-time">5 days ago</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon orange" aria-label="Equipment icon">🔧</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Mass Casualty Trailer</strong> added to Warren County inventory</div>
+                <div class="activity-time">5 days ago</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon yellow" aria-label="Deployment icon">🚀</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Team Alpha, Bravo, Charlie</strong> deployed for tornado response operations</div>
+                <div class="activity-time">3 days ago</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon blue" aria-label="Partnership icon">🤝</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Mutual Aid Agreement</strong> signed with Tennessee EMA</div>
+                <div class="activity-time">1 week ago</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon green" aria-label="Activation icon">📍</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Warren County</strong> became first operational TDRN county in Tennessee</div>
+                <div class="activity-time">6 days ago</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon purple" aria-label="Report icon">📊</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Readiness Report Q1 2026</strong> submitted to Tennessee EMA — score: 94%</div>
+                <div class="activity-time">2 weeks ago</div>
+              </div>
+            </li>
+
+          </ol>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County — County Settings">
+  <meta name="theme-color" content="#0F1011">
+  <title>Settings — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .settings-section { margin-bottom:32px; }
+    .settings-section-title { font-family:var(--font-heading);font-size:15px;font-weight:700;color:var(--text-primary);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-color); }
+    .settings-panel { background:var(--bg-panel);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;display:flex;flex-direction:column;gap:16px; }
+    .danger-panel { background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.35);border-radius:var(--radius-lg);padding:24px; }
+    .danger-title { font-family:var(--font-heading);font-size:15px;font-weight:700;color:var(--red);letter-spacing:0.04em;margin-bottom:4px; }
+    .danger-desc { font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px; }
+    .danger-actions { display:flex;gap:12px;flex-wrap:wrap; }
+    .toggle-row { display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--border-color); }
+    .toggle-row:last-child { border-bottom:none; }
+    .toggle-info { flex:1; }
+    .toggle-label { font-size:14px;font-weight:600;color:var(--text-body); }
+    .toggle-desc { font-size:12px;color:var(--text-muted);margin-top:2px; }
+    .toggle-switch { position:relative;width:44px;min-width:44px;height:24px;cursor:pointer; }
+    .toggle-switch input { opacity:0;width:0;height:0;position:absolute; }
+    .toggle-track { position:absolute;inset:0;background:var(--bg-body);border:1px solid var(--border-hover);border-radius:12px;transition:var(--transition); }
+    .toggle-thumb { position:absolute;top:3px;left:3px;width:16px;height:16px;background:var(--text-disabled);border-radius:50%;transition:var(--transition); }
+    .toggle-switch input:checked ~ .toggle-track { background:var(--yellow-light);border-color:var(--yellow); }
+    .toggle-switch input:checked ~ .toggle-thumb { transform:translateX(20px);background:var(--yellow); }
+    .toggle-switch input:focus-visible ~ .toggle-track { outline:2px solid var(--yellow);outline-offset:2px; }
+    .api-key-row { display:flex;align-items:center;gap:8px; }
+    .api-key-display { flex:1;font-family:var(--font-mono);font-size:12px;color:var(--text-muted);background:var(--bg-body);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:10px 12px;letter-spacing:0.15em; }
+    .save-footer { position:sticky;bottom:0;background:var(--bg-panel);border-top:1px solid var(--border-color);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:50;margin:0 -32px -32px; }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .modal-backdrop[hidden] { display:none; }
+    .modal { background:var(--bg-panel);border:1px solid var(--border-hover);border-radius:var(--radius-lg);width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg); }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-panel);z-index:1; }
+    .modal-title { font-family:var(--font-heading);font-size:18px;font-weight:700;color:var(--text-primary); }
+    .modal-body { padding:24px; }
+    .modal-footer-btns { display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+<div class="admin-shell">
+  <nav class="admin-sidebar" aria-label="Main navigation">
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — National dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text"><span class="logo-name">TDRN</span><span class="logo-tagline">Disaster Response Network</span></div>
+    </a>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-nat"><span class="sidebar-section-label" id="nav-nat">National</span>
+      <a href="index.html" class="nav-item" aria-label="National Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="#" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="#" class="nav-item" aria-label="Alerts"><span class="nav-item-icon" aria-hidden="true">🔔</span><span>Alerts</span><span class="nav-item-badge">3</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-tn"><span class="sidebar-section-label" id="nav-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee Dashboard"><span class="nav-item-icon" aria-hidden="true">🗺</span><span>TN Dashboard</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-wc"><span class="sidebar-section-label" id="nav-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item" aria-label="Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="wc-members.html" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="wc-teams.html" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="wc-training.html" class="nav-item" aria-label="Training"><span class="nav-item-icon" aria-hidden="true">🎓</span><span>Training</span></a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="wc-events.html" class="nav-item" aria-label="Events"><span class="nav-item-icon" aria-hidden="true">📅</span><span>Events</span></a>
+      <a href="wc-communications.html" class="nav-item" aria-label="Communications"><span class="nav-item-icon" aria-hidden="true">📡</span><span>Communications</span></a>
+      <a href="wc-documents.html" class="nav-item" aria-label="Documents"><span class="nav-item-icon" aria-hidden="true">📄</span><span>Documents</span></a>
+      <a href="wc-certifications.html" class="nav-item" aria-label="Certifications"><span class="nav-item-icon" aria-hidden="true">🏅</span><span>Certifications</span></a>
+      <a href="wc-applicants.html" class="nav-item" aria-label="Applicants"><span class="nav-item-icon" aria-hidden="true">📋</span><span>Applicants</span><span class="nav-item-badge">18</span></a>
+      <a href="wc-partners.html" class="nav-item" aria-label="Partners"><span class="nav-item-icon" aria-hidden="true">🤝</span><span>Partners</span></a>
+      <a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Readiness</span></a>
+      <a href="wc-settings.html" class="nav-item active" aria-current="page" aria-label="Settings — currently viewing"><span class="nav-item-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin"><div class="user-avatar" aria-hidden="true">JA</div><div class="user-info"><div class="user-name">Jason</div><div class="user-role">County Admin — WC</div></div></a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode"><span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span><span class="focus-mode-label">Focus Mode</span></button>
+    </div>
+  </nav>
+  <div class="admin-main">
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb"><ol>
+        <li><a href="index.html">National</a></li><li><a href="tennessee.html">Tennessee</a></li>
+        <li><a href="warren-county.html">Warren County</a></li><li><span class="current" aria-current="page">Settings</span></li>
+      </ol></nav>
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-set">Search settings</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-set" placeholder="Search settings…" autocomplete="off">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill critical" role="status" aria-label="Active Incident"><span class="status-pill-icon" aria-hidden="true">⚠</span> Active Incident</span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread"><span aria-hidden="true">🔔</span><span class="notification-badge" aria-hidden="true"></span></button>
+      </div>
+    </header>
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html" class="subnav-tab">Dashboard</a>
+      <a href="wc-members.html" class="subnav-tab">Members</a>
+      <a href="wc-teams.html" class="subnav-tab">Teams</a>
+      <a href="wc-training.html" class="subnav-tab">Training</a>
+      <a href="wc-equipment.html" class="subnav-tab">Equipment</a>
+      <a href="wc-events.html" class="subnav-tab">Events</a>
+      <a href="wc-communications.html" class="subnav-tab">Communications</a>
+      <a href="wc-documents.html" class="subnav-tab">Documents</a>
+      <a href="wc-certifications.html" class="subnav-tab">Certifications</a>
+      <a href="wc-applicants.html" class="subnav-tab">Applicants</a>
+      <a href="wc-partners.html" class="subnav-tab">Partners</a>
+      <a href="wc-readiness.html" class="subnav-tab">Readiness</a>
+      <a href="wc-settings.html" class="subnav-tab active" aria-current="page">Settings</a>
+    </nav>
+    <main id="main-content" class="admin-content" aria-label="County Settings">
+      <div class="content-header" style="margin-bottom:28px;">
+        <div class="content-header-left"><h1 class="content-title">County Settings</h1><p class="content-subtitle">Warren County, Tennessee — Administration &amp; Configuration</p></div>
+      </div>
+      <form id="settings-form" novalidate>
+        <!-- SECTION 1: COUNTY INFORMATION -->
+        <div class="settings-section">
+          <h2 class="settings-section-title"><span aria-hidden="true">🏛</span> County Information</h2>
+          <div class="settings-panel">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="set-county-name">County Name</label>
+                <input type="text" id="set-county-name" class="form-input" value="Warren County" readonly aria-readonly="true" style="color:var(--text-disabled);cursor:not-allowed;">
+                <span class="form-hint">County name is managed at the national level.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="set-state">State</label>
+                <input type="text" id="set-state" class="form-input" value="Tennessee" readonly aria-readonly="true" style="color:var(--text-disabled);cursor:not-allowed;">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="set-ema-director">EMA Director Name</label>
+                <input type="text" id="set-ema-director" class="form-input" value="Bill Summers" placeholder="Full name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="set-ema-phone">EMA Phone</label>
+                <input type="tel" id="set-ema-phone" class="form-input" value="(931) 473-2121" placeholder="(xxx) xxx-xxxx">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="set-ema-email">EMA Email</label>
+              <input type="email" id="set-ema-email" class="form-input" value="bsummers@warrencountytn.gov" placeholder="director@county.gov">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="set-county-seat">County Seat</label>
+                <input type="text" id="set-county-seat" class="form-input" value="McMinnville">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="set-population">Population</label>
+                <input type="number" id="set-population" class="form-input" value="42000" min="0">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="set-sq-miles">Square Miles</label>
+                <input type="number" id="set-sq-miles" class="form-input" value="433" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="set-hospital">Primary Hospital</label>
+                <input type="text" id="set-hospital" class="form-input" value="River Valley Medical Center">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="set-eoc">Primary EOC Location</label>
+              <input type="text" id="set-eoc" class="form-input" value="Warren County Emergency Operations Center, 201 Locust St, McMinnville, TN 37110">
+            </div>
+          </div>
+        </div>
+        <!-- SECTION 2: NOTIFICATION PREFERENCES -->
+        <div class="settings-section">
+          <h2 class="settings-section-title"><span aria-hidden="true">🔔</span> Notification Preferences</h2>
+          <div class="settings-panel">
+            <div role="group" aria-labelledby="notif-channels-legend">
+              <div id="notif-channels-legend" style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">Notification Channels</div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">Email Notifications</div><div class="toggle-desc">Receive alerts and updates via email</div></div>
+                <label class="toggle-switch" aria-label="Enable email notifications">
+                  <input type="checkbox" checked>
+                  <span class="toggle-track" aria-hidden="true"></span>
+                  <span class="toggle-thumb" aria-hidden="true"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">SMS Notifications</div><div class="toggle-desc">Receive text messages for critical alerts</div></div>
+                <label class="toggle-switch" aria-label="Enable SMS notifications">
+                  <input type="checkbox" checked>
+                  <span class="toggle-track" aria-hidden="true"></span>
+                  <span class="toggle-thumb" aria-hidden="true"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">In-App Notifications</div><div class="toggle-desc">Show notifications within the portal</div></div>
+                <label class="toggle-switch" aria-label="Enable in-app notifications">
+                  <input type="checkbox" checked>
+                  <span class="toggle-track" aria-hidden="true"></span>
+                  <span class="toggle-thumb" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+            <fieldset style="border:none;padding:0;">
+              <legend style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">Alert Threshold</legend>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-body);cursor:pointer;min-height:32px;">
+                  <input type="radio" name="alert-threshold" value="all" checked aria-label="Receive all alerts"> All Alerts
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-body);cursor:pointer;min-height:32px;">
+                  <input type="radio" name="alert-threshold" value="warnings" aria-label="Receive warnings and critical only"> Warnings &amp; Critical Only
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-body);cursor:pointer;min-height:32px;">
+                  <input type="radio" name="alert-threshold" value="critical" aria-label="Receive critical alerts only"> Critical Only
+                </label>
+              </div>
+            </fieldset>
+            <div class="form-group">
+              <label class="form-label" for="set-notif-emails">Notification Email Addresses</label>
+              <input type="text" id="set-notif-emails" class="form-input" value="jason@tdrn.org, bsummers@warrencountytn.gov" placeholder="Comma-separated email addresses">
+              <span class="form-hint">Separate multiple addresses with commas.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="set-notif-sms">SMS Notification Numbers</label>
+              <input type="text" id="set-notif-sms" class="form-input" value="+19315550100, +19315550101" placeholder="Comma-separated phone numbers">
+              <span class="form-hint">Include country code. Separate with commas.</span>
+            </div>
+          </div>
+        </div>
+        <!-- SECTION 3: DEPLOYMENT SETTINGS -->
+        <div class="settings-section">
+          <h2 class="settings-section-title"><span aria-hidden="true">🚨</span> Deployment Settings</h2>
+          <div class="settings-panel">
+            <div class="form-group">
+              <label class="form-label" for="set-staging">Default Staging Area</label>
+              <input type="text" id="set-staging" class="form-input" value="Warren County Fairgrounds — 1700 Morrison St, McMinnville, TN">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="set-assembly-gps">Assembly Point GPS Coordinates</label>
+              <input type="text" id="set-assembly-gps" class="form-input" value="35.6829° N, 85.7697° W" placeholder="Lat, Long">
+              <span class="form-hint">Used for emergency mobilization directions.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="set-ics-type">Default ICS Structure Type</label>
+              <select id="set-ics-type" class="form-select">
+                <option value="type5" selected>Type 5 — Initial Response (1-6 personnel)</option>
+                <option value="type4">Type 4 — Extended Response (up to 25 personnel)</option>
+                <option value="type3">Type 3 — Multi-Operational Period (up to 200 personnel)</option>
+                <option value="type2">Type 2 — Regional Incident</option>
+                <option value="type1">Type 1 — National Incident</option>
+              </select>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-label">Require 72-Hour Self-Sufficiency Confirmation</div><div class="toggle-desc">Members must confirm 72-hour kit readiness before deployment</div></div>
+              <label class="toggle-switch" aria-label="Require 72-hour self-sufficiency confirmation">
+                <input type="checkbox" checked>
+                <span class="toggle-track" aria-hidden="true"></span>
+                <span class="toggle-thumb" aria-hidden="true"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-label">Auto-Notify EMA on Incident Activation</div><div class="toggle-desc">Automatically send activation notice to Warren County EMA</div></div>
+              <label class="toggle-switch" aria-label="Auto-notify EMA on incident activation">
+                <input type="checkbox" checked>
+                <span class="toggle-track" aria-hidden="true"></span>
+                <span class="toggle-thumb" aria-hidden="true"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <!-- SECTION 4: USER ACCESS & ROLES -->
+        <div class="settings-section">
+          <h2 class="settings-section-title"><span aria-hidden="true">👤</span> User Access &amp; Roles</h2>
+          <div class="settings-panel" style="padding:0;overflow:hidden;">
+            <div style="padding:16px 20px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:13px;color:var(--text-muted);">5 admin users with portal access</span>
+              <button type="button" class="btn btn-ghost btn-sm" aria-label="Add admin user" onclick="TDRN.modal.open('modal-add-admin')"><span aria-hidden="true">＋</span> Add Admin User</button>
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table" aria-label="Admin users with portal access">
+                <thead><tr><th scope="col">Name</th><th scope="col">Role</th><th scope="col">Email</th><th scope="col">Last Login</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Jason</strong></td>
+                    <td>National Admin</td>
+                    <td><span style="font-size:12px;font-family:var(--font-mono);">jason@tdrn.org</span></td>
+                    <td><span style="font-family:var(--font-mono);font-size:11px;">May 2, 01:48</span></td>
+                    <td><span class="badge badge-operational" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span></td>
+                    <td><button class="btn btn-ghost btn-sm" aria-label="Edit Jason">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Marcus Reyes</strong></td>
+                    <td>County Admin</td>
+                    <td><span style="font-size:12px;font-family:var(--font-mono);">mreyes@tdrn.org</span></td>
+                    <td><span style="font-family:var(--font-mono);font-size:11px;">May 2, 00:12</span></td>
+                    <td><span class="badge badge-operational" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span></td>
+                    <td><button class="btn btn-ghost btn-sm" aria-label="Edit Marcus Reyes">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Priya Nair</strong></td>
+                    <td>Operations Lead</td>
+                    <td><span style="font-size:12px;font-family:var(--font-mono);">pnair@tdrn.org</span></td>
+                    <td><span style="font-family:var(--font-mono);font-size:11px;">May 1, 22:30</span></td>
+                    <td><span class="badge badge-operational" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span></td>
+                    <td><button class="btn btn-ghost btn-sm" aria-label="Edit Priya Nair">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Diana Chen</strong></td>
+                    <td>Training Coordinator</td>
+                    <td><span style="font-size:12px;font-family:var(--font-mono);">dchen@tdrn.org</span></td>
+                    <td><span style="font-family:var(--font-mono);font-size:11px;">Apr 30, 14:00</span></td>
+                    <td><span class="badge badge-operational" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span></td>
+                    <td><button class="btn btn-ghost btn-sm" aria-label="Edit Diana Chen">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>James Whitfield</strong></td>
+                    <td>Logistics Lead</td>
+                    <td><span style="font-size:12px;font-family:var(--font-mono);">jwhitfield@tdrn.org</span></td>
+                    <td><span style="font-family:var(--font-mono);font-size:11px;">Apr 29, 19:00</span></td>
+                    <td><span class="badge badge-operational" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span></td>
+                    <td><button class="btn btn-ghost btn-sm" aria-label="Edit James Whitfield">Edit</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- SECTION 5: DATA & INTEGRATIONS -->
+        <div class="settings-section">
+          <h2 class="settings-section-title"><span aria-hidden="true">🔌</span> Data &amp; Integrations</h2>
+          <div class="settings-panel">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:4px;">Export Data</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-ghost" aria-label="Export all data as JSON" onclick="TDRN.toast.info('Preparing JSON export…')"><span aria-hidden="true">📥</span> Export All Data (JSON)</button>
+                <button type="button" class="btn btn-ghost" aria-label="Export member list as CSV" onclick="TDRN.print.exportToCSV([],'warren-members.csv')"><span aria-hidden="true">📥</span> Member List (CSV)</button>
+                <button type="button" class="btn btn-ghost" aria-label="Export equipment registry as CSV" onclick="TDRN.print.exportToCSV([],'warren-equipment.csv')"><span aria-hidden="true">📥</span> Equipment Registry (CSV)</button>
+                <button type="button" class="btn btn-ghost" aria-label="Sync with Tennessee State Portal" onclick="TDRN.toast.info('Syncing with TN State Portal…')"><span aria-hidden="true">🔄</span> Sync with State Portal</button>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group">
+              <label class="form-label" for="set-api-key">API Key</label>
+              <div class="api-key-row">
+                <div class="api-key-display" id="set-api-key" role="text" aria-label="API key — masked">tdrn_wc_•••••••••••••••••••••••••••4f2a</div>
+                <button type="button" class="btn btn-ghost btn-sm" aria-label="Show API key" onclick="TDRN.toast.info('API key revealed — keep secure')" id="btn-reveal-key"><span aria-hidden="true">👁</span> Show</button>
+                <button type="button" class="btn btn-ghost btn-sm" aria-label="Regenerate API key" onclick="TDRN.modal.open('modal-regen-key')"><span aria-hidden="true">🔄</span> Regenerate</button>
+              </div>
+              <span class="form-hint">Use this key to authenticate requests to the TDRN API. Keep it secret.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="set-webhook">Webhook URL</label>
+              <div style="display:flex;gap:8px;">
+                <input type="url" id="set-webhook" class="form-input" value="https://hooks.example.com/tdrn/warren" placeholder="https://your-webhook-endpoint.com/tdrn" style="flex:1;">
+                <button type="button" class="btn btn-ghost" aria-label="Test webhook" onclick="TDRN.toast.success('Webhook test sent — 200 OK')"><span aria-hidden="true">⚡</span> Test</button>
+              </div>
+              <span class="form-hint">POST notifications will be sent here on incidents, alerts, and member changes.</span>
+            </div>
+          </div>
+        </div>
+        <!-- SECTION 6: DANGER ZONE -->
+        <div class="settings-section">
+          <h2 class="settings-section-title" style="color:var(--red);"><span aria-hidden="true">⚠</span> Danger Zone</h2>
+          <div class="danger-panel">
+            <div style="display:flex;flex-direction:column;gap:20px;">
+              <div>
+                <div class="danger-title">Archive County</div>
+                <div class="danger-desc">Archiving will deactivate Warren County in the TDRN portal. All data is retained but the county will not appear in active listings. This can be reversed by a National Admin.</div>
+                <button type="button" class="btn btn-ghost" style="color:var(--orange);border-color:rgba(251,146,60,0.4);" aria-label="Archive Warren County" onclick="TDRN.modal.open('modal-archive')"><span aria-hidden="true">📦</span> Archive County</button>
+              </div>
+              <hr style="border-color:rgba(248,113,113,0.25);">
+              <div>
+                <div class="danger-title">Reset All Data</div>
+                <div class="danger-desc">Permanently deletes all member records, equipment, events, documents, and settings for Warren County. <strong style="color:var(--red);">This cannot be undone.</strong></div>
+                <button type="button" class="btn btn-ghost" style="color:var(--red);border-color:rgba(248,113,113,0.4);" aria-label="Reset all Warren County data" onclick="TDRN.modal.open('modal-reset')"><span aria-hidden="true">⚠</span> Reset All Data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- STICKY SAVE FOOTER -->
+        <div class="save-footer" role="contentinfo" aria-label="Save settings">
+          <div style="font-size:12px;color:var(--text-disabled);">Last saved: <span id="last-saved-time">May 2, 2026 — 01:48 CDT</span></div>
+          <div style="display:flex;gap:10px;">
+            <button type="button" class="btn btn-ghost" aria-label="Discard changes" onclick="TDRN.toast.info('Changes discarded')">Discard Changes</button>
+            <button type="button" class="btn btn-primary" aria-label="Save all settings" onclick="TDRN.toast.success('Settings saved successfully') && (document.getElementById('last-saved-time').textContent = new Date().toLocaleString('en-US', {month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'}))"><span aria-hidden="true">💾</span> Save Settings</button>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+</div>
+<!-- ADD ADMIN MODAL -->
+<div id="modal-add-admin" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-admin-title">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="modal-admin-title">Add Admin User</h2><button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-add-admin')">✕</button></div>
+    <form id="form-add-admin" class="modal-body" data-validate-form novalidate>
+      <div class="form-group"><label class="form-label" for="admin-name">Full Name <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><input type="text" id="admin-name" class="form-input" required placeholder="First Last"></div>
+      <div class="form-group"><label class="form-label" for="admin-email">Email <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><input type="email" id="admin-email" class="form-input" required placeholder="name@tdrn.org"></div>
+      <div class="form-group"><label class="form-label" for="admin-role">Role <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><select id="admin-role" class="form-select" required><option value="">Select…</option><option>County Admin</option><option>Operations Lead</option><option>Training Coordinator</option><option>Logistics Lead</option><option>Communications Officer</option><option>Read Only</option></select></div>
+    </form>
+    <div class="modal-footer-btns">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-add-admin')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" aria-label="Add admin user" onclick="TDRN.forms.validateForm(document.getElementById('form-add-admin')) && TDRN.toast.success('Admin user added') && TDRN.modal.close('modal-add-admin')"><span aria-hidden="true">＋</span> Add User</button>
+    </div>
+  </div>
+</div>
+<!-- REGENERATE KEY MODAL -->
+<div id="modal-regen-key" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-regen-title">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="modal-regen-title" style="color:var(--orange);"><span aria-hidden="true">⚠</span> Regenerate API Key</h2><button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-regen-key')">✕</button></div>
+    <div class="modal-body"><p style="font-size:14px;color:var(--text-body);line-height:1.7;">Regenerating the API key will <strong>immediately invalidate the current key</strong>. Any integrations using the old key will stop working until updated.</p><div style="background:var(--yellow-light);border:1px solid rgba(245,196,0,0.4);border-radius:var(--radius-md);padding:12px 16px;margin-top:12px;font-size:13px;color:var(--yellow);"><span aria-hidden="true">⚠</span> Make sure to update all integrations with the new key immediately.</div></div>
+    <div class="modal-footer-btns">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-regen-key')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" style="background:var(--orange);border-color:var(--orange);" aria-label="Confirm regenerate API key" onclick="TDRN.toast.success('API key regenerated — update your integrations') && TDRN.modal.close('modal-regen-key')"><span aria-hidden="true">🔄</span> Regenerate Key</button>
+    </div>
+  </div>
+</div>
+<!-- ARCHIVE MODAL -->
+<div id="modal-archive" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-archive-title">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="modal-archive-title" style="color:var(--orange);"><span aria-hidden="true">📦</span> Archive Warren County</h2><button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-archive')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--text-body);line-height:1.7;margin-bottom:12px;">This will archive Warren County and remove it from active listings. All data is preserved and can be restored by a National Admin.</p>
+      <div class="form-group"><label class="form-label" for="archive-confirm">Type <strong>ARCHIVE</strong> to confirm</label><input type="text" id="archive-confirm" class="form-input" placeholder="ARCHIVE" autocomplete="off"></div>
+    </div>
+    <div class="modal-footer-btns">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-archive')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" style="background:var(--orange);border-color:var(--orange);" aria-label="Archive county" onclick="document.getElementById('archive-confirm').value==='ARCHIVE' ? (TDRN.toast.success('County archived') && TDRN.modal.close('modal-archive')) : TDRN.toast.error('Please type ARCHIVE to confirm')"><span aria-hidden="true">📦</span> Archive County</button>
+    </div>
+  </div>
+</div>
+<!-- RESET MODAL -->
+<div id="modal-reset" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-reset-title">
+  <div class="modal">
+    <div class="modal-header" style="border-bottom-color:rgba(248,113,113,0.3);"><h2 class="modal-title" id="modal-reset-title" style="color:var(--red);"><span aria-hidden="true">⚠</span> Reset All Data</h2><button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-reset')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--text-body);line-height:1.7;margin-bottom:12px;"><strong style="color:var(--red);">This action is irreversible.</strong> All members, teams, equipment, events, documents, certifications, and settings will be permanently deleted.</p>
+      <div style="background:var(--red-light);border:1px solid rgba(248,113,113,0.4);border-radius:var(--radius-md);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--red);"><span aria-hidden="true">⚠</span> There is no undo. This cannot be reversed.</div>
+      <div class="form-group"><label class="form-label" for="reset-confirm">Type <strong>RESET WARREN COUNTY</strong> to confirm</label><input type="text" id="reset-confirm" class="form-input" placeholder="RESET WARREN COUNTY" autocomplete="off"></div>
+    </div>
+    <div class="modal-footer-btns">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-reset')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" style="background:var(--red);border-color:var(--red);" aria-label="Confirm reset all data" onclick="document.getElementById('reset-confirm').value==='RESET WARREN COUNTY' ? (TDRN.toast.error('All data reset — county cleared') && TDRN.modal.close('modal-reset')) : TDRN.toast.error('Please type the exact confirmation phrase')"><span aria-hidden="true">⚠</span> Reset All Data</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICS Digital Forms — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .form-selector-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; margin-bottom:28px; }
+    .form-card { background:var(--bg-panel); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:8px; cursor:pointer; transition:var(--transition); }
+    .form-card:hover { border-color:var(--border-hover); background:var(--bg-panel-hover); }
+    .form-card.active { border-color:rgba(245,196,0,0.4); background:var(--yellow-light); }
+    .form-card-num { font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--yellow); background:var(--yellow-light); border:1px solid rgba(245,196,0,0.25); border-radius:4px; padding:2px 7px; display:inline-block; width:fit-content; }
+    .form-card-name { font-size:13px; font-weight:600; color:var(--text-primary); }
+    .form-card-desc { font-size:11px; color:var(--text-muted); line-height:1.4; }
+    .form-card-actions { display:flex; gap:6px; margin-top:4px; }
+    .form-card-btn { font-size:11px; padding:3px 8px; border-radius:4px; border:1px solid var(--border-color); background:transparent; color:var(--text-muted); cursor:pointer; font-family:var(--font-base); transition:var(--transition); min-height:28px; }
+    .form-card-btn:hover { border-color:var(--border-hover); color:var(--text-body); }
+    .form-card-btn.primary { background:var(--yellow); color:#000; border-color:var(--yellow); }
+    .form-card-btn.primary:hover { background:var(--yellow-hover); }
+    /* ICS Form Styles */
+    .ics-form-container { background:var(--bg-panel); border:1px solid var(--border-color); border-radius:var(--radius-lg); overflow:hidden; }
+    .ics-form-header { background:rgba(245,196,0,0.08); border-bottom:1px solid var(--border-color); padding:16px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .ics-form-title { font-family:var(--font-heading); font-size:18px; color:var(--text-primary); font-weight:600; }
+    .ics-form-badge { font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--yellow); background:var(--yellow-light); border:1px solid rgba(245,196,0,0.3); border-radius:6px; padding:4px 10px; }
+    .ics-form-body { padding:24px; }
+    .ics-section { margin-bottom:28px; }
+    .ics-section-title { font-family:var(--font-heading); font-size:14px; font-weight:600; color:var(--yellow); text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid rgba(245,196,0,0.2); padding-bottom:8px; margin-bottom:16px; }
+    .ics-field-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:14px; }
+    .ics-assignment-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .ics-assignment-table th { background:var(--bg-body); padding:8px 12px; text-align:left; font-size:12px; font-weight:600; color:var(--text-muted); border:1px solid var(--border-color); }
+    .ics-assignment-table td { padding:6px 12px; border:1px solid var(--border-color); }
+    .ics-assignment-table input { background:transparent; border:none; color:var(--text-body); font-family:var(--font-base); font-size:13px; width:100%; outline:none; }
+    .ics-attachment-list { display:flex; flex-direction:column; gap:8px; }
+    .ics-attachment-item { display:flex; align-items:center; gap:10px; font-size:13px; }
+    .form-actions-bar { position:sticky; bottom:0; background:var(--bg-panel); border-top:1px solid var(--border-color); padding:14px 24px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; z-index:50; }
+    .saved-draft-item { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:var(--radius-md); margin-bottom:10px; }
+    .draft-meta { flex:1; }
+    .draft-name { font-size:13px; font-weight:600; color:var(--text-primary); }
+    .draft-info { font-size:12px; color:var(--text-muted); margin-top:2px; }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <div class="admin-shell">
+    <!-- SIDEBAR -->
+    <nav class="admin-sidebar" aria-label="TDRN Warren County navigation">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark" aria-hidden="true">T</div>
+        <div class="sidebar-logo-text">
+          <span class="sidebar-logo-name">TDRN</span>
+          <span class="sidebar-logo-sub">Warren County</span>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label" id="nav-label-main">County Portal</div>
+        <ul role="list" aria-labelledby="nav-label-main">
+          <li><a href="warren-county.html" class="nav-item" aria-label="Dashboard"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Dashboard</span></a></li>
+          <li><a href="wc-members.html" class="nav-item" aria-label="Members"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Members</span></a></li>
+          <li><a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Readiness</span></a></li>
+          <li><a href="wc-analytics.html" class="nav-item" aria-label="Analytics"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Analytics</span></a></li>
+          <li><a href="wc-ai-center.html" class="nav-item" aria-label="AI Center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>AI Center</span></a></li>
+          <li><a href="wc-map.html" class="nav-item" aria-label="Live Map"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg><span>Live Map</span></a></li>
+          <li><a href="wc-ics-forms.html" class="nav-item active" aria-label="ICS Forms" aria-current="page"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>ICS Forms</span></a></li>
+          <li><a href="wc-communications.html" class="nav-item" aria-label="Communications"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Communications</span></a></li>
+          <li><a href="wc-documents.html" class="nav-item" aria-label="Documents"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Documents</span></a></li>
+          <li><a href="wc-settings.html" class="nav-item" aria-label="Settings"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></a></li>
+        </ul>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="user-chip-avatar" aria-hidden="true">JA</div>
+          <div class="user-chip-info"><span class="user-chip-name">Jason</span><span class="user-chip-role">National Admin</span></div>
+        </div>
+        <button class="focus-mode-toggle" id="focus-toggle" aria-pressed="false" onclick="TDRN.toggleFocusMode()" aria-label="Toggle focus mode">
+          <svg class="focus-mode-toggle-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Focus Mode</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="admin-main">
+      <!-- TOPBAR -->
+      <header class="admin-topbar" role="banner">
+        <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">National</a></li>
+            <li><a href="tennessee.html">Tennessee</a></li>
+            <li><a href="warren-county.html">Warren County</a></li>
+            <li><span class="current" aria-current="page">ICS Forms</span></li>
+          </ol>
+        </nav>
+        <div class="topbar-search">
+          <label for="topbar-search-input" class="sr-only">Search portal</label>
+          <svg class="topbar-search-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="topbar-search-input" placeholder="Search…" autocomplete="off">
+        </div>
+        <div class="topbar-actions">
+          <span id="tdrn-clock" aria-live="off"></span>
+          <div class="status-pill critical" role="status" aria-label="Incident active: Tornado Response">
+            <svg class="status-pill-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Incident Active
+          </div>
+          <button class="notification-btn" aria-label="Notifications — 3 unread">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notification-badge" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- SUBNAV -->
+      <nav class="admin-subnav" aria-label="Warren County sections">
+        <a href="warren-county.html" class="subnav-tab">Dashboard</a>
+        <a href="wc-members.html" class="subnav-tab">Members</a>
+        <a href="wc-teams.html" class="subnav-tab">Teams</a>
+        <a href="wc-training.html" class="subnav-tab">Training</a>
+        <a href="wc-equipment.html" class="subnav-tab">Equipment</a>
+        <a href="wc-events.html" class="subnav-tab">Events</a>
+        <a href="wc-communications.html" class="subnav-tab">Communications</a>
+        <a href="wc-documents.html" class="subnav-tab">Documents</a>
+        <a href="wc-certifications.html" class="subnav-tab">Certifications</a>
+        <a href="wc-applicants.html" class="subnav-tab">Applicants</a>
+        <a href="wc-partners.html" class="subnav-tab">Partners</a>
+        <a href="wc-readiness.html" class="subnav-tab">Readiness</a>
+        <a href="wc-settings.html" class="subnav-tab">Settings</a>
+        <a href="wc-analytics.html" class="subnav-tab">Analytics</a>
+        <a href="wc-ics-forms.html" class="subnav-tab active" aria-current="page">ICS Forms</a>
+        <a href="wc-map.html" class="subnav-tab">Live Map</a>
+        <a href="wc-ai-center.html" class="subnav-tab">AI Center</a>
+      </nav>
+
+      <main id="main-content" class="admin-content">
+
+        <div class="content-header">
+          <div>
+            <h1 class="content-title">ICS Digital Forms</h1>
+            <p class="content-subtitle">Standardized Incident Command System forms — auto-populated from system data</p>
+          </div>
+          <div class="content-actions">
+            <button class="topbar-btn secondary" onclick="window.print()" aria-label="Print current form">
+              <svg class="topbar-btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Print Form
+            </button>
+            <button class="topbar-btn primary" onclick="saveFormDraft()" aria-label="Save current form as draft">
+              <svg class="topbar-btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save Draft
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Selector Cards -->
+        <section aria-label="ICS Form selection">
+          <h2 class="sr-only">Select a form to open</h2>
+          <div class="form-selector-grid" role="list">
+
+            <div class="form-card active" role="listitem" onclick="selectForm('ICS-201')" aria-label="Open ICS-201 Incident Briefing form" tabindex="0">
+              <span class="form-card-num">ICS-201</span>
+              <div class="form-card-name">Incident Briefing</div>
+              <div class="form-card-desc">Initial situation summary, objectives, and resource snapshot</div>
+              <div class="form-card-actions">
+                <button class="form-card-btn primary" aria-label="Open ICS-201 form">Open Form</button>
+                <button class="form-card-btn" aria-label="Load last saved ICS-201">Last Saved</button>
+              </div>
+            </div>
+
+            <div class="form-card" role="listitem" onclick="selectForm('ICS-202')" tabindex="0" aria-label="Open ICS-202 Incident Objectives form">
+              <span class="form-card-num">ICS-202</span>
+              <div class="form-card-name">Incident Objectives</div>
+              <div class="form-card-desc">Operational period objectives, weather, and safety message</div>
+              <div class="form-card-actions">
+                <button class="form-card-btn" aria-label="Open ICS-202">Open Form</button>
+                <button class="form-card-btn" aria-label="Load last saved ICS-202">Last Saved</button>
+              </div>
+            </div>
+
+            <div class="form-card" role="listitem" onclick="selectForm('ICS-204')" tabindex="0" aria-label="Open ICS-204 Assignment List form">
+              <span class="form-card-num">ICS-204</span>
+              <div class="form-card-name">Assignment List</div>
+              <div class="form-card-desc">Division/group assignments, resources, and work tasks</div>
+              <div class="form-card-actions">
+                <button class="form-card-btn" aria-label="Open ICS-204">Open Form</button>
+                <button class="form-card-btn" aria-label="Load last saved">Last Saved</button>
+              </div>
+            </div>
+
+            <div class="form-card" role="listitem" onclick="selectForm('ICS-205')" tabindex="0" aria-label="Open ICS-205 Radio Communications Plan form">
+              <span class="form-card-num">ICS-205</span>
+              <div class="form-card-name">Radio Comms Plan</div>
+              <div class="form-card-desc">Incident radio channel assignments by function</div>
+              <div class="form-card-actions">
+                <button class="form-card-btn" aria-label="Open ICS-205">Open Form</button>
+                <button class="form-card-btn" aria-label="Load last saved">Last Saved</button>
+              </div>
+            </div>
+
+            <div class="form-card" role="listitem" onclick="selectForm('ICS-206')" tabindex="0" aria-label="Open ICS-206 Medical Plan form">
+              <span class="form-card-num">ICS-206</span>
+              <div class="form-card-name">Medical Plan</div>
+              <div class="form-card-desc">Medical aid stations, transportation, and hospitals</div>
+              <div class="form-card-actions">
+                <button class="form-card-btn" aria-label="Open ICS-206">Open Form</button>
+                <button class="form-card-btn" aria-label="Load last saved">Last Saved</button>
+              </div>
+            </div>
+
+            <div class="form-card" role="listitem" onclick="selectForm('ICS-209')" tabindex="0" aria-label="Open ICS-209 Incident Status Summary form">
+              <span class="form-card-num">ICS-209</span>
+              <div class="form-card-name">Status Summary</div>
+              <div class="form-card-desc">Comprehensive incident status for agency reporting</div>
+              <div class="form-card-actions">
+                <button class="form-card-btn" aria-label="Open ICS-209">Open Form</button>
+                <button class="form-card-btn" aria-label="Load last saved">Last Saved</button>
+              </div>
+            </div>
+
+            <div class="form-card" role="listitem" onclick="selectForm('ICS-211')" tabindex="0" aria-label="Open ICS-211 Incident Check-In List form">
+              <span class="form-card-num">ICS-211</span>
+              <div class="form-card-name">Check-In List</div>
+              <div class="form-card-desc">Personnel and equipment check-in tracking sheet</div>
+              <div class="form-card-actions">
+                <button class="form-card-btn" aria-label="Open ICS-211">Open Form</button>
+                <button class="form-card-btn" aria-label="Load last saved">Last Saved</button>
+              </div>
+            </div>
+
+            <div class="form-card" role="listitem" onclick="selectForm('ICS-213')" tabindex="0" aria-label="Open ICS-213 General Message form">
+              <span class="form-card-num">ICS-213</span>
+              <div class="form-card-name">General Message</div>
+              <div class="form-card-desc">Inter-agency and internal message routing form</div>
+              <div class="form-card-actions">
+                <button class="form-card-btn" aria-label="Open ICS-213">Open Form</button>
+                <button class="form-card-btn" aria-label="Load last saved">Last Saved</button>
+              </div>
+            </div>
+
+            <div class="form-card" role="listitem" onclick="selectForm('ICS-215A')" tabindex="0" aria-label="Open ICS-215A Safety Analysis form">
+              <span class="form-card-num">ICS-215A</span>
+              <div class="form-card-name">Safety Analysis</div>
+              <div class="form-card-desc">Incident Action Plan safety analysis and mitigations</div>
+              <div class="form-card-actions">
+                <button class="form-card-btn" aria-label="Open ICS-215A">Open Form</button>
+                <button class="form-card-btn" aria-label="Load last saved">Last Saved</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ICS-201 Active Form -->
+        <div class="ics-form-container" id="ics-201-form" aria-label="ICS-201 Incident Briefing Form">
+          <div class="ics-form-header">
+            <div>
+              <div class="ics-form-badge">ICS-201</div>
+              <div class="ics-form-title" style="margin-top:4px">Incident Briefing</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:12px;color:var(--text-muted)">Operational Period: Day 3</span>
+              <span class="badge-critical"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>ACTIVE INCIDENT</span>
+            </div>
+          </div>
+
+          <form class="ics-form-body" id="ics201-form" aria-label="ICS-201 Incident Briefing form fields" novalidate>
+
+            <!-- Section 1: Incident Info -->
+            <fieldset class="ics-section">
+              <legend class="ics-section-title">Section 1 — Incident Information</legend>
+              <div class="ics-field-row">
+                <div class="form-group">
+                  <label for="inc-name" class="form-label">Incident Name <span aria-hidden="true">*</span></label>
+                  <input type="text" id="inc-name" class="form-input" value="Warren County Tornado Response" aria-required="true">
+                </div>
+                <div class="form-group">
+                  <label for="inc-number" class="form-label">Incident Number</label>
+                  <input type="text" id="inc-number" class="form-input" value="2026-TN-WC-001">
+                </div>
+                <div class="form-group">
+                  <label for="inc-date" class="form-label">Date Prepared <span aria-hidden="true">*</span></label>
+                  <input type="date" id="inc-date" class="form-input" value="2026-05-02" aria-required="true">
+                </div>
+                <div class="form-group">
+                  <label for="inc-time" class="form-label">Time Prepared</label>
+                  <input type="time" id="inc-time" class="form-input" value="06:00">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="map-sketch" class="form-label">Map Sketch / Location Description</label>
+                <textarea id="map-sketch" class="form-textarea" rows="3" placeholder="Describe or sketch the incident area, key landmarks, access routes, and hazard zones…">Primary debris field: Hwy 70S corridor east of McMinnville city limits, approximately 3.2 miles. Secondary debris: Viola Road crossing at Barren Fork tributary. Staging Area A: Home Depot parking lot (N 35.6834, W 85.7697). EOC: McMinnville City Hall, 1 S Court Square.</textarea>
+              </div>
+            </fieldset>
+
+            <!-- Section 2: IC and Staff -->
+            <fieldset class="ics-section">
+              <legend class="ics-section-title">Section 2 — Incident Commander &amp; Staff</legend>
+              <div class="table-wrapper">
+                <table class="ics-assignment-table" aria-label="ICS Command staff assignments">
+                  <thead>
+                    <tr>
+                      <th scope="col">Position</th>
+                      <th scope="col">Name</th>
+                      <th scope="col">Agency / Organization</th>
+                      <th scope="col">Phone / Radio</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Incident Commander</td><td><label for="ic-name" class="sr-only">Incident Commander name</label><input id="ic-name" type="text" value="Capt. Robert Morgan" aria-label="Incident Commander name"></td><td><input type="text" value="TDRN Warren County" aria-label="Incident Commander agency"></td><td><input type="tel" value="(931) 555-0110" aria-label="Incident Commander phone"></td></tr>
+                    <tr><td>Deputy IC</td><td><input type="text" value="Lt. Sarah Williams" aria-label="Deputy IC name"></td><td><input type="text" value="TDRN Warren County" aria-label="Deputy IC agency"></td><td><input type="tel" value="(931) 555-0122" aria-label="Deputy IC phone"></td></tr>
+                    <tr><td>Safety Officer</td><td><input type="text" value="Marcus Davis" aria-label="Safety Officer name"></td><td><input type="text" value="TDRN Warren County" aria-label="Safety Officer agency"></td><td><input type="tel" value="(931) 555-0134" aria-label="Safety Officer phone"></td></tr>
+                    <tr><td>Public Info Officer</td><td><input type="text" value="Elena Rodriguez" aria-label="PIO name"></td><td><input type="text" value="Warren County EMA" aria-label="PIO agency"></td><td><input type="tel" value="(931) 555-0146" aria-label="PIO phone"></td></tr>
+                    <tr><td>Liaison Officer</td><td><input type="text" value="Cpt. James Hartley" aria-label="Liaison Officer name"></td><td><input type="text" value="Warren County SO" aria-label="Liaison Officer agency"></td><td><input type="tel" value="(931) 555-0158" aria-label="Liaison Officer phone"></td></tr>
+                    <tr><td>Operations Section Chief</td><td><input type="text" value="David Thompson" aria-label="Operations Section Chief name"></td><td><input type="text" value="TDRN" aria-label="Ops Chief agency"></td><td><input type="tel" value="(931) 555-0170" aria-label="Ops Chief phone"></td></tr>
+                    <tr><td>Planning Section Chief</td><td><input type="text" value="Patricia Chen" aria-label="Planning Section Chief name"></td><td><input type="text" value="TDRN" aria-label="Planning Chief agency"></td><td><input type="tel" value="(931) 555-0182" aria-label="Planning Chief phone"></td></tr>
+                    <tr><td>Logistics Section Chief</td><td><input type="text" value="Michael Johnson" aria-label="Logistics Section Chief name"></td><td><input type="text" value="TDRN" aria-label="Logistics Chief agency"></td><td><input type="tel" value="(931) 555-0194" aria-label="Logistics Chief phone"></td></tr>
+                    <tr><td>Finance/Admin Chief</td><td><input type="text" value="Diane Moore" aria-label="Finance/Admin Chief name"></td><td><input type="text" value="Warren County EMA" aria-label="Finance Chief agency"></td><td><input type="tel" value="(931) 555-0206" aria-label="Finance Chief phone"></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </fieldset>
+
+            <!-- Section 3: Situation Summary -->
+            <fieldset class="ics-section">
+              <legend class="ics-section-title">Section 3 — Situation Summary</legend>
+              <div class="form-group">
+                <label for="situation" class="form-label">Current Situation <span aria-hidden="true">*</span></label>
+                <textarea id="situation" class="form-textarea" rows="5" aria-required="true">EF-2 tornado touched down at 0312 hours on April 30, 2026, tracking northeast for approximately 4.2 miles through eastern Warren County. Three residential structures destroyed, 14 damaged. Zero fatalities confirmed. Two minor injuries treated on scene and released.
+
+Primary debris field spans Hwy 70S corridor. All utilities restored to 94% of affected area. Barren Fork Road remains closed at mile marker 7. Active search and clearance operations underway in eastern sector. Shelter operations at McMinnville Civic Center — 23 residents, capacity 87%.</textarea>
+              </div>
+            </fieldset>
+
+            <!-- Section 4: Objectives -->
+            <fieldset class="ics-section">
+              <legend class="ics-section-title">Section 4 — Incident Objectives</legend>
+              <div class="form-group">
+                <label for="obj-1" class="form-label">Objective 1 <span aria-hidden="true">*</span></label>
+                <input type="text" id="obj-1" class="form-input" value="Complete debris clearance of Hwy 70S corridor to restore two-lane traffic — target 18:00 Day 3" aria-required="true">
+              </div>
+              <div class="form-group">
+                <label for="obj-2" class="form-label">Objective 2</label>
+                <input type="text" id="obj-2" class="form-input" value="Conduct final damage assessment of all 17 affected structures — complete by 14:00 Day 3">
+              </div>
+              <div class="form-group">
+                <label for="obj-3" class="form-label">Objective 3</label>
+                <input type="text" id="obj-3" class="form-input" value="Transition shelter operations to American Red Cross by 08:00 Day 4">
+              </div>
+              <div class="form-group">
+                <label for="obj-4" class="form-label">Objective 4</label>
+                <input type="text" id="obj-4" class="form-input" value="Demobilize Teams Delta and Echo upon completion of assigned sectors — target 20:00 Day 3">
+              </div>
+            </fieldset>
+
+            <!-- Section 5: Current Actions -->
+            <fieldset class="ics-section">
+              <legend class="ics-section-title">Section 5 — Current Actions</legend>
+              <div class="form-group">
+                <label for="current-actions" class="form-label">Actions Currently Underway</label>
+                <textarea id="current-actions" class="form-textarea" rows="4">• Team Alpha — Debris clearance, Hwy 70S, Sector A (eastern end). 1 skid steer, 4 chainsaw operators. Est. completion 16:00.
+• Team Bravo — Structural assessment, Oak Ridge subdivision. 6 members. Coordinating with county building inspector.
+• Team Charlie — Access road clearing, Barren Fork Road. 8 members, 2 chainsaws.
+• Teams Delta/Echo — Standby at Staging Area A. Available for surge operations.
+• Logistics — Fuel resupply at 12:00. Meal delivery from FoodBank at 11:30.
+• Planning — Preparing demobilization plan for Day 4.</textarea>
+              </div>
+            </fieldset>
+
+            <!-- Section 6: Planned Actions -->
+            <fieldset class="ics-section">
+              <legend class="ics-section-title">Section 6 — Planned Actions</legend>
+              <div class="form-group">
+                <label for="planned-actions" class="form-label">Planned Actions — Next Operational Period</label>
+                <textarea id="planned-actions" class="form-textarea" rows="4">• Begin demobilization of Teams Delta and Echo — transport to decon point at Staging Area A.
+• Transfer shelter responsibility to ARC coordinator — documentation package to be prepared by Planning tonight.
+• Schedule team rotation for overnight; Teams Alpha/Bravo reduced to watch status.
+• Prepare After Action Report framework — incident closure expected Day 5.
+• Coordinate with county road department for permanent repair assessment.</textarea>
+              </div>
+            </fieldset>
+
+            <!-- Section 7: Weather -->
+            <fieldset class="ics-section">
+              <legend class="ics-section-title">Section 7 — Weather Forecast</legend>
+              <div class="ics-field-row">
+                <div class="form-group">
+                  <label for="wx-temp" class="form-label">Temperature (°F)</label>
+                  <input type="text" id="wx-temp" class="form-input" value="68–74°F">
+                </div>
+                <div class="form-group">
+                  <label for="wx-humidity" class="form-label">Humidity</label>
+                  <input type="text" id="wx-humidity" class="form-input" value="62%">
+                </div>
+                <div class="form-group">
+                  <label for="wx-wind" class="form-label">Wind Speed / Direction</label>
+                  <input type="text" id="wx-wind" class="form-input" value="SSW 8–12 mph">
+                </div>
+                <div class="form-group">
+                  <label for="wx-precip" class="form-label">Precipitation</label>
+                  <input type="text" id="wx-precip" class="form-input" value="20% chance afternoon thunderstorms — monitor">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="wx-notes" class="form-label">Weather Notes / Hazards</label>
+                <textarea id="wx-notes" class="form-textarea" rows="2">Afternoon convection possible. If storm activity develops, suspend chainsaw operations and move all personnel to hardened shelter. All team leaders have weather alert apps active.</textarea>
+              </div>
+            </fieldset>
+
+            <!-- Section 8: Safety Message -->
+            <fieldset class="ics-section">
+              <legend class="ics-section-title">Section 8 — Safety Message</legend>
+              <div class="form-group">
+                <label for="safety-msg" class="form-label">Safety Message for All Personnel</label>
+                <textarea id="safety-msg" class="form-textarea" rows="3">ALL PERSONNEL: Debris operations — hard hats, safety glasses, gloves, and high-visibility vests required at all times in active sectors. Watch for unstable structures, exposed utilities, and wildlife disturbed by debris. No single-person chainsaw operations. Buddy system in effect. Report all injuries or near-misses to Safety Officer immediately via radio Channel 3.</textarea>
+              </div>
+            </fieldset>
+
+            <!-- Section 9: Attachments -->
+            <fieldset class="ics-section">
+              <legend class="ics-section-title">Section 9 — Attachments</legend>
+              <div class="ics-attachment-list" role="group" aria-label="Form attachments checklist">
+                <div class="ics-attachment-item">
+                  <input type="checkbox" id="att-map" checked aria-label="Attach incident map" style="min-height:unset;width:16px;height:16px">
+                  <label for="att-map" style="font-size:13px;color:var(--text-body);cursor:pointer">Incident Area Map (attached)</label>
+                </div>
+                <div class="ics-attachment-item">
+                  <input type="checkbox" id="att-org" checked aria-label="Attach ICS organization chart" style="min-height:unset;width:16px;height:16px">
+                  <label for="att-org" style="font-size:13px;color:var(--text-body);cursor:pointer">ICS Organization Chart (attached)</label>
+                </div>
+                <div class="ics-attachment-item">
+                  <input type="checkbox" id="att-res" checked aria-label="Attach resource summary" style="min-height:unset;width:16px;height:16px">
+                  <label for="att-res" style="font-size:13px;color:var(--text-body);cursor:pointer">Resource Summary (attached)</label>
+                </div>
+                <div class="ics-attachment-item">
+                  <input type="checkbox" id="att-wx" aria-label="Attach NWS weather forecast" style="min-height:unset;width:16px;height:16px">
+                  <label for="att-wx" style="font-size:13px;color:var(--text-body);cursor:pointer">NWS Weather Forecast Printout</label>
+                </div>
+                <div class="ics-attachment-item">
+                  <input type="checkbox" id="att-204" aria-label="Attach ICS-204 assignment list" style="min-height:unset;width:16px;height:16px">
+                  <label for="att-204" style="font-size:13px;color:var(--text-body);cursor:pointer">ICS-204 Assignment List</label>
+                </div>
+                <div class="ics-attachment-item">
+                  <input type="checkbox" id="att-comms" aria-label="Attach communications plan" style="min-height:unset;width:16px;height:16px">
+                  <label for="att-comms" style="font-size:13px;color:var(--text-body);cursor:pointer">Communications Plan (ICS-205)</label>
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Section 10: Prepared By -->
+            <fieldset class="ics-section">
+              <legend class="ics-section-title">Section 10 — Prepared By</legend>
+              <div class="ics-field-row">
+                <div class="form-group">
+                  <label for="prep-name" class="form-label">Prepared By (Name &amp; Title) <span aria-hidden="true">*</span></label>
+                  <input type="text" id="prep-name" class="form-input" value="Patricia Chen, Planning Section Chief" aria-required="true">
+                </div>
+                <div class="form-group">
+                  <label for="prep-date" class="form-label">Date <span aria-hidden="true">*</span></label>
+                  <input type="date" id="prep-date" class="form-input" value="2026-05-02" aria-required="true">
+                </div>
+                <div class="form-group">
+                  <label for="prep-time" class="form-label">Time</label>
+                  <input type="time" id="prep-time" class="form-input" value="06:00">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="prep-sig" class="form-label">Signature / Acknowledgment</label>
+                <input type="text" id="prep-sig" class="form-input" placeholder="Type full name to electronically sign…">
+              </div>
+            </fieldset>
+
+          </form><!-- /#ics201-form -->
+
+          <!-- Form Actions Bar -->
+          <div class="form-actions-bar" role="toolbar" aria-label="Form actions">
+            <button class="topbar-btn primary" onclick="saveFormDraft()" aria-label="Save ICS-201 as draft">Save Draft</button>
+            <button class="topbar-btn secondary" onclick="window.print()" aria-label="Print ICS-201 form">Print Form</button>
+            <button class="topbar-btn secondary" aria-label="Export ICS-201 as PDF">Export PDF</button>
+            <button class="topbar-btn secondary" aria-label="Submit ICS-201 to command">Submit to Command</button>
+            <button class="topbar-btn ghost" aria-label="Email ICS-201 to EMA">Email to EMA</button>
+            <span style="margin-left:auto;font-size:12px;color:var(--text-muted)" aria-live="polite" id="save-status">Last saved: 2 min ago</span>
+          </div>
+        </div><!-- /.ics-form-container -->
+
+        <!-- Saved Drafts -->
+        <div class="panel" style="margin-top:24px;">
+          <div class="panel-header"><h2 class="panel-title">Saved Drafts</h2></div>
+          <div class="panel-body">
+            <div class="saved-draft-item">
+              <div class="draft-meta">
+                <div class="draft-name">ICS-201 — Warren County Tornado Response — Day 3</div>
+                <div class="draft-info">Saved May 2, 2026 at 05:47 CST &nbsp;·&nbsp; Saved by: Patricia Chen</div>
+              </div>
+              <button class="topbar-btn secondary" style="min-height:36px;font-size:13px" aria-label="Restore this ICS-201 draft">Restore</button>
+              <button class="topbar-btn ghost" style="min-height:36px;font-size:13px" aria-label="Delete this draft">Delete</button>
+            </div>
+            <div class="saved-draft-item">
+              <div class="draft-meta">
+                <div class="draft-name">ICS-209 — Incident Status Summary — Day 2</div>
+                <div class="draft-info">Saved May 1, 2026 at 20:15 CST &nbsp;·&nbsp; Saved by: David Thompson</div>
+              </div>
+              <button class="topbar-btn secondary" style="min-height:36px;font-size:13px" aria-label="Restore ICS-209 draft">Restore</button>
+              <button class="topbar-btn ghost" style="min-height:36px;font-size:13px" aria-label="Delete ICS-209 draft">Delete</button>
+            </div>
+            <div class="saved-draft-item">
+              <div class="draft-meta">
+                <div class="draft-name">ICS-204 — Assignment List — Day 2 Afternoon</div>
+                <div class="draft-info">Saved May 1, 2026 at 13:30 CST &nbsp;·&nbsp; Saved by: Patricia Chen</div>
+              </div>
+              <button class="topbar-btn secondary" style="min-height:36px;font-size:13px" aria-label="Restore ICS-204 draft">Restore</button>
+              <button class="topbar-btn ghost" style="min-height:36px;font-size:13px" aria-label="Delete ICS-204 draft">Delete</button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <script src="tdrn-core.js"></script>
+  <script>
+    TDRN.init();
+
+    function selectForm(formId) {
+      document.querySelectorAll('.form-card').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      TDRN.announceToScreenReader('Form ' + formId + ' selected');
+    }
+
+    function saveFormDraft() {
+      const data = {
+        formType: 'ICS-201',
+        incidentName: document.getElementById('inc-name')?.value,
+        savedAt: new Date().toISOString(),
+        savedBy: 'Jason'
+      };
+      TDRN.saveState('ics201_draft', data);
+      document.getElementById('save-status').textContent = 'Draft saved: ' + new Date().toLocaleTimeString();
+      TDRN.toast.success('ICS-201 draft saved successfully');
+      TDRN.announceToScreenReader('Form draft saved successfully');
+    }
+
+    // Auto-save every 3 minutes
+    setInterval(saveFormDraft, 180000);
+  </script>
+</body>
+</html>

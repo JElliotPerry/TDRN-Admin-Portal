@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARIA AI Command Center — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── ARIA AI Center — page-specific styles ── */
+    .aria-online-indicator { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.3); border-radius:20px; font-size:11px; font-weight:700; color:var(--green); letter-spacing:0.04em; }
+    .aria-pulse { width:7px; height:7px; background:var(--green); border-radius:50%; animation:aria-pulse 1.8s ease-in-out infinite; flex-shrink:0; }
+    @keyframes aria-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+    .content-title-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    /* Chat Interface */
+    .aria-chat-outer { background:var(--bg-panel); border:1px solid var(--border-color); border-radius:var(--radius-lg); display:flex; flex-direction:column; height:680px; overflow:hidden; }
+    .aria-chat-header-bar { background:rgba(52,211,153,0.06); border-bottom:1px solid var(--border-color); padding:12px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .aria-chat-title-row { display:flex; align-items:center; gap:10px; }
+    .aria-chat-name { font-family:var(--font-heading); font-size:16px; color:var(--text-primary); font-weight:600; }
+    .aria-chat-sub { font-size:11px; color:var(--text-muted); }
+    .aria-messages-area { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+    .aria-msg { display:flex; gap:10px; align-items:flex-start; max-width:100%; }
+    .aria-msg--user { flex-direction:row-reverse; }
+    .aria-msg-avatar { width:30px; height:30px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; }
+    .aria-msg-avatar--aria { background:rgba(52,211,153,0.2); color:var(--green); border:1px solid rgba(52,211,153,0.3); }
+    .aria-msg-avatar--user { background:var(--yellow-light); color:var(--yellow); border:1px solid rgba(245,196,0,0.3); }
+    .aria-msg-bubble { max-width:82%; padding:10px 14px; border-radius:12px; font-size:13px; line-height:1.55; }
+    .aria-msg--aria .aria-msg-bubble { background:rgba(52,211,153,0.06); border:1px solid rgba(52,211,153,0.18); color:var(--text-body); border-radius:4px 12px 12px 12px; }
+    .aria-msg--user .aria-msg-bubble { background:var(--yellow-light); border:1px solid rgba(245,196,0,0.25); color:var(--text-primary); border-radius:12px 4px 12px 12px; }
+    .aria-msg-time { font-size:10px; color:var(--text-disabled); margin-top:4px; }
+    .aria-typing-indicator { display:flex; align-items:center; gap:4px; padding:8px 14px; }
+    .aria-typing-dot { width:6px; height:6px; background:var(--green); border-radius:50%; animation:aria-typing 1.2s ease-in-out infinite; }
+    .aria-typing-dot:nth-child(2) { animation-delay:0.2s; }
+    .aria-typing-dot:nth-child(3) { animation-delay:0.4s; }
+    @keyframes aria-typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+    /* Quick prompt chips */
+    .quick-chips { display:flex; gap:6px; padding:8px 16px 0; flex-wrap:wrap; flex-shrink:0; border-top:1px solid var(--border-color); }
+    .quick-chip { padding:4px 10px; border-radius:14px; font-size:11px; font-weight:600; border:1px solid var(--border-color); background:transparent; color:var(--text-muted); cursor:pointer; transition:var(--transition); font-family:var(--font-base); white-space:nowrap; min-height:28px; }
+    .quick-chip:hover { border-color:rgba(52,211,153,0.4); color:var(--green); background:rgba(52,211,153,0.06); }
+    /* Chat input area */
+    .aria-input-area { padding:12px 16px; border-top:1px solid var(--border-color); display:flex; gap:8px; align-items:flex-end; flex-shrink:0; }
+    .aria-textarea-wrap { flex:1; position:relative; }
+    .aria-textarea { width:100%; min-height:44px; max-height:120px; resize:none; background:var(--bg-body); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:10px 14px; font-size:13px; font-family:var(--font-base); color:var(--text-body); outline:none; transition:var(--transition); line-height:1.4; box-sizing:border-box; }
+    .aria-textarea:focus { border-color:rgba(52,211,153,0.4); box-shadow:0 0 0 3px rgba(52,211,153,0.06); }
+    .aria-send-btn { width:44px; height:44px; border-radius:var(--radius-md); background:var(--green); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:var(--transition); }
+    .aria-send-btn:hover { background:#2DD48A; }
+    .aria-send-btn svg { color:#000; }
+    .aria-mic-btn { width:44px; height:44px; border-radius:var(--radius-md); background:var(--bg-panel-hover); border:1px solid var(--border-color); cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:var(--transition); color:var(--text-muted); }
+    .aria-mic-btn:hover { border-color:var(--border-hover); color:var(--text-body); }
+    /* Right panel tools */
+    .ai-tool-card { background:var(--bg-panel); border:1px solid var(--border-color); border-radius:var(--radius-md); overflow:hidden; margin-bottom:16px; }
+    .ai-tool-header { padding:12px 16px; border-bottom:1px solid var(--border-color); font-size:13px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+    .ai-tool-body { padding:14px 16px; }
+    .ai-tool-icon { width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .predict-alert { display:flex; flex-direction:column; gap:4px; padding:10px 12px; background:var(--bg-body); border-radius:8px; margin-bottom:8px; border-left:3px solid; }
+    .predict-alert.high { border-color:var(--red); }
+    .predict-alert.med  { border-color:var(--yellow); }
+    .predict-alert.low  { border-color:var(--blue); }
+    .predict-alert-title { font-size:12px; font-weight:600; color:var(--text-primary); }
+    .predict-alert-body  { font-size:11px; color:var(--text-muted); line-height:1.4; }
+    .predict-alert-conf  { font-family:var(--font-mono); font-size:10px; font-weight:700; }
+    .predict-alert.high .predict-alert-conf { color:var(--red); }
+    .predict-alert.med  .predict-alert-conf { color:var(--yellow); }
+    .predict-alert.low  .predict-alert-conf { color:var(--blue); }
+    /* Capabilities grid */
+    .capability-card { background:var(--bg-panel); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:18px; display:flex; flex-direction:column; gap:10px; transition:var(--transition); }
+    .capability-card:hover { border-color:var(--border-hover); background:var(--bg-panel-hover); }
+    .capability-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .capability-icon svg { width:20px; height:20px; }
+    .capability-title { font-size:14px; font-weight:600; color:var(--text-primary); }
+    .capability-desc { font-size:12px; color:var(--text-muted); line-height:1.5; }
+    /* API Config panel */
+    .api-config-panel { background:var(--bg-panel); border:1px solid var(--border-color); border-radius:var(--radius-lg); overflow:hidden; }
+    .api-config-toggle { width:100%; padding:14px 20px; background:transparent; border:none; color:var(--text-primary); font-family:var(--font-heading); font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+    .api-config-toggle:hover { background:var(--bg-panel-hover); }
+    .api-config-body { padding:20px; border-top:1px solid var(--border-color); display:none; }
+    .api-config-body.open { display:block; }
+    /* Dispatch result */
+    .dispatch-result { background:var(--bg-body); border-radius:8px; padding:12px; font-size:12px; color:var(--text-muted); border:1px solid var(--border-color); min-height:80px; font-family:var(--font-mono); line-height:1.6; }
+    .masked-input { font-family:var(--font-mono); letter-spacing:0.1em; }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <div class="admin-shell">
+    <!-- SIDEBAR -->
+    <nav class="admin-sidebar" aria-label="TDRN Warren County navigation">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark" aria-hidden="true">T</div>
+        <div class="sidebar-logo-text">
+          <span class="sidebar-logo-name">TDRN</span>
+          <span class="sidebar-logo-sub">Warren County</span>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label" id="nav-label-main">County Portal</div>
+        <ul role="list" aria-labelledby="nav-label-main">
+          <li><a href="warren-county.html" class="nav-item" aria-label="Dashboard"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Dashboard</span></a></li>
+          <li><a href="wc-members.html" class="nav-item" aria-label="Members"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Members</span></a></li>
+          <li><a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Readiness</span></a></li>
+          <li><a href="wc-analytics.html" class="nav-item" aria-label="Analytics"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Analytics</span></a></li>
+          <li><a href="wc-ai-center.html" class="nav-item active" aria-label="AI Center" aria-current="page"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>AI Center</span></a></li>
+          <li><a href="wc-map.html" class="nav-item" aria-label="Live Map"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg><span>Live Map</span></a></li>
+          <li><a href="wc-ics-forms.html" class="nav-item" aria-label="ICS Forms"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>ICS Forms</span></a></li>
+          <li><a href="wc-communications.html" class="nav-item" aria-label="Communications"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Communications</span></a></li>
+          <li><a href="wc-documents.html" class="nav-item" aria-label="Documents"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Documents</span></a></li>
+          <li><a href="wc-settings.html" class="nav-item" aria-label="Settings"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></a></li>
+        </ul>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="user-chip-avatar" aria-hidden="true">JA</div>
+          <div class="user-chip-info"><span class="user-chip-name">Jason</span><span class="user-chip-role">National Admin</span></div>
+        </div>
+        <button class="focus-mode-toggle" id="focus-toggle" aria-pressed="false" onclick="TDRN.toggleFocusMode()" aria-label="Toggle focus mode">
+          <svg class="focus-mode-toggle-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Focus Mode</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="admin-main">
+      <!-- TOPBAR — includes ARIA ONLINE indicator -->
+      <header class="admin-topbar" role="banner">
+        <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="index.html">National</a></li>
+            <li><a href="tennessee.html">Tennessee</a></li>
+            <li><a href="warren-county.html">Warren County</a></li>
+            <li><span class="current" aria-current="page">AI Center</span></li>
+          </ol>
+        </nav>
+        <div class="topbar-search">
+          <label for="topbar-search-input" class="sr-only">Search portal</label>
+          <svg class="topbar-search-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="topbar-search-input" placeholder="Search…" autocomplete="off">
+        </div>
+        <div class="topbar-actions">
+          <span id="tdrn-clock" aria-live="off"></span>
+          <!-- ARIA ONLINE status indicator -->
+          <div class="aria-online-indicator" role="status" aria-label="ARIA AI is online">
+            <span class="aria-pulse" aria-hidden="true"></span>
+            ARIA ONLINE
+          </div>
+          <div class="status-pill critical" role="status" aria-label="Incident active: Tornado Response Day 3">
+            <svg class="status-pill-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            Incident Active
+          </div>
+          <button class="notification-btn" aria-label="Notifications — 3 unread">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notification-badge" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- SUBNAV -->
+      <nav class="admin-subnav" aria-label="Warren County sections">
+        <a href="warren-county.html" class="subnav-tab">Dashboard</a>
+        <a href="wc-members.html" class="subnav-tab">Members</a>
+        <a href="wc-teams.html" class="subnav-tab">Teams</a>
+        <a href="wc-training.html" class="subnav-tab">Training</a>
+        <a href="wc-equipment.html" class="subnav-tab">Equipment</a>
+        <a href="wc-events.html" class="subnav-tab">Events</a>
+        <a href="wc-communications.html" class="subnav-tab">Communications</a>
+        <a href="wc-documents.html" class="subnav-tab">Documents</a>
+        <a href="wc-certifications.html" class="subnav-tab">Certifications</a>
+        <a href="wc-applicants.html" class="subnav-tab">Applicants</a>
+        <a href="wc-partners.html" class="subnav-tab">Partners</a>
+        <a href="wc-readiness.html" class="subnav-tab">Readiness</a>
+        <a href="wc-settings.html" class="subnav-tab">Settings</a>
+        <a href="wc-analytics.html" class="subnav-tab">Analytics</a>
+        <a href="wc-ics-forms.html" class="subnav-tab">ICS Forms</a>
+        <a href="wc-map.html" class="subnav-tab">Live Map</a>
+        <a href="wc-ai-center.html" class="subnav-tab active" aria-current="page">AI Center</a>
+      </nav>
+
+      <main id="main-content" class="admin-content">
+
+        <!-- Page Header -->
+        <div class="content-header">
+          <div>
+            <div class="content-title-row">
+              <h1 class="content-title">ARIA AI Command Center</h1>
+              <span class="aria-pulse" aria-hidden="true" style="width:10px;height:10px"></span>
+            </div>
+            <p class="content-subtitle">Automated Response Intelligence Assistant — Powered by GPT-4o &nbsp;·&nbsp; Warren County Tornado Response — Day 3</p>
+          </div>
+          <div class="content-actions">
+            <button class="topbar-btn secondary" onclick="clearARIAChat()" aria-label="Clear ARIA conversation history">
+              <svg class="topbar-btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              Clear Chat
+            </button>
+            <button class="topbar-btn primary" onclick="openAPIConfig()" aria-label="Configure AI API settings">
+              <svg class="topbar-btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Configure API
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Status Stats Row -->
+        <div class="stats-row" style="margin-bottom:24px" role="region" aria-label="ARIA AI system status">
+          <div class="stat-card">
+            <div class="stat-label">API Status</div>
+            <div class="stat-value" style="color:var(--green)">Online</div>
+            <div class="stat-sub">GPT-4o connected</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Queries Today</div>
+            <div class="stat-value">47</div>
+            <div class="stat-sub">+12 vs yesterday</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Avg Response Time</div>
+            <div class="stat-value">1.2s</div>
+            <div class="stat-sub">Well within SLA</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Last Analysis</div>
+            <div class="stat-value">2 min</div>
+            <div class="stat-sub">ICS-209 summary</div>
+          </div>
+        </div>
+
+        <!-- Main 2-1 Grid: Chat + Tools -->
+        <div class="grid-2-1" style="margin-bottom:28px">
+
+          <!-- LEFT: ARIA Chat Interface -->
+          <div>
+            <div class="aria-chat-outer" role="region" aria-label="ARIA AI chat interface">
+              <!-- Chat Header -->
+              <div class="aria-chat-header-bar">
+                <div class="aria-chat-title-row">
+                  <div style="width:34px;height:34px;border-radius:50%;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);display:flex;align-items:center;justify-content:center;" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  </div>
+                  <div>
+                    <div class="aria-chat-name">ARIA</div>
+                    <div class="aria-chat-sub">Automated Response Intelligence Assistant</div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:11px;color:var(--text-muted)">Warren County — Day 3</span>
+                  <div class="aria-online-indicator" style="font-size:10px;padding:2px 8px" aria-label="ARIA is active">
+                    <span class="aria-pulse" aria-hidden="true" style="width:5px;height:5px"></span>ACTIVE
+                  </div>
+                </div>
+              </div>
+
+              <!-- Messages Area -->
+              <div class="aria-messages-area" id="aria-chat-container" role="log" aria-live="polite" aria-label="ARIA conversation history">
+
+                <!-- Message 1: ARIA greeting -->
+                <div class="aria-msg aria-msg--aria" role="article" aria-label="ARIA message">
+                  <div class="aria-msg-avatar aria-msg-avatar--aria" aria-hidden="true">AI</div>
+                  <div>
+                    <div class="aria-msg-bubble"><strong>ARIA online.</strong> I have full situational awareness of the Warren County Tornado Response — Day 3. 8 teams deployed, 142 personnel active, ICS Type 3 structure in effect. What do you need?</div>
+                    <div class="aria-msg-time">06:00 CST</div>
+                  </div>
+                </div>
+
+                <!-- Message 2: User query -->
+                <div class="aria-msg aria-msg--user" role="article" aria-label="User message">
+                  <div class="aria-msg-avatar aria-msg-avatar--user" aria-hidden="true">JA</div>
+                  <div>
+                    <div class="aria-msg-bubble">What teams do we have available for the eastern sector debris field?</div>
+                    <div class="aria-msg-time" style="text-align:right">06:02 CST</div>
+                  </div>
+                </div>
+
+                <!-- Message 3: ARIA response -->
+                <div class="aria-msg aria-msg--aria" role="article" aria-label="ARIA message">
+                  <div class="aria-msg-avatar aria-msg-avatar--aria" aria-hidden="true">AI</div>
+                  <div>
+                    <div class="aria-msg-bubble">Based on current deployment: <strong>Team Delta</strong> (10 members, 1 skid steer) is available at Staging Area B. <strong>Team Foxtrot</strong> (6 members, chainsaw crew) completed their sector 3 sweep at 14:32 and are returning to base. Recommend Delta for heavy debris, Foxtrot for access path clearing. Estimated sector ETA: <strong>23 minutes</strong>.</div>
+                    <div class="aria-msg-time">06:02 CST</div>
+                  </div>
+                </div>
+
+                <!-- Message 4: User query -->
+                <div class="aria-msg aria-msg--user" role="article" aria-label="User message">
+                  <div class="aria-msg-avatar aria-msg-avatar--user" aria-hidden="true">JA</div>
+                  <div>
+                    <div class="aria-msg-bubble">Generate an ICS-209 summary for today</div>
+                    <div class="aria-msg-time" style="text-align:right">06:08 CST</div>
+                  </div>
+                </div>
+
+                <!-- Message 5: ARIA ICS-209 -->
+                <div class="aria-msg aria-msg--aria" role="article" aria-label="ARIA message">
+                  <div class="aria-msg-avatar aria-msg-avatar--aria" aria-hidden="true">AI</div>
+                  <div>
+                    <div class="aria-msg-bubble" style="font-family:var(--font-mono);font-size:11px;line-height:1.7;white-space:pre-wrap;">ICS-209 INCIDENT STATUS SUMMARY
+
+Incident Name: Warren County Tornado Response
+Incident #: 2026-TN-WC-001  |  Date: May 2, 2026
+Incident Commander: Capt. R. Morgan
+ICS Type: 3  |  Operational Period: Day 3
+
+SITUATION SUMMARY:
+EF-2 tornado (0312 hrs Apr 30). 3 structures destroyed,
+14 damaged. Zero fatalities. 2 minor injuries treated.
+Primary debris field: Hwy 70S corridor, 65% cleared.
+
+RESOURCES: 8 teams / 142 personnel / 23 equipment
+ESTIMATED CONTAINMENT: 90%
+ETA FULL RECOVERY: 72 hours</div>
+                    <div class="aria-msg-time">06:09 CST</div>
+                  </div>
+                </div>
+
+                <!-- Message 6: User query -->
+                <div class="aria-msg aria-msg--user" role="article" aria-label="User message">
+                  <div class="aria-msg-avatar aria-msg-avatar--user" aria-hidden="true">JA</div>
+                  <div>
+                    <div class="aria-msg-bubble">What certifications are expiring in the next 30 days?</div>
+                    <div class="aria-msg-time" style="text-align:right">06:14 CST</div>
+                  </div>
+                </div>
+
+                <!-- Message 7: ARIA cert response -->
+                <div class="aria-msg aria-msg--aria" role="article" aria-label="ARIA message">
+                  <div class="aria-msg-avatar aria-msg-avatar--aria" aria-hidden="true">AI</div>
+                  <div>
+                    <div class="aria-msg-bubble"><strong>12 certifications expiring:</strong><br><br>• <strong>4x First Aid/CPR</strong> — Johnson, Martinez, Chen, Williams (expires May 28–31)<br>• <strong>3x ICS-200</strong> — Davis, Thompson, Garcia (expires June 2–8)<br>• <strong>5x Chainsaw Safety</strong> — Miller, Brown, Wilson, Moore, Taylor (expires June 10–15)<br><br>Recommend scheduling refresher training week of May 19. I can draft a training announcement if needed.</div>
+                    <div class="aria-msg-time">06:14 CST</div>
+                  </div>
+                </div>
+
+              </div><!-- /#aria-chat-container -->
+
+              <!-- Quick Prompt Chips -->
+              <div class="quick-chips" role="group" aria-label="Quick prompt shortcuts">
+                <button class="quick-chip" onclick="injectPrompt('Deploy available teams to eastern sector')" aria-label="Quick prompt: Deploy Team">Deploy Team</button>
+                <button class="quick-chip" onclick="injectPrompt('Generate a full ICS-201 report for current incident')" aria-label="Quick prompt: Generate Report">Generate Report</button>
+                <button class="quick-chip" onclick="injectPrompt('What is our current readiness score and any gaps?')" aria-label="Quick prompt: Check Readiness">Check Readiness</button>
+                <button class="quick-chip" onclick="injectPrompt('Draft an emergency alert for shelter capacity update')" aria-label="Quick prompt: Draft Alert">Draft Alert</button>
+                <button class="quick-chip" onclick="injectPrompt('Analyze our current incident and recommend next actions')" aria-label="Quick prompt: Analyze Incident">Analyze Incident</button>
+              </div>
+
+              <!-- Input Area -->
+              <div class="aria-input-area">
+                <div class="aria-textarea-wrap">
+                  <label for="aria-input" class="sr-only">Message ARIA — ask about the incident, members, equipment, or request a report</label>
+                  <textarea
+                    id="aria-input"
+                    class="aria-textarea"
+                    placeholder="Ask ARIA anything about the incident, members, equipment, or request a report…"
+                    rows="1"
+                    aria-label="Message to ARIA"
+                    onkeydown="handleChatKeydown(event)"
+                    oninput="autoResizeTextarea(this)"
+                  ></textarea>
+                </div>
+                <button class="aria-mic-btn" aria-label="Voice input (microphone)" onclick="startVoiceInput()">
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                </button>
+                <button class="aria-send-btn" onclick="sendARIAMessage()" aria-label="Send message to ARIA">
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div><!-- /.aria-chat-outer -->
+          </div>
+
+          <!-- RIGHT: AI Tools Panel -->
+          <div>
+
+            <!-- Smart Dispatch Tool -->
+            <div class="ai-tool-card">
+              <div class="ai-tool-header">
+                <div class="ai-tool-icon" style="background:rgba(245,196,0,0.1)">
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5C400" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                Smart Dispatch
+              </div>
+              <div class="ai-tool-body">
+                <div class="form-group" style="margin-bottom:10px">
+                  <label for="dispatch-input" class="form-label" style="font-size:12px">Incident Description</label>
+                  <textarea id="dispatch-input" class="form-textarea" rows="3" placeholder="Describe the incident for AI analysis and deployment recommendation…" style="font-size:12px">Structure fire reported at 412 Oak Ridge Dr. Unknown occupancy. Access via Viola Road compromised by debris. Nearest team is Delta at Staging Area A.</textarea>
+                </div>
+                <button class="topbar-btn primary" style="width:100%;font-size:12px" onclick="runDispatchAnalysis()" aria-label="Analyze incident with AI and get dispatch recommendation">
+                  <svg class="topbar-btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Analyze &amp; Dispatch
+                </button>
+                <div class="dispatch-result" id="dispatch-result" aria-live="polite" aria-label="Dispatch analysis result" style="margin-top:10px">
+                  <span style="color:var(--text-disabled);font-size:11px">Analysis will appear here after clicking Analyze &amp; Dispatch…</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Predictive Alerts -->
+            <div class="ai-tool-card">
+              <div class="ai-tool-header">
+                <div class="ai-tool-icon" style="background:rgba(96,165,250,0.1)">
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                Predictive Alerts
+              </div>
+              <div class="ai-tool-body" style="padding-top:10px">
+
+                <div class="predict-alert high" role="alert" aria-label="High confidence predictive alert: Training compliance">
+                  <div class="predict-alert-title">Training Compliance Drop</div>
+                  <div class="predict-alert-body">ICS-200 and Chainsaw certifications will fall below 80% threshold within 14 days without intervention.</div>
+                  <div class="predict-alert-conf">87% confidence</div>
+                </div>
+
+                <div class="predict-alert med" role="alert" aria-label="Medium confidence predictive alert: Equipment maintenance">
+                  <div class="predict-alert-title">Equipment Service Due</div>
+                  <div class="predict-alert-body">Skid steer Unit #3 and Chainsaw #7 approaching 200-hour service interval. Recommend scheduling during recovery phase.</div>
+                  <div class="predict-alert-conf">74% confidence</div>
+                </div>
+
+                <div class="predict-alert low" role="alert" aria-label="Low confidence predictive alert: Seasonal risk">
+                  <div class="predict-alert-title">Seasonal Tornado Risk Elevated</div>
+                  <div class="predict-alert-body">Mid-Tennessee historically sees 2nd tornado peak in late May. Recommend readiness review by May 20.</div>
+                  <div class="predict-alert-conf">61% confidence</div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- NLP Field Report Parser -->
+            <div class="ai-tool-card">
+              <div class="ai-tool-header">
+                <div class="ai-tool-icon" style="background:rgba(167,139,250,0.1)">
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                NLP Field Report Parser
+              </div>
+              <div class="ai-tool-body">
+                <div class="form-group" style="margin-bottom:10px">
+                  <label for="nlp-input" class="form-label" style="font-size:12px">Paste Field Report Text</label>
+                  <textarea id="nlp-input" class="form-textarea" rows="3" placeholder="Paste freeform field report text here…" style="font-size:12px">Team Charlie reporting in. We got the Barren Fork road access about 70 percent cleared. Had to stop cause of a big oak blocking the secondary path. No injuries. We need a chainsaw crew if one's available. About 45 minutes to full clearance I'd say. Wind picking up a little.</textarea>
+                </div>
+                <button class="topbar-btn secondary" style="width:100%;font-size:12px" onclick="parseFieldReport()" aria-label="Parse field report text into structured ICS format">
+                  Parse Report
+                </button>
+                <div class="dispatch-result" id="nlp-result" aria-live="polite" aria-label="Parsed field report output" style="margin-top:10px">
+                  <span style="color:var(--text-disabled);font-size:11px">Structured output will appear here…</span>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /right tools -->
+        </div><!-- /.grid-2-1 -->
+
+        <!-- AI Capabilities Grid (3 columns) -->
+        <div class="panel" style="margin-bottom:24px">
+          <div class="panel-header">
+            <h2 class="panel-title">ARIA Capabilities</h2>
+            <span class="panel-subtitle">8 AI-powered modules active</span>
+          </div>
+          <div class="panel-body">
+            <div class="grid-3">
+
+              <div class="capability-card">
+                <div class="capability-icon" style="background:rgba(245,196,0,0.1)">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#F5C400" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                <div class="capability-title">Smart Dispatch</div>
+                <div class="capability-desc">Analyzes incident descriptions and recommends optimal team assignments, equipment deployment, and ICS structure in seconds.</div>
+              </div>
+
+              <div class="capability-card">
+                <div class="capability-icon" style="background:rgba(96,165,250,0.1)">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <div class="capability-title">NLP Reporting</div>
+                <div class="capability-desc">Converts freeform field reports into structured ICS-compatible JSON and generates complete ICS-201, 204, and 209 forms automatically.</div>
+              </div>
+
+              <div class="capability-card">
+                <div class="capability-icon" style="background:rgba(52,211,153,0.1)">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div class="capability-title">Predictive Readiness</div>
+                <div class="capability-desc">Forecasts certification gaps, training compliance trends, and readiness score trajectories weeks before they become critical.</div>
+              </div>
+
+              <div class="capability-card">
+                <div class="capability-icon" style="background:rgba(248,113,113,0.1)">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div class="capability-title">Damage Classification</div>
+                <div class="capability-desc">Classifies damage imagery and field descriptions into standard FEMA categories, estimating resource needs and recovery timelines.</div>
+              </div>
+
+              <div class="capability-card">
+                <div class="capability-icon" style="background:rgba(167,139,250,0.1)">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="capability-title">Volunteer Matching</div>
+                <div class="capability-desc">Matches open positions and mission requirements to available members based on skills, certifications, location, and current availability.</div>
+              </div>
+
+              <div class="capability-card">
+                <div class="capability-icon" style="background:rgba(251,146,60,0.1)">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#FB923C" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="capability-title">Comms Triage</div>
+                <div class="capability-desc">Classifies incoming messages by priority, type, and required action — surfacing critical field reports before coordinators are overwhelmed.</div>
+              </div>
+
+              <div class="capability-card">
+                <div class="capability-icon" style="background:rgba(245,196,0,0.1)">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#F5C400" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </div>
+                <div class="capability-title">After-Action Reports</div>
+                <div class="capability-desc">Generates comprehensive AARs from incident logs and team data including lessons learned, corrective actions, and improvement recommendations.</div>
+              </div>
+
+              <div class="capability-card">
+                <div class="capability-icon" style="background:rgba(248,113,113,0.1)">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="capability-title">Risk Assessment</div>
+                <div class="capability-desc">Combines weather data, historical incident patterns, and current resource posture to generate real-time risk scores for proactive response positioning.</div>
+              </div>
+
+            </div><!-- /.grid-3 -->
+          </div>
+        </div><!-- /.capabilities panel -->
+
+        <!-- API Configuration Panel (collapsible, admin only) -->
+        <div class="api-config-panel" id="api-config-panel" aria-label="API configuration — admin only">
+          <button class="api-config-toggle" onclick="toggleAPIConfig()" aria-expanded="false" aria-controls="api-config-body" id="api-config-btn">
+            <span style="display:flex;align-items:center;gap:8px">
+              <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              API Configuration
+              <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-base);font-weight:400">&nbsp;— Admin only</span>
+            </span>
+            <svg aria-hidden="true" id="api-config-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.2s"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="api-config-body" id="api-config-body" role="region" aria-labelledby="api-config-btn">
+            <div class="grid-2" style="gap:16px;margin-bottom:16px">
+              <div class="form-group">
+                <label for="api-endpoint" class="form-label">API Endpoint</label>
+                <input type="url" id="api-endpoint" class="form-input" value="https://api.openai.com/v1/chat/completions" placeholder="https://api.openai.com/v1/chat/completions">
+              </div>
+              <div class="form-group">
+                <label for="api-model" class="form-label">Model</label>
+                <select id="api-model" class="form-input" aria-label="Select AI model">
+                  <option value="gpt-4o" selected>GPT-4o (Recommended)</option>
+                  <option value="gpt-4o-mini">GPT-4o Mini (Faster)</option>
+                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Budget)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:16px">
+              <label for="api-key" class="form-label">API Key</label>
+              <div style="display:flex;gap:8px">
+                <input type="password" id="api-key" class="form-input masked-input" placeholder="sk-…" autocomplete="off" style="flex:1">
+                <button class="topbar-btn secondary" onclick="toggleKeyVisibility()" aria-label="Toggle API key visibility" style="min-height:44px;white-space:nowrap">Show Key</button>
+                <button class="topbar-btn primary" onclick="saveAPIConfig()" aria-label="Save API configuration" style="min-height:44px">Save &amp; Connect</button>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:6px">⚠ For production use, route through a serverless proxy. Never expose your API key in client-side code on a public site.</div>
+            </div>
+            <div class="grid-3" style="gap:12px;margin-bottom:16px">
+              <div class="stat-card" style="padding:12px">
+                <div class="stat-label">Tokens Used Today</div>
+                <div class="stat-value" style="font-size:20px">18,247</div>
+              </div>
+              <div class="stat-card" style="padding:12px">
+                <div class="stat-label">Estimated Cost</div>
+                <div class="stat-value" style="font-size:20px">$0.14</div>
+              </div>
+              <div class="stat-card" style="padding:12px">
+                <div class="stat-label">Requests Today</div>
+                <div class="stat-value" style="font-size:20px">47</div>
+              </div>
+            </div>
+            <button class="topbar-btn secondary" onclick="testAPIConnection()" aria-label="Test API connection">
+              <svg class="topbar-btn-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Test Connection
+            </button>
+            <span id="api-test-result" aria-live="polite" style="margin-left:12px;font-size:12px;color:var(--text-muted)"></span>
+          </div>
+        </div><!-- /.api-config-panel -->
+
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <script src="tdrn-core.js"></script>
+  <script src="ai-engine.js"></script>
+  <script>
+    TDRN.init();
+
+    // ── Chat helpers ──────────────────────────────────────────────────────────
+    function handleChatKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendARIAMessage();
+      }
+    }
+
+    function autoResizeTextarea(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    }
+
+    function injectPrompt(text) {
+      const input = document.getElementById('aria-input');
+      input.value = text;
+      input.focus();
+      autoResizeTextarea(input);
+      TDRN.announceToScreenReader('Prompt injected: ' + text);
+    }
+
+    async function sendARIAMessage() {
+      const input = document.getElementById('aria-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const container = document.getElementById('aria-chat-container');
+      const now = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+
+      // Append user message
+      container.insertAdjacentHTML('beforeend', `
+        <div class="aria-msg aria-msg--user" role="article" aria-label="User message">
+          <div class="aria-msg-avatar aria-msg-avatar--user" aria-hidden="true">JA</div>
+          <div>
+            <div class="aria-msg-bubble">${escapeHtml(text)}</div>
+            <div class="aria-msg-time" style="text-align:right">${now}</div>
+          </div>
+        </div>
+      `);
+
+      input.value = '';
+      input.style.height = 'auto';
+      container.scrollTop = container.scrollHeight;
+
+      // Show typing indicator
+      const typingId = 'typing-' + Date.now();
+      container.insertAdjacentHTML('beforeend', `
+        <div class="aria-msg aria-msg--aria" id="${typingId}" role="status" aria-label="ARIA is thinking">
+          <div class="aria-msg-avatar aria-msg-avatar--aria" aria-hidden="true">AI</div>
+          <div class="aria-typing-indicator">
+            <span class="aria-typing-dot" aria-hidden="true"></span>
+            <span class="aria-typing-dot" aria-hidden="true"></span>
+            <span class="aria-typing-dot" aria-hidden="true"></span>
+          </div>
+        </div>
+      `);
+      container.scrollTop = container.scrollHeight;
+
+      // Call AI if available, else demo
+      let response = 'ARIA demo mode — configure your API key in the API Configuration panel to enable live responses.';
+      if (window.TDRNai) {
+        const res = await TDRNai.chat.send(text);
+        if (res.success) response = res.data;
+        else response = '⚠ ARIA error: ' + (res.error || 'Unknown error');
+      }
+
+      // Replace typing with response
+      const typingEl = document.getElementById(typingId);
+      if (typingEl) typingEl.outerHTML = `
+        <div class="aria-msg aria-msg--aria" role="article" aria-label="ARIA message">
+          <div class="aria-msg-avatar aria-msg-avatar--aria" aria-hidden="true">AI</div>
+          <div>
+            <div class="aria-msg-bubble">${escapeHtml(response)}</div>
+            <div class="aria-msg-time">${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}</div>
+          </div>
+        </div>
+      `;
+      container.scrollTop = container.scrollHeight;
+      TDRN.announceToScreenReader('ARIA responded');
+    }
+
+    function clearARIAChat() {
+      if (!confirm('Clear entire ARIA conversation history?')) return;
+      const container = document.getElementById('aria-chat-container');
+      container.innerHTML = `
+        <div class="aria-msg aria-msg--aria" role="article" aria-label="ARIA greeting message">
+          <div class="aria-msg-avatar aria-msg-avatar--aria" aria-hidden="true">AI</div>
+          <div>
+            <div class="aria-msg-bubble"><strong>Conversation cleared.</strong> ARIA ready. How can I assist with the Warren County response?</div>
+            <div class="aria-msg-time">${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}</div>
+          </div>
+        </div>`;
+      if (window.TDRNai) TDRNai.chat.clear();
+      TDRN.announceToScreenReader('ARIA conversation cleared');
+      TDRN.toast.info('Chat history cleared');
+    }
+
+    // ── Smart Dispatch ────────────────────────────────────────────────────────
+    async function runDispatchAnalysis() {
+      const desc = document.getElementById('dispatch-input').value.trim();
+      const result = document.getElementById('dispatch-result');
+      if (!desc) { TDRN.toast.warning('Enter an incident description first'); return; }
+
+      result.innerHTML = '<span style="color:var(--text-muted);font-size:11px">Analyzing…</span>';
+
+      if (window.TDRNai) {
+        const res = await TDRNai.dispatch.analyzeIncident(desc);
+        if (res.success && res.data) {
+          const d = typeof res.data === 'string' ? res.data : JSON.stringify(res.data, null, 2);
+          result.textContent = d;
+        } else {
+          result.textContent = 'Error: ' + (res.error || 'Analysis failed');
+        }
+      } else {
+        result.textContent = 'incidentType: Structure Fire\nseverity: 3\nrecommendedTeams: ["Team Delta", "Team Foxtrot"]\nrecommendedEquipment: ["Chainsaw Crew", "Rescue Kit"]\nestimatedPersonnel: 16\npriorityActions:\n  1. Establish perimeter\n  2. Check for occupants\n  3. Coordinate with fire department\nicsLevel: 2';
+      }
+      TDRN.announceToScreenReader('Dispatch analysis complete');
+    }
+
+    // ── NLP Field Report Parser ───────────────────────────────────────────────
+    async function parseFieldReport() {
+      const text = document.getElementById('nlp-input').value.trim();
+      const result = document.getElementById('nlp-result');
+      if (!text) { TDRN.toast.warning('Paste a field report first'); return; }
+
+      result.innerHTML = '<span style="color:var(--text-muted);font-size:11px">Parsing…</span>';
+
+      if (window.TDRNai) {
+        const res = await TDRNai.reporting.parseFieldReport(text);
+        if (res.success && res.data) {
+          const d = typeof res.data === 'string' ? res.data : JSON.stringify(res.data, null, 2);
+          result.textContent = d;
+        } else {
+          result.textContent = 'Error: ' + (res.error || 'Parse failed');
+        }
+      } else {
+        result.textContent = 'reporter: Team Charlie\nteam: Charlie\nlocation: Barren Fork Road\nsituationSummary: 70% debris cleared, oak blockage on secondary path\nresourcesNeeded: Chainsaw crew\ncasualties: None\nurgencyLevel: 2\nestimatedCompletion: 45 minutes';
+      }
+      TDRN.announceToScreenReader('Field report parsed');
+    }
+
+    // ── API Config ────────────────────────────────────────────────────────────
+    function toggleAPIConfig() {
+      const body = document.getElementById('api-config-body');
+      const btn  = document.getElementById('api-config-btn');
+      const chevron = document.getElementById('api-config-chevron');
+      const open = body.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      chevron.style.transform = open ? 'rotate(180deg)' : '';
+      TDRN.announceToScreenReader('API configuration panel ' + (open ? 'opened' : 'closed'));
+    }
+
+    function openAPIConfig() {
+      const body = document.getElementById('api-config-body');
+      if (!body.classList.contains('open')) toggleAPIConfig();
+      document.getElementById('api-config-panel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleKeyVisibility() {
+      const input = document.getElementById('api-key');
+      const btn = event.currentTarget;
+      if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide Key'; }
+      else { input.type = 'password'; btn.textContent = 'Show Key'; }
+    }
+
+    function saveAPIConfig() {
+      const key = document.getElementById('api-key').value.trim();
+      const endpoint = document.getElementById('api-endpoint').value.trim();
+      const model = document.getElementById('api-model').value;
+      if (!key) { TDRN.toast.warning('Enter your API key first'); return; }
+      if (window.TDRNai) TDRNai.configure(key, endpoint, model);
+      TDRN.saveState('aria_key', key);
+      TDRN.saveState('aria_endpoint', endpoint);
+      TDRN.saveState('aria_model', model);
+      TDRN.toast.success('API configuration saved. ARIA connected.');
+      TDRN.announceToScreenReader('API configuration saved');
+    }
+
+    async function testAPIConnection() {
+      const resultEl = document.getElementById('api-test-result');
+      resultEl.textContent = 'Testing…';
+      resultEl.style.color = 'var(--text-muted)';
+      try {
+        if (window.TDRNai) {
+          const res = await TDRNai.chat.send('ping');
+          resultEl.textContent = res.success ? '✓ Connected successfully' : '✗ ' + res.error;
+          resultEl.style.color = res.success ? 'var(--green)' : 'var(--red)';
+        } else {
+          resultEl.textContent = 'ai-engine.js not loaded';
+          resultEl.style.color = 'var(--yellow)';
+        }
+      } catch(e) {
+        resultEl.textContent = '✗ ' + e.message;
+        resultEl.style.color = 'var(--red)';
+      }
+      TDRN.announceToScreenReader('API connection test complete: ' + resultEl.textContent);
+    }
+
+    function startVoiceInput() {
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        TDRN.toast.warning('Voice input not supported in this browser');
+        return;
+      }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SR();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        const input = document.getElementById('aria-input');
+        input.value = transcript;
+        autoResizeTextarea(input);
+        TDRN.announceToScreenReader('Voice transcribed: ' + transcript);
+      };
+      recognition.onerror = () => TDRN.toast.error('Voice input error');
+      recognition.start();
+      TDRN.toast.info('Listening…');
+    }
+
+    // ── Load saved API key on init ────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedKey = TDRN.loadState('aria_key');
+      const savedEndpoint = TDRN.loadState('aria_endpoint');
+      const savedModel = TDRN.loadState('aria_model');
+      if (savedKey) {
+        document.getElementById('api-key').value = savedKey;
+        if (window.TDRNai) TDRNai.configure(savedKey, savedEndpoint, savedModel);
+      }
+      // Render chat widget via ai-engine if available (alternative render target)
+      if (window.TDRNai && typeof TDRNai.chat.renderUI === 'function') {
+        // Chat is already manually rendered — just sync history
+        console.log('[ARIA] Chat interface active.');
+      }
+    });
+
+    // ── Utility: HTML escape ──────────────────────────────────────────────────
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#039;').replace(/\n/g,'<br>');
+    }
+  </script>
+</body>
+</html>

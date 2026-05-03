@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN National Operations Dashboard — Thrive Disaster Response Network">
+  <meta name="theme-color" content="#0F1011">
+  <title>Dashboard — TDRN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tdrn-core.css">
+</head>
+<body>
+
+<!-- Skip Navigation -->
+<a class="skip-link" href="#admin-main-content">Skip to main content</a>
+
+<!-- Screen Reader Announce Region -->
+<div id="tdrn-announce" aria-live="polite" aria-atomic="true" class="sr-only" role="status"></div>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<!-- ================================================================
+     ADMIN SHELL
+     ================================================================ -->
+<div class="admin-shell">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <nav class="admin-sidebar" aria-label="Main navigation">
+
+    <!-- Logo -->
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — Thrive Disaster Response Network — Go to dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text">
+        <span class="logo-name">TDRN</span>
+        <span class="logo-tagline">Disaster Response Network</span>
+      </div>
+    </a>
+
+    <!-- National Section -->
+    <div class="sidebar-section" role="group" aria-labelledby="nav-label-national">
+      <span class="sidebar-section-label" id="nav-label-national">National</span>
+
+      <a href="index.html" class="nav-item active" data-route="#/dashboard" aria-current="page" aria-label="National Dashboard — currently active">
+        <span class="nav-item-icon" aria-hidden="true">⊞</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="#/members" class="nav-item" data-route="#/members" aria-label="All members">
+        <span class="nav-item-icon" aria-hidden="true">👥</span>
+        <span>Members</span>
+        <span class="nav-item-badge" aria-label="142 members">142</span>
+      </a>
+      <a href="#/teams" class="nav-item" data-route="#/teams" aria-label="All teams">
+        <span class="nav-item-icon" aria-hidden="true">🛡</span>
+        <span>Teams</span>
+      </a>
+      <a href="#/equipment" class="nav-item" data-route="#/equipment" aria-label="Equipment inventory">
+        <span class="nav-item-icon" aria-hidden="true">🔧</span>
+        <span>Equipment</span>
+      </a>
+      <a href="#/alerts" class="nav-item" data-route="#/alerts" aria-label="Active alerts">
+        <span class="nav-item-icon" aria-hidden="true">🔔</span>
+        <span>Alerts</span>
+        <span class="nav-item-badge" aria-label="3 active alerts">3</span>
+      </a>
+      <a href="#/reports" class="nav-item" data-route="#/reports" aria-label="Reports and analytics">
+        <span class="nav-item-icon" aria-hidden="true">📊</span>
+        <span>Reports</span>
+      </a>
+      <a href="#/settings" class="nav-item" data-route="#/settings" aria-label="System settings">
+        <span class="nav-item-icon" aria-hidden="true">⚙</span>
+        <span>Settings</span>
+      </a>
+    </div>
+
+    <!-- States Section -->
+    <div class="sidebar-section" role="group" aria-labelledby="nav-label-states">
+      <span class="sidebar-section-label" id="nav-label-states">States</span>
+
+      <!-- State Search -->
+      <div class="state-search">
+        <label class="state-search-label" for="state-search-input">Search states</label>
+        <input type="search" id="state-search-input" placeholder="Search states…" aria-label="Search states" autocomplete="off" data-live-search data-search-container="#state-list" data-search-items=".state-item">
+      </div>
+
+      <!-- State List -->
+      <ul class="state-list" id="state-list" role="list" aria-label="State portals">
+
+        <!-- ACTIVE STATE -->
+        <li>
+          <a href="tennessee.html" class="state-item" aria-label="Tennessee — Operational — Go to Tennessee dashboard">
+            <span class="state-item-name">Tennessee</span>
+            <span class="state-status operational" aria-label="Status: Operational">
+              <span aria-hidden="true">✓</span> Active
+            </span>
+          </a>
+        </li>
+
+        <!-- PENDING STATES -->
+        <li>
+          <a href="#" class="state-item" aria-label="Texas — Standby — Go to Texas portal">
+            <span class="state-item-name">Texas</span>
+            <span class="state-status standby" aria-label="Status: Standby"><span aria-hidden="true">⏱</span> Pending</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="state-item" aria-label="Florida — Standby — Go to Florida portal">
+            <span class="state-item-name">Florida</span>
+            <span class="state-status standby" aria-label="Status: Standby"><span aria-hidden="true">⏱</span> Pending</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="state-item" aria-label="Georgia — Standby — Go to Georgia portal">
+            <span class="state-item-name">Georgia</span>
+            <span class="state-status standby" aria-label="Status: Standby"><span aria-hidden="true">⏱</span> Pending</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="state-item" aria-label="North Carolina — Standby — Go to North Carolina portal">
+            <span class="state-item-name">N. Carolina</span>
+            <span class="state-status standby" aria-label="Status: Standby"><span aria-hidden="true">⏱</span> Pending</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="state-item" aria-label="Kentucky — Standby — Go to Kentucky portal">
+            <span class="state-item-name">Kentucky</span>
+            <span class="state-status standby" aria-label="Status: Standby"><span aria-hidden="true">⏱</span> Pending</span>
+          </a>
+        </li>
+
+        <!-- INACTIVE STATES (alphabetical) -->
+        <li><a href="#" class="state-item" aria-label="Alabama — Inactive"><span class="state-item-name">Alabama</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Alaska — Inactive"><span class="state-item-name">Alaska</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Arizona — Inactive"><span class="state-item-name">Arizona</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Arkansas — Inactive"><span class="state-item-name">Arkansas</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="California — Inactive"><span class="state-item-name">California</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Colorado — Inactive"><span class="state-item-name">Colorado</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Connecticut — Inactive"><span class="state-item-name">Connecticut</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Delaware — Inactive"><span class="state-item-name">Delaware</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Hawaii — Inactive"><span class="state-item-name">Hawaii</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Idaho — Inactive"><span class="state-item-name">Idaho</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Illinois — Inactive"><span class="state-item-name">Illinois</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Indiana — Inactive"><span class="state-item-name">Indiana</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Iowa — Inactive"><span class="state-item-name">Iowa</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Kansas — Inactive"><span class="state-item-name">Kansas</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Louisiana — Inactive"><span class="state-item-name">Louisiana</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Maine — Inactive"><span class="state-item-name">Maine</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Maryland — Inactive"><span class="state-item-name">Maryland</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Massachusetts — Inactive"><span class="state-item-name">Massachusetts</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Michigan — Inactive"><span class="state-item-name">Michigan</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Minnesota — Inactive"><span class="state-item-name">Minnesota</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Mississippi — Inactive"><span class="state-item-name">Mississippi</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Missouri — Inactive"><span class="state-item-name">Missouri</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Montana — Inactive"><span class="state-item-name">Montana</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Nebraska — Inactive"><span class="state-item-name">Nebraska</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Nevada — Inactive"><span class="state-item-name">Nevada</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="New Hampshire — Inactive"><span class="state-item-name">N. Hampshire</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="New Jersey — Inactive"><span class="state-item-name">New Jersey</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="New Mexico — Inactive"><span class="state-item-name">New Mexico</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="New York — Inactive"><span class="state-item-name">New York</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="North Dakota — Inactive"><span class="state-item-name">N. Dakota</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Ohio — Inactive"><span class="state-item-name">Ohio</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Oklahoma — Inactive"><span class="state-item-name">Oklahoma</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Oregon — Inactive"><span class="state-item-name">Oregon</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Pennsylvania — Inactive"><span class="state-item-name">Pennsylvania</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Rhode Island — Inactive"><span class="state-item-name">Rhode Island</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="South Carolina — Inactive"><span class="state-item-name">S. Carolina</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="South Dakota — Inactive"><span class="state-item-name">S. Dakota</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Utah — Inactive"><span class="state-item-name">Utah</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Vermont — Inactive"><span class="state-item-name">Vermont</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Virginia — Inactive"><span class="state-item-name">Virginia</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Washington — Inactive"><span class="state-item-name">Washington</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="West Virginia — Inactive"><span class="state-item-name">W. Virginia</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Wisconsin — Inactive"><span class="state-item-name">Wisconsin</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+        <li><a href="#" class="state-item" aria-label="Wyoming — Inactive"><span class="state-item-name">Wyoming</span><span class="state-status inactive" aria-label="Status: Inactive"><span aria-hidden="true">–</span> Inactive</span></a></li>
+      </ul>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <a href="#/profile" class="user-chip" aria-label="Jason — National Admin — View profile">
+        <div class="user-avatar" aria-hidden="true">JA</div>
+        <div class="user-info">
+          <div class="user-name">Jason</div>
+          <div class="user-role">National Admin</div>
+        </div>
+      </a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode — reduces visual noise for better reading">
+        <span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span>
+        <span class="focus-mode-label">Focus Mode</span>
+      </button>
+    </div>
+
+  </nav>
+  <!-- /sidebar -->
+
+  <!-- ============================================================
+       MAIN
+       ============================================================ -->
+  <div class="admin-main" id="admin-main-content" tabindex="-1">
+
+    <!-- TOP BAR -->
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb">
+        <ol>
+          <li><a href="index.html" aria-label="Go to National Dashboard">National</a></li>
+          <li><span class="current" aria-current="page">Dashboard</span></li>
+        </ol>
+      </nav>
+
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-input">Search TDRN — members, counties, incidents</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-input" class="topbar-search" placeholder="Search members, counties, incidents…" autocomplete="off" aria-label="Search TDRN">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+
+        <span class="status-pill operational" role="status" aria-label="System status: Operational">
+          <span class="status-pill-icon" aria-hidden="true">✓</span>
+          Systems Operational
+        </span>
+
+        <button class="notification-btn" aria-label="Notifications — 3 unread" aria-haspopup="true">
+          <span aria-hidden="true">🔔</span>
+          <span class="notification-badge" aria-hidden="true"></span>
+        </button>
+
+        <button class="topbar-btn primary" aria-label="Deploy a response team now">
+          <span aria-hidden="true">🚀</span>
+          Deploy Now
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="admin-content" id="main-content" aria-label="National Dashboard">
+
+      <!-- ALERT STRIP -->
+      <div class="alert-strip warning" role="alert" aria-label="Active incident warning">
+        <div class="alert-strip-text">
+          <span aria-hidden="true">⚠</span>
+          <strong>Active Incident:</strong>&nbsp;Warren County, TN — Tornado Response — Day 3.
+          <a href="warren-county.html" style="color:inherit;margin-left:8px;font-weight:700;">View details →</a>
+        </div>
+        <button class="btn btn-sm btn-ghost" aria-label="Dismiss incident alert">✕</button>
+      </div>
+
+      <!-- CONTENT HEADER -->
+      <div class="content-header" style="margin-top:24px;">
+        <div class="content-header-left">
+          <h1 class="content-title">National Dashboard</h1>
+          <p class="content-subtitle">Real-time overview of TDRN operations across all active states and counties.</p>
+        </div>
+        <div class="content-actions">
+          <button class="btn btn-secondary" aria-label="Export national report to CSV">
+            <span aria-hidden="true">📥</span> Export Report
+          </button>
+          <button class="btn btn-primary" aria-label="Add a new state to TDRN network">
+            <span aria-hidden="true">＋</span> Add State
+          </button>
+        </div>
+      </div>
+
+      <!-- STATS GRID -->
+      <section aria-labelledby="stats-heading">
+        <h2 id="stats-heading" class="sr-only">National Statistics</h2>
+        <div class="stats-grid">
+
+          <div class="stat-card accent-green" role="article" aria-label="Active States: 1">
+            <div class="stat-label">Active States</div>
+            <div class="stat-value">1</div>
+            <div class="stat-change up" aria-label="Increased by 1 this month">
+              <span aria-hidden="true">↑</span> +1 this month
+            </div>
+            <span class="stat-icon" aria-hidden="true">🗺</span>
+          </div>
+
+          <div class="stat-card accent-blue" role="article" aria-label="Total Members: 142">
+            <div class="stat-label">Total Members</div>
+            <div class="stat-value">142</div>
+            <div class="stat-change up" aria-label="Increased by 12 this month">
+              <span aria-hidden="true">↑</span> +12 this month
+            </div>
+            <span class="stat-icon" aria-hidden="true">👥</span>
+          </div>
+
+          <div class="stat-card accent-yellow" role="article" aria-label="Trained Operators: 67">
+            <div class="stat-label">Trained Operators</div>
+            <div class="stat-value">67</div>
+            <div class="stat-change up" aria-label="Increased by 5 this month">
+              <span aria-hidden="true">↑</span> +5 this month
+            </div>
+            <span class="stat-icon" aria-hidden="true">🎓</span>
+          </div>
+
+          <div class="stat-card accent-orange" role="article" aria-label="Equipment Units: 23">
+            <div class="stat-label">Equipment Units</div>
+            <div class="stat-value">23</div>
+            <div class="stat-change flat" aria-label="No change this month">
+              <span aria-hidden="true">→</span> No change
+            </div>
+            <span class="stat-icon" aria-hidden="true">🔧</span>
+          </div>
+
+          <div class="stat-card accent-red" role="article" aria-label="Active Incidents: 1">
+            <div class="stat-label">Active Incidents</div>
+            <div class="stat-value">1</div>
+            <div class="stat-change down" aria-label="Down from 2 last week">
+              <span aria-hidden="true">↓</span> Down from 2
+            </div>
+            <span class="stat-icon" aria-hidden="true">🚨</span>
+          </div>
+
+          <div class="stat-card accent-purple" role="article" aria-label="Counties Online: 1">
+            <div class="stat-label">Counties Online</div>
+            <div class="stat-value">1</div>
+            <div class="stat-change up" aria-label="Increased by 1 this month">
+              <span aria-hidden="true">↑</span> +1 this month
+            </div>
+            <span class="stat-icon" aria-hidden="true">📍</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- GRID 2-1: MAP + LIVE ALERTS -->
+      <div class="grid-2-1" style="margin-bottom:24px;">
+
+        <!-- National Activity Map -->
+        <section class="panel" aria-labelledby="map-panel-title">
+          <div class="panel-header">
+            <h2 class="panel-title" id="map-panel-title">
+              <span aria-hidden="true">🗺</span> National Activity Map
+            </h2>
+            <div class="panel-actions">
+              <span class="badge badge-operational"><span class="badge-icon" aria-hidden="true"></span>1 Active State</span>
+            </div>
+          </div>
+          <div class="panel-body" style="padding:16px;">
+
+            <!-- SVG USA Map -->
+            <svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" aria-labelledby="usa-map-title usa-map-desc" role="img" style="width:100%;height:auto;display:block;">
+              <title id="usa-map-title">United States TDRN Activity Map</title>
+              <desc id="usa-map-desc">Map of the United States showing TDRN state activation status. Tennessee is highlighted in green as the only active state. Six states are shown in yellow as pending. All others are shown in gray as inactive.</desc>
+
+              <rect width="960" height="600" fill="#0F1011" rx="4"/>
+
+              <!-- INACTIVE STATES (simplified approximate positions as rectangles/polygons) -->
+              <!-- Pacific Northwest -->
+              <rect x="40" y="40" width="90" height="80" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="85" y="86" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">WA</text>
+              <rect x="40" y="125" width="90" height="85" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="85" y="172" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">OR</text>
+              <rect x="40" y="215" width="90" height="110" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="85" y="275" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">CA</text>
+
+              <!-- Mountain West -->
+              <rect x="135" y="40" width="80" height="100" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="175" y="95" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">ID</text>
+              <rect x="135" y="145" width="80" height="90" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="175" y="195" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">NV</text>
+              <rect x="135" y="240" width="80" height="85" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="175" y="287" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">AZ</text>
+              <rect x="220" y="40" width="85" height="95" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="262" y="93" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">MT</text>
+              <rect x="220" y="140" width="85" height="80" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="262" y="185" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">ID/WY</text>
+              <rect x="220" y="225" width="85" height="80" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="262" y="270" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">UT</text>
+              <rect x="220" y="310" width="85" height="75" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="262" y="352" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">NM</text>
+
+              <!-- Plains -->
+              <rect x="310" y="40" width="75" height="85" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="347" y="88" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">ND</text>
+              <rect x="310" y="130" width="75" height="80" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="347" y="175" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">SD</text>
+              <rect x="310" y="215" width="75" height="80" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="347" y="260" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">NE</text>
+              <rect x="310" y="300" width="75" height="80" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="347" y="345" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">KS</text>
+
+              <!-- Midwest -->
+              <rect x="390" y="130" width="70" height="75" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="425" y="173" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">MN</text>
+              <rect x="390" y="210" width="70" height="70" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="425" y="250" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">IA</text>
+              <rect x="390" y="285" width="70" height="70" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="425" y="325" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">MO</text>
+
+              <!-- Great Lakes -->
+              <rect x="465" y="130" width="65" height="65" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="497" y="168" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">WI</text>
+              <rect x="465" y="200" width="65" height="65" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="497" y="238" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">IL</text>
+              <rect x="465" y="270" width="65" height="65" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="497" y="308" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">AR</text>
+
+              <rect x="535" y="130" width="65" height="65" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="567" y="168" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">MI</text>
+              <rect x="535" y="200" width="65" height="65" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="567" y="238" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">IN</text>
+              <rect x="535" y="270" width="65" height="65" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="567" y="308" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">OH</text>
+
+              <!-- PENDING STATES (yellow) -->
+              <!-- Texas -->
+              <rect x="310" y="385" width="130" height="130" fill="rgba(245,196,0,0.15)" stroke="#F5C400" stroke-width="1.5" rx="2"/>
+              <text x="375" y="455" text-anchor="middle" font-size="11" fill="#F5C400" font-family="Inter,sans-serif" font-weight="600">TX</text>
+              <text x="375" y="470" text-anchor="middle" font-size="8" fill="#D4A800" font-family="Inter,sans-serif">Pending</text>
+
+              <!-- Florida -->
+              <rect x="650" y="400" width="80" height="100" fill="rgba(245,196,0,0.15)" stroke="#F5C400" stroke-width="1.5" rx="2"/>
+              <text x="690" y="455" text-anchor="middle" font-size="11" fill="#F5C400" font-family="Inter,sans-serif" font-weight="600">FL</text>
+              <text x="690" y="470" text-anchor="middle" font-size="8" fill="#D4A800" font-family="Inter,sans-serif">Pending</text>
+
+              <!-- Georgia -->
+              <rect x="650" y="320" width="75" height="75" fill="rgba(245,196,0,0.15)" stroke="#F5C400" stroke-width="1.5" rx="2"/>
+              <text x="687" y="363" text-anchor="middle" font-size="11" fill="#F5C400" font-family="Inter,sans-serif" font-weight="600">GA</text>
+              <text x="687" y="378" text-anchor="middle" font-size="8" fill="#D4A800" font-family="Inter,sans-serif">Pending</text>
+
+              <!-- North Carolina -->
+              <rect x="720" y="270" width="85" height="55" fill="rgba(245,196,0,0.15)" stroke="#F5C400" stroke-width="1.5" rx="2"/>
+              <text x="762" y="299" text-anchor="middle" font-size="9" fill="#F5C400" font-family="Inter,sans-serif" font-weight="600">NC</text>
+              <text x="762" y="312" text-anchor="middle" font-size="7" fill="#D4A800" font-family="Inter,sans-serif">Pending</text>
+
+              <!-- Kentucky -->
+              <rect x="570" y="270" width="85" height="55" fill="rgba(245,196,0,0.15)" stroke="#F5C400" stroke-width="1.5" rx="2"/>
+              <text x="612" y="299" text-anchor="middle" font-size="9" fill="#F5C400" font-family="Inter,sans-serif" font-weight="600">KY</text>
+              <text x="612" y="312" text-anchor="middle" font-size="7" fill="#D4A800" font-family="Inter,sans-serif">Pending</text>
+
+              <!-- ACTIVE STATE: Tennessee (green, highlighted) -->
+              <a href="tennessee.html" aria-label="Tennessee — Active — View Tennessee dashboard">
+                <rect x="570" y="330" width="85" height="55" fill="rgba(52,211,153,0.2)" stroke="#34D399" stroke-width="2.5" rx="3"/>
+                <text x="612" y="357" text-anchor="middle" font-size="11" fill="#34D399" font-family="Inter,sans-serif" font-weight="700">TN</text>
+                <text x="612" y="373" text-anchor="middle" font-size="8" fill="#34D399" font-family="Inter,sans-serif">✓ Active</text>
+              </a>
+
+              <!-- East Coast -->
+              <rect x="730" y="130" width="60" height="55" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="760" y="163" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">PA/NJ</text>
+              <rect x="795" y="120" width="60" height="55" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="825" y="153" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">NY</text>
+              <rect x="810" y="60" width="60" height="55" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="840" y="93" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">NE</text>
+              <rect x="730" y="190" width="60" height="55" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="760" y="223" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">MD/VA</text>
+              <rect x="730" y="250" width="60" height="55" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="760" y="283" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">SC</text>
+
+              <!-- Southeast remaining -->
+              <rect x="600" y="390" width="70" height="70" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="635" y="430" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">AL/MS</text>
+              <rect x="445" y="330" width="75" height="60" fill="#252830" stroke="#363A45" stroke-width="1" rx="2"/>
+              <text x="482" y="365" text-anchor="middle" font-size="9" fill="#6B7280" font-family="Inter,sans-serif">LA</text>
+            </svg>
+
+            <!-- Map Legend -->
+            <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:12px;padding:8px 0;border-top:1px solid var(--border-color);" role="list" aria-label="Map legend">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;" role="listitem">
+                <span style="width:12px;height:12px;border-radius:2px;background:rgba(52,211,153,0.2);border:2px solid #34D399;display:inline-block;" aria-hidden="true"></span>
+                <span style="color:var(--green);">Active (1)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;" role="listitem">
+                <span style="width:12px;height:12px;border-radius:2px;background:rgba(245,196,0,0.15);border:2px solid #F5C400;display:inline-block;" aria-hidden="true"></span>
+                <span style="color:var(--yellow);">Pending (6)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;" role="listitem">
+                <span style="width:12px;height:12px;border-radius:2px;background:#252830;border:1px solid #363A45;display:inline-block;" aria-hidden="true"></span>
+                <span style="color:var(--text-muted);">Inactive (43)</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Live Alerts Panel -->
+        <section class="panel" aria-labelledby="alerts-panel-title">
+          <div class="panel-header">
+            <h2 class="panel-title" id="alerts-panel-title">
+              <span aria-hidden="true">🔔</span> Live Alerts
+            </h2>
+            <a href="#/alerts" class="btn btn-sm btn-ghost" aria-label="View all alerts">View all</a>
+          </div>
+          <div class="panel-body" style="padding:0;">
+
+            <!-- Critical Alert -->
+            <article class="alert alert-danger" role="alert" aria-label="Critical alert: Tornado Response Active" style="border-radius:0;border:none;border-bottom:1px solid var(--border-color);">
+              <span class="alert-icon" aria-hidden="true">🚨</span>
+              <div class="alert-body">
+                <div class="alert-title">Tornado Response Active</div>
+                <div class="alert-message" style="font-size:13px;">Warren County, TN — ICS activated, 3 teams deployed</div>
+                <div style="font-size:11px;margin-top:4px;font-family:var(--font-mono);color:var(--text-muted);">3 days ago</div>
+              </div>
+            </article>
+
+            <!-- Warning Alert -->
+            <article class="alert alert-warning" role="alert" aria-label="Warning: Equipment certification expiring" style="border-radius:0;border:none;border-bottom:1px solid var(--border-color);">
+              <span class="alert-icon" aria-hidden="true">⏱</span>
+              <div class="alert-body">
+                <div class="alert-title">Equipment Cert Expiring</div>
+                <div class="alert-message" style="font-size:13px;">Rope Rescue Kit — 14 days until expiration</div>
+                <div style="font-size:11px;margin-top:4px;font-family:var(--font-mono);color:var(--text-muted);">1 day ago</div>
+              </div>
+            </article>
+
+            <!-- Info Alert -->
+            <article class="alert alert-info" role="alert" aria-label="Information: New member applications pending" style="border-radius:0;border:none;">
+              <span class="alert-icon" aria-hidden="true">ℹ</span>
+              <div class="alert-body">
+                <div class="alert-title">New Member Applications</div>
+                <div class="alert-message" style="font-size:13px;">3 applications awaiting Team Leader review</div>
+                <div style="font-size:11px;margin-top:4px;font-family:var(--font-mono);color:var(--text-muted);">2 days ago</div>
+              </div>
+            </article>
+
+          </div>
+        </section>
+
+      </div>
+      <!-- /grid-2-1 -->
+
+      <!-- GRID 3: Expansion Pipeline + Activity Feed + Quick Actions -->
+      <div class="grid-3" style="margin-bottom:24px;">
+
+        <!-- Expansion Pipeline -->
+        <section class="panel" aria-labelledby="expansion-panel-title">
+          <div class="panel-header">
+            <h2 class="panel-title" id="expansion-panel-title">
+              <span aria-hidden="true">📈</span> Expansion Pipeline
+            </h2>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <ul role="list" aria-label="Expansion pipeline targets">
+
+              <li style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border-color);">
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Rutherford Co., TN</div>
+                  <div style="font-size:12px;color:var(--text-muted);">Murfreesboro — 94 prospects</div>
+                </div>
+                <span class="badge badge-standby" aria-label="Status: In Progress"><span class="badge-icon" aria-hidden="true"></span>In Progress</span>
+              </li>
+              <li style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border-color);">
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Davidson Co., TN</div>
+                  <div style="font-size:12px;color:var(--text-muted);">Nashville — 230 prospects</div>
+                </div>
+                <span class="badge badge-training" aria-label="Status: Recruiting"><span class="badge-icon" aria-hidden="true"></span>Recruiting</span>
+              </li>
+              <li style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border-color);">
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Travis Co., TX</div>
+                  <div style="font-size:12px;color:var(--text-muted);">Austin — 180 prospects</div>
+                </div>
+                <span class="badge badge-training" aria-label="Status: Outreach"><span class="badge-icon" aria-hidden="true"></span>Outreach</span>
+              </li>
+              <li style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border-color);">
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Orange Co., FL</div>
+                  <div style="font-size:12px;color:var(--text-muted);">Orlando — 210 prospects</div>
+                </div>
+                <span class="badge badge-inactive" aria-label="Status: Planning"><span class="badge-icon" aria-hidden="true"></span>Planning</span>
+              </li>
+              <li style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;">
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Fulton Co., GA</div>
+                  <div style="font-size:12px;color:var(--text-muted);">Atlanta — 320 prospects</div>
+                </div>
+                <span class="badge badge-inactive" aria-label="Status: Planning"><span class="badge-icon" aria-hidden="true"></span>Planning</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Recent Activity Feed -->
+        <section class="panel" aria-labelledby="activity-panel-title">
+          <div class="panel-header">
+            <h2 class="panel-title" id="activity-panel-title">
+              <span aria-hidden="true">⚡</span> Recent Activity
+            </h2>
+          </div>
+          <div class="panel-body" style="padding:0 20px;">
+            <ol class="activity-feed" role="list" aria-label="Recent network activity">
+              <li class="activity-item">
+                <div class="activity-icon green" aria-hidden="true">👤</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Marcus Reyes</strong> joined Warren County team</div>
+                  <div class="activity-time">2 hrs ago</div>
+                </div>
+              </li>
+              <li class="activity-item">
+                <div class="activity-icon blue" aria-hidden="true">🎓</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>ICS-200</strong> training completed — 14 members certified</div>
+                  <div class="activity-time">5 hrs ago</div>
+                </div>
+              </li>
+              <li class="activity-item">
+                <div class="activity-icon yellow" aria-hidden="true">🚀</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Team Alpha</strong> deployed — Tornado Response, Day 3</div>
+                  <div class="activity-time">3 days ago</div>
+                </div>
+              </li>
+              <li class="activity-item">
+                <div class="activity-icon orange" aria-hidden="true">🔧</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Mass Casualty Trailer</strong> added to inventory</div>
+                  <div class="activity-time">4 days ago</div>
+                </div>
+              </li>
+              <li class="activity-item">
+                <div class="activity-icon green" aria-hidden="true">👤</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Denise Okafor</strong> earned EMT-B certification</div>
+                  <div class="activity-time">5 days ago</div>
+                </div>
+              </li>
+              <li class="activity-item">
+                <div class="activity-icon blue" aria-hidden="true">📍</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Warren County</strong> became first active TDRN county</div>
+                  <div class="activity-time">6 days ago</div>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="panel" aria-labelledby="actions-panel-title">
+          <div class="panel-header">
+            <h2 class="panel-title" id="actions-panel-title">
+              <span aria-hidden="true">⚡</span> Quick Actions
+            </h2>
+          </div>
+          <div class="panel-body">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+
+              <button class="btn btn-primary w-full" style="justify-content:flex-start;gap:12px;padding:0 16px;" aria-label="Deploy a response team">
+                <span style="font-size:20px;" aria-hidden="true">🚀</span>
+                <div style="text-align:left;">
+                  <div style="font-weight:700;">Deploy Team</div>
+                  <div style="font-size:12px;opacity:0.8;font-weight:400;">Activate a response deployment</div>
+                </div>
+              </button>
+
+              <button class="btn btn-secondary w-full" style="justify-content:flex-start;gap:12px;padding:0 16px;" aria-label="Add a new TDRN member">
+                <span style="font-size:20px;" aria-hidden="true">👤</span>
+                <div style="text-align:left;">
+                  <div style="font-weight:700;">Add Member</div>
+                  <div style="font-size:12px;opacity:0.8;font-weight:400;">Register a new team member</div>
+                </div>
+              </button>
+
+              <button class="btn btn-secondary w-full" style="justify-content:flex-start;gap:12px;padding:0 16px;" aria-label="Create a new network alert">
+                <span style="font-size:20px;" aria-hidden="true">🔔</span>
+                <div style="text-align:left;">
+                  <div style="font-weight:700;">Create Alert</div>
+                  <div style="font-size:12px;opacity:0.8;font-weight:400;">Send network-wide notification</div>
+                </div>
+              </button>
+
+              <button class="btn btn-secondary w-full" style="justify-content:flex-start;gap:12px;padding:0 16px;" aria-label="Generate a national operations report">
+                <span style="font-size:20px;" aria-hidden="true">📊</span>
+                <div style="text-align:left;">
+                  <div style="font-weight:700;">Generate Report</div>
+                  <div style="font-size:12px;opacity:0.8;font-weight:400;">Export operational data</div>
+                </div>
+              </button>
+
+            </div>
+          </div>
+        </section>
+
+      </div>
+      <!-- /grid-3 -->
+
+      <!-- PLATFORM CAPABILITIES -->
+      <section aria-labelledby="capabilities-heading" style="margin-bottom:32px;">
+        <div class="content-header">
+          <div class="content-header-left">
+            <h2 class="content-title" id="capabilities-heading" style="font-size:22px;">Platform Capabilities</h2>
+            <p class="content-subtitle">TDRN provides a complete disaster response infrastructure.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+
+          <article class="panel" style="padding:20px;gap:12px;display:flex;flex-direction:column;" aria-label="Member Management capability">
+            <div style="font-size:28px;" aria-hidden="true">👥</div>
+            <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);">Member Management</h3>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Onboard, certify, and manage responders with role-based access and real-time status tracking across all counties.</p>
+          </article>
+
+          <article class="panel" style="padding:20px;gap:12px;display:flex;flex-direction:column;" aria-label="Incident Command capability">
+            <div style="font-size:28px;" aria-hidden="true">🚨</div>
+            <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);">Incident Command</h3>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">ICS-compliant incident management with team assignment, resource tracking, and real-time operational reporting.</p>
+          </article>
+
+          <article class="panel" style="padding:20px;gap:12px;display:flex;flex-direction:column;" aria-label="Training Management capability">
+            <div style="font-size:28px;" aria-hidden="true">🎓</div>
+            <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);">Training Management</h3>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Schedule and track ICS, NIMS, CERT, and specialty certifications with automated compliance monitoring and renewal alerts.</p>
+          </article>
+
+          <article class="panel" style="padding:20px;gap:12px;display:flex;flex-direction:column;" aria-label="Equipment Tracking capability">
+            <div style="font-size:28px;" aria-hidden="true">🔧</div>
+            <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);">Equipment Tracking</h3>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Full lifecycle inventory management — location, maintenance schedules, certification status, and deployment assignment.</p>
+          </article>
+
+          <article class="panel" style="padding:20px;gap:12px;display:flex;flex-direction:column;" aria-label="Communications capability">
+            <div style="font-size:28px;" aria-hidden="true">📡</div>
+            <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);">Communications</h3>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Integrated alert system with multi-channel notifications, HAM radio coordination, and priority messaging for all team levels.</p>
+          </article>
+
+          <article class="panel" style="padding:20px;gap:12px;display:flex;flex-direction:column;" aria-label="Readiness Scoring capability">
+            <div style="font-size:28px;" aria-hidden="true">📊</div>
+            <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);">Readiness Scoring</h3>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Automated county and team readiness scores based on member certifications, equipment status, and training compliance metrics.</p>
+          </article>
+
+          <article class="panel" style="padding:20px;gap:12px;display:flex;flex-direction:column;" aria-label="Partner Coordination capability">
+            <div style="font-size:28px;" aria-hidden="true">🤝</div>
+            <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);">Partner Coordination</h3>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Manage mutual aid agreements, coordinate with local EMA, fire, EMS, Red Cross, and government agencies for unified response.</p>
+          </article>
+
+          <article class="panel" style="padding:20px;gap:12px;display:flex;flex-direction:column;" aria-label="National Expansion capability">
+            <div style="font-size:28px;" aria-hidden="true">🗺</div>
+            <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);">National Expansion</h3>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Scalable county-to-state-to-national architecture. Activate new counties and states with structured onboarding and replication tools.</p>
+          </article>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <!-- /admin-main -->
+
+</div>
+<!-- /admin-shell -->
+
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

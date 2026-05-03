@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County, Tennessee — County Operations Dashboard — Active Incident: Tornado Response">
+  <meta name="theme-color" content="#0F1011">
+  <title>Warren County — TDRN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tdrn-core.css">
+  <style>
+    /* Warren County page-specific styles */
+    .incident-board {
+      background: var(--bg-panel);
+      border: 2px solid var(--red);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(248,113,113,0.1), var(--shadow-md);
+    }
+    .incident-board-header {
+      background: var(--red-light);
+      border-bottom: 1px solid rgba(248,113,113,0.3);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .incident-board-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--red);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .incident-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--red);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      animation: pulse 2s ease infinite;
+    }
+    .team-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border-color);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .team-row:last-child { border-bottom: none; }
+    .team-row-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .team-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .team-leader {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .quick-action-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      min-height: var(--touch-target);
+    }
+    .quick-action-card:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-panel-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .quick-action-card.danger {
+      border-color: rgba(248,113,113,0.3);
+      background: rgba(248,113,113,0.05);
+    }
+    .quick-action-card.danger:hover {
+      background: rgba(248,113,113,0.1);
+      border-color: var(--red);
+    }
+    .quick-action-icon {
+      font-size: 32px;
+      line-height: 1;
+    }
+    .quick-action-title {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.04em;
+    }
+    .quick-action-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .notes-textarea {
+      width: 100%;
+      background: var(--bg-body);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      color: var(--text-body);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .notes-textarea:focus-visible {
+      border-color: var(--yellow);
+      outline: 2px solid var(--yellow);
+      outline-offset: 2px;
+    }
+    .eq-deployed-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13px;
+      gap: 12px;
+    }
+    .eq-deployed-item:last-child { border-bottom: none; }
+    /* Pulse animation for active incident badge */
+    @media (prefers-reduced-motion: no-preference) {
+      .incident-status-badge {
+        animation: pulse 2s ease infinite;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Skip Navigation -->
+<a class="skip-link" href="#admin-main-content">Skip to main content</a>
+
+<!-- Screen Reader Announce Region -->
+<div id="tdrn-announce" aria-live="polite" aria-atomic="true" class="sr-only" role="status"></div>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<div class="admin-shell">
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <nav class="admin-sidebar" aria-label="Main navigation">
+
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — Go to national dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text">
+        <span class="logo-name">TDRN</span>
+        <span class="logo-tagline">Disaster Response Network</span>
+      </div>
+    </a>
+
+    <!-- National Section -->
+    <div class="sidebar-section" role="group" aria-labelledby="nav-label-national">
+      <span class="sidebar-section-label" id="nav-label-national">National</span>
+      <a href="index.html" class="nav-item" aria-label="Go to National Dashboard">
+        <span class="nav-item-icon" aria-hidden="true">⊞</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" aria-label="All members nationwide">
+        <span class="nav-item-icon" aria-hidden="true">👥</span>
+        <span>Members</span>
+        <span class="nav-item-badge" aria-label="142 total members">142</span>
+      </a>
+      <a href="#" class="nav-item" aria-label="All teams">
+        <span class="nav-item-icon" aria-hidden="true">🛡</span>
+        <span>Teams</span>
+      </a>
+      <a href="#" class="nav-item" aria-label="Equipment inventory">
+        <span class="nav-item-icon" aria-hidden="true">🔧</span>
+        <span>Equipment</span>
+      </a>
+      <a href="#" class="nav-item" aria-label="Active alerts">
+        <span class="nav-item-icon" aria-hidden="true">🔔</span>
+        <span>Alerts</span>
+        <span class="nav-item-badge" aria-label="3 active alerts">3</span>
+      </a>
+      <a href="#" class="nav-item" aria-label="Reports and analytics">
+        <span class="nav-item-icon" aria-hidden="true">📊</span>
+        <span>Reports</span>
+      </a>
+    </div>
+
+    <!-- Tennessee Section -->
+    <div class="sidebar-section" role="group" aria-labelledby="nav-label-tn">
+      <span class="sidebar-section-label" id="nav-label-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee State Dashboard">
+        <span class="nav-item-icon" aria-hidden="true">🗺</span>
+        <span>TN Dashboard</span>
+      </a>
+    </div>
+
+    <!-- Warren County Section -->
+    <div class="sidebar-section" role="group" aria-labelledby="nav-label-wc">
+      <span class="sidebar-section-label" id="nav-label-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item active" aria-current="page" data-route="#/dashboard" aria-label="Warren County Dashboard — currently active">
+        <span class="nav-item-icon" aria-hidden="true">⊞</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="wc-members.html" class="nav-item" aria-label="Warren County members">
+        <span class="nav-item-icon" aria-hidden="true">👥</span>
+        <span>Members</span>
+        <span class="nav-item-badge" aria-label="142 members">142</span>
+      </a>
+      <a href="wc-teams.html" class="nav-item" aria-label="Warren County teams">
+        <span class="nav-item-icon" aria-hidden="true">🛡</span>
+        <span>Teams</span>
+        <span class="nav-item-badge" aria-label="8 teams">8</span>
+      </a>
+      <a href="wc-training.html" class="nav-item" aria-label="Warren County training">
+        <span class="nav-item-icon" aria-hidden="true">🎓</span>
+        <span>Training</span>
+      </a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Warren County equipment">
+        <span class="nav-item-icon" aria-hidden="true">🔧</span>
+        <span>Equipment</span>
+        <span class="nav-item-badge" aria-label="23 equipment units">23</span>
+      </a>
+      <a href="wc-events.html" class="nav-item" aria-label="Warren County events">
+        <span class="nav-item-icon" aria-hidden="true">📅</span>
+        <span>Events</span>
+      </a>
+      <a href="wc-comms.html" class="nav-item" aria-label="Warren County communications">
+        <span class="nav-item-icon" aria-hidden="true">📡</span>
+        <span>Communications</span>
+      </a>
+      <a href="wc-documents.html" class="nav-item" aria-label="Warren County documents">
+        <span class="nav-item-icon" aria-hidden="true">📄</span>
+        <span>Documents</span>
+      </a>
+      <a href="wc-certs.html" class="nav-item" aria-label="Warren County certifications">
+        <span class="nav-item-icon" aria-hidden="true">🏅</span>
+        <span>Certifications</span>
+      </a>
+      <a href="wc-applicants.html" class="nav-item" aria-label="Warren County applicants">
+        <span class="nav-item-icon" aria-hidden="true">📋</span>
+        <span>Applicants</span>
+        <span class="nav-item-badge" aria-label="3 pending applicants">3</span>
+      </a>
+      <a href="wc-partners.html" class="nav-item" aria-label="Warren County partner organizations">
+        <span class="nav-item-icon" aria-hidden="true">🤝</span>
+        <span>Partners</span>
+      </a>
+      <a href="wc-readiness.html" class="nav-item" aria-label="Warren County readiness score">
+        <span class="nav-item-icon" aria-hidden="true">📊</span>
+        <span>Readiness</span>
+      </a>
+      <a href="wc-settings.html" class="nav-item" aria-label="Warren County settings">
+        <span class="nav-item-icon" aria-hidden="true">⚙</span>
+        <span>Settings</span>
+      </a>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin — View profile">
+        <div class="user-avatar" aria-hidden="true">JA</div>
+        <div class="user-info">
+          <div class="user-name">Jason</div>
+          <div class="user-role">County Admin — WC</div>
+        </div>
+      </a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode — reduces visual noise for better reading">
+        <span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span>
+        <span class="focus-mode-label">Focus Mode</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       MAIN
+       ============================================================ -->
+  <div class="admin-main" id="admin-main-content" tabindex="-1">
+
+    <!-- TOP BAR -->
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb">
+        <ol>
+          <li><a href="index.html" aria-label="Go to National Dashboard">National</a></li>
+          <li><a href="tennessee.html" aria-label="Go to Tennessee dashboard">Tennessee</a></li>
+          <li><span class="current" aria-current="page">Warren County</span></li>
+        </ol>
+      </nav>
+
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-wc">Search Warren County — members, equipment, teams</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-wc" placeholder="Search Warren County…" autocomplete="off" aria-label="Search Warren County portal">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill critical" role="status" aria-label="County status: Active Incident">
+          <span class="status-pill-icon" aria-hidden="true">⚠</span>
+          Active Incident
+        </span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread">
+          <span aria-hidden="true">🔔</span>
+          <span class="notification-badge" aria-hidden="true"></span>
+        </button>
+        <button class="topbar-btn secondary" onclick="TDRN.print.section('main-content')" aria-label="Print current view">
+          <span aria-hidden="true">🖨</span> Print
+        </button>
+        <button class="topbar-btn primary" aria-label="Generate ICS incident report">
+          <span aria-hidden="true">📋</span> ICS Report
+        </button>
+      </div>
+    </header>
+
+    <!-- SUBNAV TABS -->
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html" class="subnav-tab active" aria-current="page" aria-label="Warren County Dashboard — currently active">Dashboard</a>
+      <a href="wc-members.html"    class="subnav-tab" aria-label="Members — 142 total">Members <span class="subnav-tab-count" aria-hidden="true">142</span></a>
+      <a href="wc-teams.html"      class="subnav-tab" aria-label="Teams — 8 active">Teams <span class="subnav-tab-count" aria-hidden="true">8</span></a>
+      <a href="wc-training.html"   class="subnav-tab" aria-label="Training — 87% compliance">Training</a>
+      <a href="wc-equipment.html"  class="subnav-tab" aria-label="Equipment — 23 units">Equipment <span class="subnav-tab-count" aria-hidden="true">23</span></a>
+      <a href="wc-events.html"     class="subnav-tab" aria-label="Upcoming events">Events</a>
+      <a href="wc-comms.html"      class="subnav-tab" aria-label="Communications and alerts">Communications</a>
+      <a href="wc-documents.html"  class="subnav-tab" aria-label="County documents and files">Documents</a>
+      <a href="wc-certs.html"      class="subnav-tab" aria-label="Member certifications">Certifications</a>
+      <a href="wc-applicants.html" class="subnav-tab" aria-label="New member applicants — 3 pending">Applicants <span class="subnav-tab-count" aria-hidden="true">3</span></a>
+      <a href="wc-partners.html"   class="subnav-tab" aria-label="Partner organizations and mutual aid">Partners</a>
+      <a href="wc-readiness.html"  class="subnav-tab" aria-label="Readiness score — 94%">Readiness</a>
+      <a href="wc-settings.html"   class="subnav-tab" aria-label="County settings and configuration">Settings</a>
+    </nav>
+
+    <!-- CONTENT -->
+    <main class="admin-content" id="main-content" aria-label="Warren County Dashboard">
+
+      <!-- ACTIVE INCIDENT STRIP -->
+      <div class="alert-strip critical" role="alert" aria-label="Active incident: Tornado Response" aria-live="assertive">
+        <div class="alert-strip-text">
+          <span aria-hidden="true">🚨</span>
+          <span class="sr-only">Alert:</span>
+          <strong>ACTIVE INCIDENT: Tornado Response</strong>
+          &nbsp;— Day 3 — Status:
+          <span class="incident-status-badge" aria-label="Incident status: Active">
+            <span aria-hidden="true">⚡</span> ACTIVE
+          </span>
+          &nbsp;— ICS activated — 3 teams deployed
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <a href="#incident-board" class="btn btn-sm" style="background:var(--red);color:#fff;border:none;" aria-label="Jump to incident readiness board">View Board</a>
+          <button class="btn btn-sm btn-ghost" aria-label="Dismiss incident strip notice">✕</button>
+        </div>
+      </div>
+
+      <!-- CONTENT HEADER -->
+      <div class="content-header" style="margin-top:24px;">
+        <div class="content-header-left">
+          <h1 class="content-title">Warren County</h1>
+          <p class="content-subtitle">McMinnville, Tennessee — TDRN Operational County — Active since May 2026</p>
+        </div>
+        <div class="content-actions">
+          <button class="btn btn-ghost" aria-label="Export Warren County data to CSV" onclick="TDRN.print.exportToCSV(TDRN.data.members, 'warren-members.csv')">
+            <span aria-hidden="true">📥</span> Export
+          </button>
+          <button class="btn btn-secondary" aria-label="Add a new Warren County member">
+            <span aria-hidden="true">＋</span> Add Member
+          </button>
+          <button class="btn btn-primary" aria-label="Generate ICS incident report">
+            <span aria-hidden="true">📋</span> ICS Report
+          </button>
+        </div>
+      </div>
+
+      <!-- STATS GRID -->
+      <section aria-labelledby="wc-stats-heading">
+        <h2 id="wc-stats-heading" class="sr-only">Warren County Statistics</h2>
+        <div class="stats-grid">
+
+          <div class="stat-card accent-blue" role="article" aria-label="Total Members: 142">
+            <div class="stat-label">Total Members</div>
+            <div class="stat-value">142</div>
+            <div class="stat-change up"><span aria-hidden="true">↑</span> +12 this month</div>
+            <span class="stat-icon" aria-hidden="true">👥</span>
+          </div>
+
+          <div class="stat-card accent-green" role="article" aria-label="Active Teams: 8">
+            <div class="stat-label">Active Teams</div>
+            <div class="stat-value">8</div>
+            <div class="stat-change up"><span aria-hidden="true">↑</span> 3 deployed now</div>
+            <span class="stat-icon" aria-hidden="true">🛡</span>
+          </div>
+
+          <div class="stat-card accent-orange" role="article" aria-label="Equipment Units: 23">
+            <div class="stat-label">Equipment Units</div>
+            <div class="stat-value">23</div>
+            <div class="stat-change flat"><span aria-hidden="true">→</span> 5 deployed</div>
+            <span class="stat-icon" aria-hidden="true">🔧</span>
+          </div>
+
+          <div class="stat-card accent-yellow" role="article" aria-label="Training Compliance: 87%">
+            <div class="stat-label">Training Compliance</div>
+            <div class="stat-value">87<span style="font-size:18px;color:var(--text-muted);font-weight:400;">%</span></div>
+            <div class="stat-change up"><span aria-hidden="true">↑</span> +3% this month</div>
+            <span class="stat-icon" aria-hidden="true">🎓</span>
+          </div>
+
+          <div class="stat-card accent-red" role="article" aria-label="Active Alerts: 3">
+            <div class="stat-label">Active Alerts</div>
+            <div class="stat-value">3</div>
+            <div class="stat-change down"><span aria-hidden="true">⚠</span> Requires attention</div>
+            <span class="stat-icon" aria-hidden="true">🚨</span>
+          </div>
+
+          <div class="stat-card accent-green" role="article" aria-label="Readiness Score: 94%">
+            <div class="stat-label">Readiness Score</div>
+            <div class="stat-value">94<span style="font-size:18px;color:var(--text-muted);font-weight:400;">%</span></div>
+            <div class="stat-change up"><span aria-hidden="true">↑</span> Top county nationally</div>
+            <span class="stat-icon" aria-hidden="true">📊</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- QUICK ACTIONS GRID -->
+      <section aria-labelledby="quick-actions-heading" style="margin-bottom:24px;">
+        <h2 id="quick-actions-heading" class="sr-only">Quick Actions</h2>
+        <div class="grid-4">
+
+          <button class="quick-action-card danger" aria-label="Activate a disaster response deployment">
+            <div class="quick-action-icon" aria-hidden="true">🚀</div>
+            <div class="quick-action-title">Activate Deployment</div>
+            <div class="quick-action-desc">Launch a new incident response with ICS structure</div>
+          </button>
+
+          <button class="quick-action-card" aria-label="Send an emergency alert to all county members">
+            <div class="quick-action-icon" aria-hidden="true">🔔</div>
+            <div class="quick-action-title">Send Alert</div>
+            <div class="quick-action-desc">Notify all members via push, SMS, and radio broadcast</div>
+          </button>
+
+          <button class="quick-action-card" aria-label="Add a new member to Warren County roster">
+            <div class="quick-action-icon" aria-hidden="true">👤</div>
+            <div class="quick-action-title">Add Member</div>
+            <div class="quick-action-desc">Register and onboard a new TDRN team member</div>
+          </button>
+
+          <button class="quick-action-card" aria-label="Generate an ICS-compliant incident report">
+            <div class="quick-action-icon" aria-hidden="true">📋</div>
+            <div class="quick-action-title">Generate ICS Report</div>
+            <div class="quick-action-desc">Export ICS 209 / SITREP for current incident</div>
+          </button>
+
+        </div>
+      </section>
+
+      <!-- GRID 2-1: INCIDENT BOARD + METRICS -->
+      <div class="grid-2-1" style="margin-bottom:24px;">
+
+        <!-- LEFT: Incident Readiness Board -->
+        <section id="incident-board" aria-labelledby="incident-board-heading">
+          <div class="incident-board">
+            <div class="incident-board-header">
+              <div class="incident-board-title">
+                <span aria-hidden="true">🚨</span>
+                <span id="incident-board-heading">Incident Readiness Board</span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span class="incident-status-badge" aria-label="Incident is active">
+                  <span aria-hidden="true">⚡</span> ACTIVE
+                </span>
+                <span style="font-size:12px;color:var(--red);font-family:var(--font-mono);">Day 3 of Incident</span>
+              </div>
+            </div>
+
+            <!-- Incident Info -->
+            <div style="padding:16px 20px;border-bottom:1px solid var(--border-color);">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+                <div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:4px;">Incident Type</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--text-primary);">Tornado — EF2</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:4px;">ICS Level</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--red);">Type III</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:4px;">Incident Commander</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--text-primary);">Marcus Reyes</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:4px;">Activated</div>
+                  <div style="font-size:13px;color:var(--text-body);font-family:var(--font-mono);">Apr 29 07:42 CDT</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:4px;">Location</div>
+                  <div style="font-size:13px;color:var(--text-body);">McMinnville, TN</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:4px;">FEMA Declared</div>
+                  <div style="font-size:13px;color:var(--text-body);">Pending</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Deployed Teams -->
+            <div style="padding:12px 20px 4px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Deployed Teams</div>
+            </div>
+            <div role="list" aria-label="Teams currently deployed">
+              <div class="team-row" role="listitem">
+                <div class="team-row-left">
+                  <span class="team-name">Team Alpha — Urban S&amp;R</span>
+                  <span class="team-leader">Leader: Marcus Reyes &nbsp;·&nbsp; 18 members</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span class="badge badge-critical" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span>
+                  <button class="btn btn-ghost btn-sm" aria-label="View Team Alpha details">Details</button>
+                </div>
+              </div>
+              <div class="team-row" role="listitem">
+                <div class="team-row-left">
+                  <span class="team-name">Team Bravo — Medical Support</span>
+                  <span class="team-leader">Leader: Denise Okafor &nbsp;·&nbsp; 12 members</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span class="badge badge-critical" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span>
+                  <button class="btn btn-ghost btn-sm" aria-label="View Team Bravo details">Details</button>
+                </div>
+              </div>
+              <div class="team-row" role="listitem">
+                <div class="team-row-left">
+                  <span class="team-name">Team Charlie — Logistics</span>
+                  <span class="team-leader">Leader: James Whitfield &nbsp;·&nbsp; 10 members</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span class="badge badge-standby" aria-label="Status: Staging"><span class="badge-icon" aria-hidden="true"></span>Staging</span>
+                  <button class="btn btn-ghost btn-sm" aria-label="View Team Charlie details">Details</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Deployed Equipment -->
+            <div style="padding:12px 20px 4px;border-top:1px solid var(--border-color);margin-top:4px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Equipment Deployed</div>
+            </div>
+            <div role="list" aria-label="Equipment currently deployed">
+              <div class="eq-deployed-item" role="listitem">
+                <span style="color:var(--text-primary);font-weight:500;">Mobile Command Unit</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;color:var(--text-muted);">EQ001</span>
+                  <span class="badge badge-critical" style="font-size:10px;" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span>
+                </div>
+              </div>
+              <div class="eq-deployed-item" role="listitem">
+                <span style="color:var(--text-primary);font-weight:500;">Generator — 20kW (×2)</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;color:var(--text-muted);">EQ002</span>
+                  <span class="badge badge-critical" style="font-size:10px;" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span>
+                </div>
+              </div>
+              <div class="eq-deployed-item" role="listitem">
+                <span style="color:var(--text-primary);font-weight:500;">Mass Casualty Trailer</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;color:var(--text-muted);">EQ010</span>
+                  <span class="badge badge-critical" style="font-size:10px;" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span>
+                </div>
+              </div>
+              <div class="eq-deployed-item" role="listitem">
+                <span style="color:var(--text-primary);font-weight:500;">HAM Radio Station</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;color:var(--text-muted);">EQ005</span>
+                  <span class="badge badge-operational" style="font-size:10px;" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Online</span>
+                </div>
+              </div>
+              <div class="eq-deployed-item" role="listitem">
+                <span style="color:var(--text-primary);font-weight:500;">Defibrillator AED (×4)</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;color:var(--text-muted);">EQ004</span>
+                  <span class="badge badge-operational" style="font-size:10px;" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Deployed</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Real-time Notes -->
+            <div style="padding:16px 20px;border-top:1px solid var(--border-color);">
+              <label for="incident-notes" style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:8px;">Real-Time Incident Notes</label>
+              <textarea id="incident-notes" class="notes-textarea" aria-label="Real-time incident notes — auto-saved" placeholder="Enter incident updates, observations, resource requests…">Day 3 Update: EF2 tornado impacted SE McMinnville. Team Alpha conducting secondary search grid C4-C7. Team Bravo has treated 23 individuals, 4 transported. Debris clearing on Hwy 70S ongoing. Request additional fuel delivery for generator EQ002-B by 1400.</textarea>
+              <div style="display:flex;justify-content:flex-end;margin-top:8px;gap:8px;">
+                <button class="btn btn-sm btn-ghost" aria-label="Clear incident notes">Clear</button>
+                <button class="btn btn-sm btn-primary" aria-label="Save incident notes">Save Notes</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT: County Metrics + Training Events -->
+        <aside aria-label="County metrics and upcoming training events">
+
+          <!-- County Readiness Metrics -->
+          <section class="panel" aria-labelledby="metrics-panel-title" style="margin-bottom:16px;">
+            <div class="panel-header">
+              <h2 class="panel-title" id="metrics-panel-title">
+                <span aria-hidden="true">📊</span> County Metrics
+              </h2>
+              <span class="badge badge-operational" aria-label="Overall readiness: 94%"><span class="badge-icon" aria-hidden="true"></span>94% Ready</span>
+            </div>
+            <div class="panel-body">
+
+              <div class="progress-bar" aria-label="Member training compliance: 87%">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">Training Compliance</span>
+                  <span class="progress-bar-value">87%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill green" style="width:87%" role="progressbar" aria-valuenow="87" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+
+              <div class="progress-bar" style="margin-top:12px;" aria-label="Equipment readiness: 91%">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">Equipment Readiness</span>
+                  <span class="progress-bar-value">91%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill green" style="width:91%" role="progressbar" aria-valuenow="91" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+
+              <div class="progress-bar" style="margin-top:12px;" aria-label="Team deployment readiness: 100%">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">Team Deployment Ready</span>
+                  <span class="progress-bar-value">100%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill green" style="width:100%" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+
+              <div class="progress-bar" style="margin-top:12px;" aria-label="Communications readiness: 95%">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">Communications</span>
+                  <span class="progress-bar-value">95%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill green" style="width:95%" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+
+              <div class="progress-bar" style="margin-top:12px;" aria-label="ICS-200 certification: 78%">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">ICS-200 Cert</span>
+                  <span class="progress-bar-value">78%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" style="width:78%" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div></div>
+              </div>
+
+              <div class="progress-bar" style="margin-top:12px;" aria-label="Mutual aid agreements: 3 of 5 target">
+                <div class="progress-bar-header">
+                  <span class="progress-bar-label">Mutual Aid Coverage</span>
+                  <span class="progress-bar-value">3/5</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill orange" style="width:60%" role="progressbar" aria-valuenow="3" aria-valuemin="0" aria-valuemax="5"></div></div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Upcoming Training Events -->
+          <section class="panel" aria-labelledby="next-training-title">
+            <div class="panel-header">
+              <h2 class="panel-title" id="next-training-title">
+                <span aria-hidden="true">📅</span> Next Training Events
+              </h2>
+              <a href="wc-events.html" class="btn btn-sm btn-ghost" aria-label="View all Warren County events">View all</a>
+            </div>
+            <div class="panel-body" style="padding:0;">
+              <ul role="list" aria-label="Upcoming Warren County training events">
+
+                <li style="padding:12px 20px;border-bottom:1px solid var(--border-color);">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:var(--text-primary);">ICS-100 Certification</div>
+                      <div style="font-size:12px;color:var(--text-muted);">May 10 · McMinnville Fire Hall · 30 seats</div>
+                    </div>
+                    <span class="badge badge-training" style="font-size:10px;" aria-label="Event type: Training"><span class="badge-icon" aria-hidden="true"></span>Training</span>
+                  </div>
+                </li>
+
+                <li style="padding:12px 20px;border-bottom:1px solid var(--border-color);">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:var(--text-primary);">CERT Basic — Cohort 8</div>
+                      <div style="font-size:12px;color:var(--text-muted);">Jun 7 · Warren County EOC · 25 seats</div>
+                    </div>
+                    <span class="badge badge-training" style="font-size:10px;" aria-label="Event type: CERT Training"><span class="badge-icon" aria-hidden="true"></span>CERT</span>
+                  </div>
+                </li>
+
+                <li style="padding:12px 20px;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Swift Water Rescue</div>
+                      <div style="font-size:12px;color:var(--text-muted);">Jun 14 · Collins River · 15 seats</div>
+                    </div>
+                    <span class="badge badge-standby" style="font-size:10px;" aria-label="Event type: Specialty Training"><span class="badge-icon" aria-hidden="true"></span>Specialty</span>
+                  </div>
+                </li>
+
+              </ul>
+            </div>
+          </section>
+
+        </aside>
+      </div>
+      <!-- /grid-2-1 -->
+
+      <!-- GRID 2: MEMBER TABLE + EQUIPMENT TABLE -->
+      <div class="grid-2" style="margin-bottom:24px;">
+
+        <!-- Member Summary Table -->
+        <section class="panel" aria-labelledby="members-table-title">
+          <div class="panel-header">
+            <h2 class="panel-title" id="members-table-title">
+              <span aria-hidden="true">👥</span> Members
+            </h2>
+            <div class="panel-actions">
+              <a href="wc-members.html" class="btn btn-sm btn-ghost" aria-label="View all 142 members">View all 142</a>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" aria-label="Warren County member summary — top 8" data-sortable>
+              <thead>
+                <tr>
+                  <th scope="col" data-sort-col="0" aria-sort="ascending">Name</th>
+                  <th scope="col" data-sort-col="1">Role</th>
+                  <th scope="col" data-sort-col="2">Status</th>
+                  <th scope="col" data-sort-col="3">Last Active</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Marcus Reyes</td>
+                  <td>Team Leader</td>
+                  <td><span class="badge badge-critical" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td>
+                  <td><span class="font-mono text-muted" style="font-size:12px;">Today</span></td>
+                </tr>
+                <tr>
+                  <td>Denise Okafor</td>
+                  <td>Medical Officer</td>
+                  <td><span class="badge badge-critical" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td>
+                  <td><span class="font-mono text-muted" style="font-size:12px;">Today</span></td>
+                </tr>
+                <tr>
+                  <td>James Whitfield</td>
+                  <td>Logistics Coord.</td>
+                  <td><span class="badge badge-standby" aria-label="Status: Staging"><span class="badge-icon" aria-hidden="true"></span>Staging</span></td>
+                  <td><span class="font-mono text-muted" style="font-size:12px;">Today</span></td>
+                </tr>
+                <tr>
+                  <td>Aisha Mohammed</td>
+                  <td>Communications</td>
+                  <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                  <td><span class="font-mono text-muted" style="font-size:12px;">2 hrs ago</span></td>
+                </tr>
+                <tr>
+                  <td>Priya Nair</td>
+                  <td>Shelter Manager</td>
+                  <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                  <td><span class="font-mono text-muted" style="font-size:12px;">4 hrs ago</span></td>
+                </tr>
+                <tr>
+                  <td>Travis Buchanan</td>
+                  <td>SAR Specialist</td>
+                  <td><span class="badge badge-training" aria-label="Status: Training"><span class="badge-icon" aria-hidden="true"></span>Training</span></td>
+                  <td><span class="font-mono text-muted" style="font-size:12px;">Yesterday</span></td>
+                </tr>
+                <tr>
+                  <td>Nathan Park</td>
+                  <td>IT / Comms</td>
+                  <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                  <td><span class="font-mono text-muted" style="font-size:12px;">1 hr ago</span></td>
+                </tr>
+                <tr>
+                  <td>Latasha Williams</td>
+                  <td>Medical Officer</td>
+                  <td><span class="badge badge-standby" aria-label="Status: Standby"><span class="badge-icon" aria-hidden="true"></span>Standby</span></td>
+                  <td><span class="font-mono text-muted" style="font-size:12px;">6 hrs ago</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Equipment Status Table -->
+        <section class="panel" aria-labelledby="equip-table-title">
+          <div class="panel-header">
+            <h2 class="panel-title" id="equip-table-title">
+              <span aria-hidden="true">🔧</span> Equipment Status
+            </h2>
+            <div class="panel-actions">
+              <a href="wc-equipment.html" class="btn btn-sm btn-ghost" aria-label="View all 23 equipment items">View all 23</a>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" aria-label="Warren County equipment status — top 6" data-sortable>
+              <thead>
+                <tr>
+                  <th scope="col" data-sort-col="0" aria-sort="ascending">Equipment</th>
+                  <th scope="col" data-sort-col="1">Type</th>
+                  <th scope="col" data-sort-col="2">Status</th>
+                  <th scope="col" data-sort-col="3">Operator</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Mobile Command Unit</td>
+                  <td><span style="font-size:12px;color:var(--text-muted);">Vehicle</span></td>
+                  <td><span class="badge badge-critical" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td>
+                  <td><span style="font-size:13px;color:var(--text-muted);">M. Reyes</span></td>
+                </tr>
+                <tr>
+                  <td>Generator — 20kW</td>
+                  <td><span style="font-size:12px;color:var(--text-muted);">Power</span></td>
+                  <td><span class="badge badge-critical" aria-label="Status: Active"><span class="badge-icon" aria-hidden="true"></span>Active</span></td>
+                  <td><span style="font-size:13px;color:var(--text-muted);">J. Whitfield</span></td>
+                </tr>
+                <tr>
+                  <td>Mass Casualty Trailer</td>
+                  <td><span style="font-size:12px;color:var(--text-muted);">Medical</span></td>
+                  <td><span class="badge badge-critical" aria-label="Status: Deployed"><span class="badge-icon" aria-hidden="true"></span>Deployed</span></td>
+                  <td><span style="font-size:13px;color:var(--text-muted);">D. Okafor</span></td>
+                </tr>
+                <tr>
+                  <td>HAM Radio Station</td>
+                  <td><span style="font-size:12px;color:var(--text-muted);">Comms</span></td>
+                  <td><span class="badge badge-operational" aria-label="Status: Online"><span class="badge-icon" aria-hidden="true"></span>Online</span></td>
+                  <td><span style="font-size:13px;color:var(--text-muted);">N. Park</span></td>
+                </tr>
+                <tr>
+                  <td>Defibrillator AED</td>
+                  <td><span style="font-size:12px;color:var(--text-muted);">Medical</span></td>
+                  <td><span class="badge badge-operational" aria-label="Status: Operational"><span class="badge-icon" aria-hidden="true"></span>Operational</span></td>
+                  <td><span style="font-size:13px;color:var(--text-muted);">D. Okafor</span></td>
+                </tr>
+                <tr>
+                  <td>4x4 Response Truck</td>
+                  <td><span style="font-size:12px;color:var(--text-muted);">Vehicle</span></td>
+                  <td><span class="badge badge-standby" aria-label="Status: Maintenance"><span class="badge-icon" aria-hidden="true"></span>Maintenance</span></td>
+                  <td><span style="font-size:13px;color:var(--text-muted);">—</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+      <!-- /grid-2 -->
+
+      <!-- ACTIVITY FEED -->
+      <section class="panel" aria-labelledby="wc-activity-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="wc-activity-heading">
+            <span aria-hidden="true">⚡</span> County Activity Feed
+          </h2>
+          <div class="panel-actions">
+            <button class="btn btn-sm btn-ghost" aria-label="Refresh activity feed">
+              <span aria-hidden="true">↺</span> Refresh
+            </button>
+            <button class="btn btn-sm btn-secondary" aria-label="Export activity log to CSV" onclick="TDRN.print.exportToCSV([], 'warren-activity.csv')">
+              <span aria-hidden="true">📥</span> Export Log
+            </button>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0 24px;">
+          <ol class="activity-feed" role="list" aria-label="Recent Warren County activity — newest first">
+
+            <li class="activity-item">
+              <div class="activity-icon red" aria-label="Incident update icon">🚨</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Incident Update:</strong> Team Alpha completed secondary search grid C4-C7 — all clear</div>
+                <div class="activity-time">Today, 01:15 CDT</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon green" aria-label="Medical icon">🏥</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Team Bravo</strong> — 23 individuals assessed, 4 transported to Vanderbilt Medical</div>
+                <div class="activity-time">Today, 00:48 CDT</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon orange" aria-label="Equipment icon">🔧</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Generator EQ002-B</strong> fuel level at 30% — resupply requested for 1400</div>
+                <div class="activity-time">Yesterday, 22:30 CDT</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon blue" aria-label="Communications icon">📡</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>HAM Radio Net</strong> — Established comms with Warren County EMA and TEMA Region IV</div>
+                <div class="activity-time">Yesterday, 20:00 CDT</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon yellow" aria-label="Deployment icon">🚀</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Team Charlie</strong> moved to staging position — Hwy 70S debris clearance sector</div>
+                <div class="activity-time">Yesterday, 18:22 CDT</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon green" aria-label="Member icon">👤</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Latasha Williams, RN</strong> added to standby roster — available for medical surge</div>
+                <div class="activity-time">Yesterday, 14:10 CDT</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon red" aria-label="Alert icon">⚠</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>ICS Type III</strong> incident activated — Incident Commander: Marcus Reyes</div>
+                <div class="activity-time">Apr 29, 07:42 CDT</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon blue" aria-label="Training icon">🎓</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>ICS-200 Cohort 3</strong> — 14 members completed certification, compliance now 78%</div>
+                <div class="activity-time">Apr 27, 16:00 CDT</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon orange" aria-label="Equipment icon">🔧</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Mass Casualty Trailer</strong> added to county inventory — certification verified</div>
+                <div class="activity-time">Apr 26, 11:30 CDT</div>
+              </div>
+            </li>
+
+            <li class="activity-item">
+              <div class="activity-icon green" aria-label="Partnership icon">🤝</div>
+              <div class="activity-content">
+                <div class="activity-text"><strong>Mutual Aid Agreement</strong> signed with Warren County Fire &amp; Rescue</div>
+                <div class="activity-time">Apr 25, 09:00 CDT</div>
+              </div>
+            </li>
+
+          </ol>
+        </div>
+        <div class="panel-footer">
+          <span style="font-size:13px;color:var(--text-muted);">Showing 10 of 47 events</span>
+          <a href="wc-documents.html#activity-log" class="btn btn-sm btn-ghost" aria-label="View full activity log">View Full Log →</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <!-- /admin-main -->
+
+</div>
+<!-- /admin-shell -->
+
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>

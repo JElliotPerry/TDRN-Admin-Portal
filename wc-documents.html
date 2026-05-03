@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TDRN Warren County — Document Vault">
+  <meta name="theme-color" content="#0F1011">
+  <title>Documents — TDRN Warren County</title>
+  <link rel="stylesheet" href="tdrn-core.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .doc-layout { display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start; }
+    .folder-tree { background:var(--bg-panel);border:1px solid var(--border-color);border-radius:var(--radius-lg);overflow:hidden; }
+    .folder-tree-header { padding:12px 16px;border-bottom:1px solid var(--border-color);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-disabled); }
+    .folder-item { display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border-color);transition:var(--transition);gap:8px;min-height:44px; }
+    .folder-item:last-child { border-bottom:none; }
+    .folder-item:hover { background:var(--bg-panel-hover); }
+    .folder-item:focus-visible { outline:2px solid var(--yellow);outline-offset:-2px; }
+    .folder-item.active { background:var(--yellow-light);border-left:3px solid var(--yellow); }
+    .folder-item-left { display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-body);font-weight:500; }
+    .folder-item.active .folder-item-left { color:var(--yellow); }
+    .folder-count { font-size:10px;font-weight:700;background:var(--bg-body);color:var(--text-disabled);padding:2px 6px;border-radius:8px;min-width:20px;text-align:center; }
+    .file-type-badge { display:inline-block;font-family:var(--font-mono);font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;letter-spacing:0.05em;text-transform:uppercase; }
+    .file-type-badge.pdf { background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3); }
+    .file-type-badge.docx { background:rgba(96,165,250,0.15);color:var(--blue);border:1px solid rgba(96,165,250,0.3); }
+    .file-type-badge.xlsx { background:rgba(52,211,153,0.15);color:var(--green);border:1px solid rgba(52,211,153,0.3); }
+    .file-type-badge.png,.file-type-badge.jpg { background:rgba(167,139,250,0.15);color:var(--purple);border:1px solid rgba(167,139,250,0.3); }
+    .file-type-badge.zip { background:rgba(251,146,60,0.15);color:var(--orange);border:1px solid rgba(251,146,60,0.3); }
+    .drop-zone { border:2px dashed var(--border-hover);border-radius:var(--radius-lg);padding:40px 20px;text-align:center;cursor:pointer;transition:var(--transition); }
+    .drop-zone:hover,.drop-zone:focus-visible { border-color:var(--yellow);background:var(--yellow-light); }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .modal-backdrop[hidden] { display:none; }
+    .modal { background:var(--bg-panel);border:1px solid var(--border-hover);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg); }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-panel);z-index:1; }
+    .modal-title { font-family:var(--font-heading);font-size:18px;font-weight:700;color:var(--text-primary); }
+    .modal-body { padding:24px; }
+    .modal-footer { display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border-color); }
+    @media (max-width:768px) { .doc-layout { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="tdrn-sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+<div class="admin-shell">
+  <nav class="admin-sidebar" aria-label="Main navigation">
+    <a href="index.html" class="sidebar-logo" aria-label="TDRN — National dashboard">
+      <div class="sidebar-logo-mark" aria-hidden="true">TDRN</div>
+      <div class="sidebar-logo-text"><span class="logo-name">TDRN</span><span class="logo-tagline">Disaster Response Network</span></div>
+    </a>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-nat"><span class="sidebar-section-label" id="nav-nat">National</span>
+      <a href="index.html" class="nav-item" aria-label="National Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="#" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="#" class="nav-item" aria-label="Alerts"><span class="nav-item-icon" aria-hidden="true">🔔</span><span>Alerts</span><span class="nav-item-badge">3</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-tn"><span class="sidebar-section-label" id="nav-tn">Tennessee</span>
+      <a href="tennessee.html" class="nav-item" aria-label="Tennessee Dashboard"><span class="nav-item-icon" aria-hidden="true">🗺</span><span>TN Dashboard</span></a>
+    </div>
+    <div class="sidebar-section" role="group" aria-labelledby="nav-wc"><span class="sidebar-section-label" id="nav-wc">Warren County</span>
+      <a href="warren-county.html" class="nav-item" aria-label="Dashboard"><span class="nav-item-icon" aria-hidden="true">⊞</span><span>Dashboard</span></a>
+      <a href="wc-members.html" class="nav-item" aria-label="Members"><span class="nav-item-icon" aria-hidden="true">👥</span><span>Members</span><span class="nav-item-badge">142</span></a>
+      <a href="wc-teams.html" class="nav-item" aria-label="Teams"><span class="nav-item-icon" aria-hidden="true">🛡</span><span>Teams</span></a>
+      <a href="wc-training.html" class="nav-item" aria-label="Training"><span class="nav-item-icon" aria-hidden="true">🎓</span><span>Training</span></a>
+      <a href="wc-equipment.html" class="nav-item" aria-label="Equipment"><span class="nav-item-icon" aria-hidden="true">🔧</span><span>Equipment</span></a>
+      <a href="wc-events.html" class="nav-item" aria-label="Events"><span class="nav-item-icon" aria-hidden="true">📅</span><span>Events</span></a>
+      <a href="wc-communications.html" class="nav-item" aria-label="Communications"><span class="nav-item-icon" aria-hidden="true">📡</span><span>Communications</span></a>
+      <a href="wc-documents.html" class="nav-item active" aria-current="page" aria-label="Documents — currently viewing"><span class="nav-item-icon" aria-hidden="true">📄</span><span>Documents</span></a>
+      <a href="wc-certifications.html" class="nav-item" aria-label="Certifications"><span class="nav-item-icon" aria-hidden="true">🏅</span><span>Certifications</span></a>
+      <a href="wc-applicants.html" class="nav-item" aria-label="Applicants"><span class="nav-item-icon" aria-hidden="true">📋</span><span>Applicants</span><span class="nav-item-badge">18</span></a>
+      <a href="wc-partners.html" class="nav-item" aria-label="Partners"><span class="nav-item-icon" aria-hidden="true">🤝</span><span>Partners</span></a>
+      <a href="wc-readiness.html" class="nav-item" aria-label="Readiness"><span class="nav-item-icon" aria-hidden="true">📊</span><span>Readiness</span></a>
+      <a href="wc-settings.html" class="nav-item" aria-label="Settings"><span class="nav-item-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" class="user-chip" aria-label="Jason — Warren County Admin"><div class="user-avatar" aria-hidden="true">JA</div><div class="user-info"><div class="user-name">Jason</div><div class="user-role">County Admin — WC</div></div></a>
+      <button class="focus-mode-toggle" aria-pressed="false" aria-label="Toggle Focus Mode"><span class="focus-mode-toggle-icon" aria-hidden="true">🎯</span><span class="focus-mode-label">Focus Mode</span></button>
+    </div>
+  </nav>
+  <div class="admin-main">
+    <header class="admin-topbar" role="banner">
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb"><ol>
+        <li><a href="index.html">National</a></li><li><a href="tennessee.html">Tennessee</a></li>
+        <li><a href="warren-county.html">Warren County</a></li><li><span class="current" aria-current="page">Documents</span></li>
+      </ol></nav>
+      <div class="topbar-search" role="search">
+        <label class="sr-only" for="topbar-search-docs">Search documents</label>
+        <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="topbar-search-docs" placeholder="Search documents…" autocomplete="off">
+        <span class="topbar-search-hint" aria-hidden="true"><kbd>/</kbd></span>
+      </div>
+      <div class="topbar-actions" role="group" aria-label="Top bar actions">
+        <time id="tdrn-clock" aria-live="off" aria-label="Current time"></time>
+        <span class="status-pill critical" role="status" aria-label="Active Incident"><span class="status-pill-icon" aria-hidden="true">⚠</span> Active Incident</span>
+        <button class="notification-btn" aria-label="Notifications — 3 unread"><span aria-hidden="true">🔔</span><span class="notification-badge" aria-hidden="true"></span></button>
+        <button class="topbar-btn secondary" aria-label="Create new folder" onclick="TDRN.toast.info('Folder creation coming soon')"><span aria-hidden="true">📁</span> New Folder</button>
+        <button class="topbar-btn primary" aria-label="Upload document" onclick="TDRN.modal.open('modal-upload')"><span aria-hidden="true">⬆</span> Upload Document</button>
+      </div>
+    </header>
+    <nav class="admin-subnav" aria-label="Warren County sections">
+      <a href="warren-county.html" class="subnav-tab">Dashboard</a>
+      <a href="wc-members.html" class="subnav-tab">Members</a>
+      <a href="wc-teams.html" class="subnav-tab">Teams</a>
+      <a href="wc-training.html" class="subnav-tab">Training</a>
+      <a href="wc-equipment.html" class="subnav-tab">Equipment</a>
+      <a href="wc-events.html" class="subnav-tab">Events</a>
+      <a href="wc-communications.html" class="subnav-tab">Communications</a>
+      <a href="wc-documents.html" class="subnav-tab active" aria-current="page">Documents</a>
+      <a href="wc-certifications.html" class="subnav-tab">Certifications</a>
+      <a href="wc-applicants.html" class="subnav-tab">Applicants</a>
+      <a href="wc-partners.html" class="subnav-tab">Partners</a>
+      <a href="wc-readiness.html" class="subnav-tab">Readiness</a>
+      <a href="wc-settings.html" class="subnav-tab">Settings</a>
+    </nav>
+    <main id="main-content" class="admin-content" aria-label="Document Vault">
+      <div class="content-header">
+        <div class="content-header-left"><h1 class="content-title">Document Vault</h1><p class="content-subtitle">Secure document storage and version control — 84 documents, 2.3 GB</p></div>
+        <div class="content-actions">
+          <button class="btn btn-ghost" aria-label="Create new folder" onclick="TDRN.toast.info('Folder creation coming soon')"><span aria-hidden="true">📁</span> New Folder</button>
+          <button class="btn btn-primary" aria-label="Upload document" onclick="TDRN.modal.open('modal-upload')"><span aria-hidden="true">⬆</span> Upload Document</button>
+        </div>
+      </div>
+      <!-- STATS -->
+      <section aria-labelledby="docs-stats-h"><h2 id="docs-stats-h" class="sr-only">Document Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card accent-blue" role="article" aria-label="Total Documents: 84"><div class="stat-label">Total Documents</div><div class="stat-value">84</div><div class="stat-change up"><span aria-hidden="true">↑</span> +12 this month</div><span class="stat-icon" aria-hidden="true">📄</span></div>
+          <div class="stat-card accent-green" role="article" aria-label="Added This Month: 12"><div class="stat-label">Added This Month</div><div class="stat-value">12</div><div class="stat-change up"><span aria-hidden="true">↑</span> Active incident</div><span class="stat-icon" aria-hidden="true">📥</span></div>
+          <div class="stat-card accent-purple" role="article" aria-label="Shared Externally: 7"><div class="stat-label">Shared Externally</div><div class="stat-value">7</div><div class="stat-change flat"><span aria-hidden="true">→</span> With state/federal</div><span class="stat-icon" aria-hidden="true">🔗</span></div>
+          <div class="stat-card accent-orange" role="article" aria-label="Storage: 2.3 GB of 10 GB used">
+            <div class="stat-label">Storage Used</div><div class="stat-value">2.3 <span style="font-size:14px;">GB</span></div>
+            <div style="margin-top:6px;">
+              <div class="progress-bar" role="progressbar" aria-valuenow="23" aria-valuemin="0" aria-valuemax="100" aria-label="Storage: 2.3 GB of 10 GB used (23%)" style="height:6px;">
+                <div class="progress-fill" style="width:23%;background:var(--orange);"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text-disabled);margin-top:3px;">23% of 10 GB</div>
+            </div>
+            <span class="stat-icon" aria-hidden="true">💾</span>
+          </div>
+        </div>
+      </section>
+      <!-- DOC LAYOUT -->
+      <div class="doc-layout">
+        <!-- FOLDER TREE -->
+        <aside aria-label="Document folders">
+          <div class="folder-tree" role="tree">
+            <div class="folder-tree-header">Folders</div>
+            <div class="folder-item active" role="treeitem" aria-selected="true" aria-label="ICS Forms — 23 documents" tabindex="0">
+              <div class="folder-item-left"><span aria-hidden="true">📁</span> ICS Forms</div>
+              <span class="folder-count" aria-hidden="true">23</span>
+            </div>
+            <div class="folder-item" role="treeitem" aria-selected="false" aria-label="Training Materials — 31 documents" tabindex="0">
+              <div class="folder-item-left"><span aria-hidden="true">📁</span> Training Materials</div>
+              <span class="folder-count" aria-hidden="true">31</span>
+            </div>
+            <div class="folder-item" role="treeitem" aria-selected="false" aria-label="SOPs — 12 documents" tabindex="0">
+              <div class="folder-item-left"><span aria-hidden="true">📁</span> SOPs</div>
+              <span class="folder-count" aria-hidden="true">12</span>
+            </div>
+            <div class="folder-item" role="treeitem" aria-selected="false" aria-label="Maps and GIS — 8 documents" tabindex="0">
+              <div class="folder-item-left"><span aria-hidden="true">📁</span> Maps &amp; GIS</div>
+              <span class="folder-count" aria-hidden="true">8</span>
+            </div>
+            <div class="folder-item" role="treeitem" aria-selected="false" aria-label="Equipment Manuals — 6 documents" tabindex="0">
+              <div class="folder-item-left"><span aria-hidden="true">📁</span> Equipment Manuals</div>
+              <span class="folder-count" aria-hidden="true">6</span>
+            </div>
+            <div class="folder-item" role="treeitem" aria-selected="false" aria-label="Legal and Compliance — 4 documents" tabindex="0">
+              <div class="folder-item-left"><span aria-hidden="true">📁</span> Legal &amp; Compliance</div>
+              <span class="folder-count" aria-hidden="true">4</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:12px;background:var(--bg-panel);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-disabled);margin-bottom:8px;">Storage</div>
+            <div class="progress-bar" role="progressbar" aria-valuenow="23" aria-valuemin="0" aria-valuemax="100" aria-label="2.3 GB of 10 GB used" style="height:8px;">
+              <div class="progress-fill" style="width:23%;background:var(--green);"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-disabled);margin-top:4px;"><span>2.3 GB used</span><span>10 GB total</span></div>
+          </div>
+        </aside>
+        <!-- DOCUMENT LIST -->
+        <section aria-labelledby="doc-list-h">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <h2 id="doc-list-h" style="font-family:var(--font-heading);font-size:15px;font-weight:700;color:var(--text-primary);"><span aria-hidden="true">📁</span> ICS Forms <span style="font-weight:400;color:var(--text-muted);font-size:13px;">— 23 documents</span></h2>
+            <div style="display:flex;gap:8px;">
+              <label class="sr-only" for="doc-sort">Sort documents by</label>
+              <select id="doc-sort" class="form-select" style="height:36px;font-size:12px;padding:0 8px;min-height:36px;"><option>Modified: Newest</option><option>Modified: Oldest</option><option>Name A–Z</option><option>Name Z–A</option><option>Size: Largest</option></select>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" aria-label="ICS Forms documents">
+              <thead><tr>
+                <th scope="col">Name</th>
+                <th scope="col">Size</th>
+                <th scope="col">Modified</th>
+                <th scope="col">Modified By</th>
+                <th scope="col">Version</th>
+                <th scope="col">Actions</th>
+              </tr></thead>
+              <tbody>
+                <tr><td><span class="file-type-badge pdf" aria-label="File type: PDF">PDF</span> <strong style="margin-left:6px;">ICS-201 Incident Briefing — Tornado Response</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">842 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 2, 01:20</span></td><td>M. Reyes</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v4</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-201">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share ICS-201">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge pdf" aria-label="File type: PDF">PDF</span> <strong style="margin-left:6px;">ICS-204 Assignment List — Alpha Team</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">234 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 2, 00:45</span></td><td>J. Williams</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v2</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-204 Alpha">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge pdf" aria-label="File type: PDF">PDF</span> <strong style="margin-left:6px;">ICS-204 Assignment List — Bravo Team</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">218 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 1, 23:55</span></td><td>J. Williams</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v2</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-204 Bravo">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge pdf" aria-label="File type: PDF">PDF</span> <strong style="margin-left:6px;">ICS-209 Incident Status Summary — Day 3</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">1.1 MB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 1, 20:00</span></td><td>M. Reyes</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v1</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-209">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge xlsx" aria-label="File type: XLSX">XLSX</span> <strong style="margin-left:6px;">ICS-204 Master Resource Tracker</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">456 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 1, 18:30</span></td><td>D. Chen</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v6</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download resource tracker">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge docx" aria-label="File type: DOCX">DOCX</span> <strong style="margin-left:6px;">ICS-215A Incident Action Plan Safety Analysis</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">189 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 1, 16:00</span></td><td>N. Park</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v3</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-215A">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge pdf" aria-label="File type: PDF">PDF</span> <strong style="margin-left:6px;">ICS-202 Incident Objectives — Day 3</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">312 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 1, 08:00</span></td><td>M. Reyes</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v1</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-202">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge png" aria-label="File type: PNG">PNG</span> <strong style="margin-left:6px;">ICS Organizational Chart — Current Incident</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">2.8 MB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 30, 14:00</span></td><td>J. Admin</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v2</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download org chart">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge pdf" aria-label="File type: PDF">PDF</span> <strong style="margin-left:6px;">ICS-205 Incident Radio Communications Plan</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">145 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 30, 12:30</span></td><td>A. Mohammed</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v1</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-205">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge xlsx" aria-label="File type: XLSX">XLSX</span> <strong style="margin-left:6px;">ICS-211 Check-in/Check-out Log — All Teams</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">678 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 29, 20:00</span></td><td>D. Okafor</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v8</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-211">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge pdf" aria-label="File type: PDF">PDF</span> <strong style="margin-left:6px;">ICS-206 Medical Plan — Tornado Response</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">234 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 29, 18:00</span></td><td>D. Okafor</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v1</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-206">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge docx" aria-label="File type: DOCX">DOCX</span> <strong style="margin-left:6px;">After-Action Report Template — Warren County</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">98 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 15, 10:00</span></td><td>J. Admin</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v3</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download AAR template">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge pdf" aria-label="File type: PDF">PDF</span> <strong style="margin-left:6px;">ICS-214 Activity Log — Operations Section</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">567 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 2, 00:00</span></td><td>E. Thompson</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v3</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-214">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge pdf" aria-label="File type: PDF">PDF</span> <strong style="margin-left:6px;">ICS-220 Air Operations Summary</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">421 KB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">Apr 30, 09:00</span></td><td>M. Reyes</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v1</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download ICS-220">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+                <tr><td><span class="file-type-badge xlsx" aria-label="File type: XLSX">XLSX</span> <strong style="margin-left:6px;">Finance &amp; Cost Tracking — Tornado Response</strong></td><td><span style="font-family:var(--font-mono);font-size:12px;">1.2 MB</span></td><td><span style="font-family:var(--font-mono);font-size:12px;">May 1, 12:00</span></td><td>R. Martinez</td><td><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">v5</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" aria-label="Download finance tracker">⬇</button><button class="btn btn-ghost btn-sm" aria-label="Share">🔗</button></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+<!-- UPLOAD MODAL -->
+<div id="modal-upload" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="modal-upload-title">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="modal-upload-title">Upload Document</h2><button class="btn btn-ghost" aria-label="Close" onclick="TDRN.modal.close('modal-upload')">✕</button></div>
+    <form id="form-upload" class="modal-body" data-validate-form novalidate>
+      <div class="drop-zone" role="button" tabindex="0" aria-label="Drag and drop files here, or press Enter to select files">
+        <div style="font-size:32px;margin-bottom:8px;" aria-hidden="true">📄</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text-body);margin-bottom:4px;">Drag &amp; drop files here</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">PDF, DOCX, XLSX, PNG, ZIP supported</div>
+        <label for="file-input" style="display:none;">Select file to upload</label>
+        <input type="file" id="file-input" style="display:none;" aria-label="Select file to upload" accept=".pdf,.docx,.xlsx,.png,.jpg,.zip">
+        <button type="button" class="btn btn-ghost" aria-label="Browse files" onclick="document.getElementById('file-input').click()"><span aria-hidden="true">📂</span> Browse Files</button>
+      </div>
+      <div class="form-group" style="margin-top:16px;"><label class="form-label" for="upload-name">File Name / Display Title</label><input type="text" id="upload-name" class="form-input" placeholder="Leave blank to use original filename"></div>
+      <div class="form-group"><label class="form-label" for="upload-folder">Folder <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><select id="upload-folder" class="form-select" required><option value="">Select folder…</option><option>ICS Forms</option><option>Training Materials</option><option>SOPs</option><option>Maps &amp; GIS</option><option>Equipment Manuals</option><option>Legal &amp; Compliance</option></select></div>
+      <div class="form-group"><label class="form-label" for="upload-desc">Description</label><textarea id="upload-desc" class="form-textarea" rows="2" placeholder="Brief description of contents…"></textarea></div>
+      <div class="form-group"><label class="form-label" for="upload-tags">Tags</label><input type="text" id="upload-tags" class="form-input" placeholder="tornado, ics-201, operations…"></div>
+      <div class="form-group"><label class="form-label" for="upload-access">Access Level <span aria-hidden="true" style="color:var(--red);">*</span><span class="sr-only">(required)</span></label><select id="upload-access" class="form-select" required><option value="members">Members Only</option><option value="leaders">Leaders Only</option><option value="admin">Admin Only</option><option value="public">Public</option></select></div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="TDRN.modal.close('modal-upload')" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary" aria-label="Upload file" onclick="TDRN.toast.success('Document uploaded successfully') && TDRN.modal.close('modal-upload')"><span aria-hidden="true">⬆</span> Upload</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+<script src="tdrn-core.js"></script>
+<script>TDRN.init();</script>
+</body>
+</html>
